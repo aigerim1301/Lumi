@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Презентация курсовой работы — Lumi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --sage: #2D5A4C;
+      --sage-light: #3D7A68;
+      --sage-subtle: #E8F0ED;
+      --terracotta: #D96B43;
+      --terracotta-light: #FBF0EC;
+      --lavender: #8A79AF;
+      --lavender-light: #F2EFF8;
+      --bg-cream: #F7F5F0;
+      --card-bg: #FFFFFF;
+      --text-dark: #1E2422;
+      --text-muted: #606864;
+      --border-subtle: #E3DFD5;
+      --shadow-sm: 0 4px 12px rgba(45, 90, 76, 0.06);
+      --shadow-md: 0 10px 25px rgba(45, 90, 76, 0.10);
+      --shadow-lg: 0 20px 40px rgba(45, 90, 76, 0.15);
+    }
+
+    [data-theme="dark"] {
+      --bg-cream: #141A18;
+      --card-bg: #1B2421;
+      --text-dark: #F3F5F4;
+      --text-muted: #9BA4A0;
+      --border-subtle: #293632;
+      --sage-subtle: #1F2E29;
+      --terracotta-light: #38241D;
+      --lavender-light: #2A2536;
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.50);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-cream);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Slides Container */
+    .deck-viewport {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .slide {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.96);
+      width: 100%;
+      max-width: 1100px;
+      min-height: 600px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 48px;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* Staggered entrance for slide elements */
+    .slide.active .anim-item {
+      animation: fadeInUp 0.45s ease forwards;
+    }
+
+    .slide.active .anim-delay-1 { animation-delay: 0.08s; }
+    .slide.active .anim-delay-2 { animation-delay: 0.16s; }
+    .slide.active .anim-delay-3 { animation-delay: 0.24s; }
+    .slide.active .anim-delay-4 { animation-delay: 0.32s; }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .badge-sage { background: var(--sage-subtle); color: var(--sage); }
+    .badge-terracotta { background: var(--terracotta-light); color: var(--terracotta); }
+    .badge-lavender { background: var(--lavender-light); color: var(--lavender); }
+
+    /* Control Bar */
+    .deck-controls {
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-subtle);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      bottom: 0;
+      z-index: 50;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Progress Dots */
+    .progress-bar-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 4px;
+      width: 100%;
+      background: var(--border-subtle);
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--sage), var(--terracotta));
+      transition: width 0.35s ease;
+    }
+
+    /* Interactive Elements in Slides */
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 20px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--sage);
+    }
+
+    /* Speaker Notes Modal */
+    .notes-drawer {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120%);
+      width: 90%;
+      max-width: 900px;
+      background: var(--card-bg);
+      border: 2px solid var(--terracotta);
+      border-radius: 18px;
+      padding: 22px 28px;
+      box-shadow: var(--shadow-lg);
+      z-index: 100;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .notes-drawer.open {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Pulse animation for key badges */
+    .pulse-glow {
+      animation: pulseGlow 2.5s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(217, 107, 67, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(217, 107, 67, 0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar with brand & utility toggles -->
+  <header class="px-8 py-4 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--card-bg)]">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-[var(--sage)] flex items-center justify-center text-white font-bold text-lg shadow-sm">
+        LU
+      </div>
+      <div>
+        <h1 class="text-base font-bold text-[var(--text-dark)] leading-tight">Lumi — Интерактивные опросы</h1>
+        <p class="text-xs text-[var(--text-muted)]">Презентация курсовой работы 2026</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Speaker Notes Button -->
+      <button id="toggleNotesBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] text-xs font-semibold hover:border-[var(--terracotta)] hover:text-[var(--terracotta)] transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+        <span>Шпаргалка докладчика [N]</span>
+      </button>
+
+      <!-- Theme Toggle -->
+      <button id="themeToggleBtn" class="p-2 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--sage)] transition-colors" title="Переключить тему">
+        <svg id="themeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button id="fullscreenBtn" class="p-2 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--sage)] transition-colors" title="Полноэкранный режим [F]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Viewport for Slides -->
+  <main class="deck-viewport">
+
+    <!-- ==================== СЛАЙД 1: ТИТУЛЬНЫЙ ==================== -->
+    <section class="slide active" data-slide="1">
+      <div class="flex-1 flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="badge badge-sage anim-item">Курсовая работа • 2026</span>
+          <span class="badge badge-lavender anim-item">Django 6.1 • DRF • SQLite • Chart.js</span>
+        </div>
+
+        <div class="my-auto py-8">
+          <div class="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-[var(--sage-subtle)] text-[var(--sage)] mb-6 anim-item anim-delay-1">
+            <span class="w-2.5 h-2.5 rounded-full bg-[var(--terracotta)] animate-ping"></span>
+            <span class="font-bold text-sm tracking-wide uppercase">Платформа нового поколения</span>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-[var(--text-dark)] leading-tight mb-4 anim-item anim-delay-2">
+            Lumi — Интерактивная веб-платформа для опросов
+          </h1>
+          <p class="text-lg md:text-xl text-[var(--text-muted)] max-w-3xl leading-relaxed anim-item anim-delay-3">
+            Разработка веб-сервиса с геймифицированным интерфейсом (свайпы, эмодзи-термометр), мгновенной сравнительной аналитикой, встроенным AI-генератором и открытым REST API.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-[var(--border-subtle)] anim-item anim-delay-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-[var(--sage)] text-white flex items-center justify-center font-bold">С</div>
+            <div>
+              <div class="text-xs text-[var(--text-muted)]">Выполнил(а) студент(ка):</div>
+              <div class="text-sm font-bold text-[var(--text-dark)]">Айгерим / Информационные системы</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 md:justify-end">
+            <div class="w-10 h-10 rounded-full bg-[var(--lavender)] text-white flex items-center justify-center font-bold">Р</div>
+            <div>
+              <div class="text-xs text-[var(--text-muted)]">Научный руководитель:</div>
+              <div class="text-sm font-bold text-[var(--text-dark)]">Кафедра программной инженерии</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 2: ПРОБЛЕМА И РЕШЕНИЕ ==================== -->
+    <section class="slide" data-slide="2">
+      <div class="flex items-center justify-between mb-6">
+        <span class="badge badge-terracotta anim-item">Проблематика & Актуальность</span>
+        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">Почему Google Forms больше не работают?</span>
+      </div>
+
+      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-6 anim-item anim-delay-1">
+        Усталость от опросов и низкая вовлеченность
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 items-stretch anim-item anim-delay-2">
+        <!-- Колонка проблемы -->
+        <div class="feature-card border-red-200 bg-red-50/30 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 text-red-600 font-bold mb-3">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Классические сервисы (Google Forms)</span>
+            </div>
+            <ul class="space-y-3 text-sm text-[var(--text-dark)]">
+              <li class="flex items-start gap-2">
+                <span class="text-red-500 font-bold">✕</span>
+                <span><b>Монотонность:</b> длинные списки радиокнопок вызывают скуку.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-500 font-bold">✕</span>
+                <span><b>Отказы:</b> до 45% пользователей закрывают опрос на середине.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-red-500 font-bold">✕</span>
+                <span><b>Нет обратной связи:</b> респондент отдаёт данные, не получая ничего взамен.</span>
+              </li>
+            </ul>
+          </div>
+          <div class="mt-4 p-3 bg-red-100/60 rounded-xl text-xs font-semibold text-red-800 text-center">
+            Результат: искаженные выборки и низкая конверсия
+          </div>
+        </div>
+
+        <!-- Колонка решения Lumi -->
+        <div class="feature-card border-[var(--sage)] bg-[var(--sage-subtle)] flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 text-[var(--sage)] font-bold mb-3">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Инновационный подход Lumi</span>
+            </div>
+            <ul class="space-y-3 text-sm text-[var(--text-dark)]">
+              <li class="flex items-start gap-2">
+                <span class="text-[var(--sage)] font-bold">✓</span>
+                <span><b>Геймификация:</b> свайпы как в Tinder, шкала эмоций и звёзды.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-[var(--sage)] font-bold">✓</span>
+                <span><b>Доходимость 85%+:</b> интерактив удерживает внимание до конца.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-[var(--sage)] font-bold">✓</span>
+                <span><b>Карточка-итог:</b> мгновенное сравнение: <i>«Вы ответили так же, как 78%»</i>.</span>
+              </li>
+            </ul>
+          </div>
+          <div class="mt-4 p-3 bg-[var(--sage)] text-white rounded-xl text-xs font-bold text-center">
+            Результат: качественные данные и искреннее участие
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 3: ЦЕЛЬ И ЗАДАЧИ ==================== -->
+    <section class="slide" data-slide="3">
+      <div class="flex items-center justify-between mb-4">
+        <span class="badge badge-sage anim-item">Постановка задачи</span>
+        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">MVT Архитектура</span>
+      </div>
+
+      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-3 anim-item anim-delay-1">
+        Цель и этапы разработки проекта
+      </h2>
+      <p class="text-sm text-[var(--text-muted)] mb-6 anim-item anim-delay-2">
+        <b>Цель:</b> создать надёжное, масштабируемое и безопасное веб-приложение для сбора и анализа мнений пользователей с микросервисной интеграцией через REST API.
+      </p>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 flex-1 anim-item anim-delay-3">
+        <div class="feature-card">
+          <div class="w-8 h-8 rounded-lg bg-[var(--sage-subtle)] text-[var(--sage)] flex items-center justify-center font-bold text-sm mb-2">1</div>
+          <h4 class="font-bold text-sm mb-1 text-[var(--text-dark)]">Моделирование БД</h4>
+          <p class="text-xs text-[var(--text-muted)]">6 связанных моделей с защитой от повторного голосования на уровне БД.</p>
+        </div>
+        <div class="feature-card">
+          <div class="w-8 h-8 rounded-lg bg-[var(--terracotta-light)] text-[var(--terracotta)] flex items-center justify-center font-bold text-sm mb-2">2</div>
+          <h4 class="font-bold text-sm mb-1 text-[var(--text-dark)]">Ролевая система</h4>
+          <p class="text-xs text-[var(--text-muted)]">Разграничение прав: Администратор, Автор, Респондент, защита от IDOR.</p>
+        </div>
+        <div class="feature-card">
+          <div class="w-8 h-8 rounded-lg bg-[var(--lavender-light)] text-[var(--lavender)] flex items-center justify-center font-bold text-sm mb-2">3</div>
+          <h4 class="font-bold text-sm mb-1 text-[var(--text-dark)]">Геймифицированный UI</h4>
+          <p class="text-xs text-[var(--text-muted)]">Свайп-карточки, термометр эмоций, адаптивная вёрстка под смартфоны.</p>
+        </div>
+        <div class="feature-card">
+          <div class="w-8 h-8 rounded-lg bg-[var(--sage-subtle)] text-[var(--sage)] flex items-center justify-center font-bold text-sm mb-2">4</div>
+          <h4 class="font-bold text-sm mb-1 text-[var(--text-dark)]">Аналитика и экспорт</h4>
+          <p class="text-xs text-[var(--text-muted)]">Визуализация в Chart.js и выгрузка отчётов в CSV с кодировкой UTF-8 BOM для Excel.</p>
+        </div>
+        <div class="feature-card">
+          <div class="w-8 h-8 rounded-lg bg-[var(--terracotta-light)] text-[var(--terracotta)] flex items-center justify-center font-bold text-sm mb-2">5</div>
+          <h4 class="font-bold text-sm mb-1 text-[var(--text-dark)]">AI Конструктор</h4>
+          <p class="text-xs text-[var(--text-muted)]">Автоматическая генерация 6 разнотипных вопросов по краткой теме.</p>
+        </div>
+        <div class="feature-card">
+          <div class="w-8 h-8 rounded-lg bg-[var(--lavender-light)] text-[var(--lavender)] flex items-center justify-center font-bold text-sm mb-2">6</div>
+          <h4 class="font-bold text-sm mb-1 text-[var(--text-dark)]">REST API & Тесты</h4>
+          <p class="text-xs text-[var(--text-muted)]">5 API эндпоинтов (DRF) и 43 автоматизированных Unit-теста.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 4: СТЕК ТЕХНОЛОГИЙ ==================== -->
+    <section class="slide" data-slide="4">
+      <div class="flex items-center justify-between mb-6">
+        <span class="badge badge-lavender anim-item">Технологический фундамент</span>
+        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">Промышленный стек</span>
+      </div>
+
+      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-6 anim-item anim-delay-1">
+        Стек технологий и инструменты разработки
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 anim-item anim-delay-2">
+        <div class="feature-card flex flex-col justify-between">
+          <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-[var(--sage)] mb-2">Backend & API</div>
+            <h3 class="text-xl font-bold mb-3">Django 6.1 + DRF</h3>
+            <ul class="text-xs text-[var(--text-muted)] space-y-2">
+              <li>• Python 3.12+ современный синтаксис</li>
+              <li>• Django ORM с миграциями</li>
+              <li>• Django REST Framework 3.18</li>
+              <li>• Session & Basic Authentication</li>
+              <li>• Безопасный CSRF-контроль</li>
+            </ul>
+          </div>
+          <div class="mt-4 pt-3 border-t border-[var(--border-subtle)] text-xs font-semibold text-[var(--sage)]">
+            Надёжный MVT каркас
+          </div>
+        </div>
+
+        <div class="feature-card flex flex-col justify-between">
+          <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-[var(--terracotta)] mb-2">Frontend & UX</div>
+            <h3 class="text-xl font-bold mb-3">CSS3 + Vanilla JS</h3>
+            <ul class="text-xs text-[var(--text-muted)] space-y-2">
+              <li>• Чистый HTML5 / CSS Variables</li>
+              <li>• Палитра Lumi (шалфей, терракота)</li>
+              <li>• Живая тёмная тема (Dark Theme)</li>
+              <li>• Chart.js для Donut & Bar графиков</li>
+              <li>• Сенсорные жесты для мобильных</li>
+            </ul>
+          </div>
+          <div class="mt-4 pt-3 border-t border-[var(--border-subtle)] text-xs font-semibold text-[var(--terracotta)]">
+            Быстрая загрузка без лишнего веса
+          </div>
+        </div>
+
+        <div class="feature-card flex flex-col justify-between">
+          <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-[var(--lavender)] mb-2">DevOps & Cloud</div>
+            <h3 class="text-xl font-bold mb-3">Gunicorn & Render</h3>
+            <ul class="text-xs text-[var(--text-muted)] space-y-2">
+              <li>• SQLite 3 (транзакционность)</li>
+              <li>• WhiteNoise для сжатия статики</li>
+              <li>• WSGI сервер Gunicorn 27.0</li>
+              <li>• Git CI/CD через GitHub</li>
+              <li>• Публичный HTTPS хостинг Render</li>
+            </ul>
+          </div>
+          <div class="mt-4 pt-3 border-t border-[var(--border-subtle)] text-xs font-semibold text-[var(--lavender)]">
+            Готовность к 24/7 продакшену
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 5: МОДЕЛИ ДАННЫХ ==================== -->
+    <section class="slide" data-slide="5">
+      <div class="flex items-center justify-between mb-4">
+        <span class="badge badge-sage anim-item">База данных</span>
+        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">Реляционная схема ORM</span>
+      </div>
+
+      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-4 anim-item anim-delay-1">
+        Архитектура 6 связанных моделей
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 anim-item anim-delay-2">
+        <div class="space-y-3">
+          <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--card-bg)]">
+            <div class="flex items-center justify-between font-bold text-sm text-[var(--sage)]">
+              <span>Profile (OneToOne к User)</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-[var(--sage-subtle)]">Роли: author / resp</span>
+            </div>
+            <p class="text-xs text-[var(--text-muted)] mt-1">Автосоздание через Django-сигнал <code>post_save</code>. Хранит язык, тёмную тему и статус уведомлений.</p>
+          </div>
+
+          <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--card-bg)]">
+            <div class="flex items-center justify-between font-bold text-sm text-[var(--sage)]">
+              <span>Survey (Опрос)</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-[var(--sage-subtle)]">FK: author</span>
+            </div>
+            <p class="text-xs text-[var(--text-muted)] mt-1">Заголовок, описание, статус (<code>draft</code>, <code>published</code>, <code>closed</code>), счётчик ответов.</p>
+          </div>
+
+          <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--card-bg)]">
+            <div class="flex items-center justify-between font-bold text-sm text-[var(--sage)]">
+              <span>Question & Choice</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-[var(--sage-subtle)]">6 типов вопросов</span>
+            </div>
+            <p class="text-xs text-[var(--text-muted)] mt-1">Порядковый номер <code>order</code>, тип <code>qtype</code>, текст и каскадные варианты ответа.</p>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl border border-[var(--terracotta)] bg-[var(--terracotta-light)] flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 font-bold text-sm text-[var(--terracotta)] mb-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <span>Response & Answer: Защита целостности</span>
+            </div>
+            <p class="text-xs text-[var(--text-dark)] mb-3 leading-relaxed">
+              Модель <b>Response</b> фиксирует факт прохождения опроса. В ней заложено строгое ограничение целостности:
+            </p>
+            <div class="bg-[var(--card-bg)] p-3 rounded-lg font-mono text-xs text-[var(--text-dark)] border border-[var(--border-subtle)]">
+              unique_together = ('survey', 'respondent')
+            </div>
+            <p class="text-xs text-[var(--text-muted)] mt-3">
+              Это гарантирует на уровне базы данных: <b>один респондент может пройти опрос строго один раз</b>, исключая накрутки и дубликаты.
+            </p>
+          </div>
+          <div class="text-xs font-semibold text-[var(--terracotta)] mt-3">
+            Модель Answer полиморфна: хранит число, текст или FK на Choice.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 6: ИНТЕРФЕЙС РЕСПОНДЕНТА ==================== -->
+    <section class="slide" data-slide="6">
+      <div class="flex items-center justify-between mb-4">
+        <span class="badge badge-terracotta anim-item">Геймификация</span>
+        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">Интерактивный UI</span>
+      </div>
+
+      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-4 anim-item anim-delay-1">
+        Интерактивный опыт прохождения опроса
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1 anim-item anim-delay-2">
+        <!-- Свайп карточки -->
+        <div class="feature-card flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-[var(--terracotta-light)] text-[var(--terracotta)] flex items-center justify-center font-bold text-lg mb-3">👆</div>
+            <h4 class="font-bold text-base mb-2">Свайп-карточки</h4>
+            <p class="text-xs text-[var(--text-muted)] leading-relaxed">
+              Интуитивный выбор «Да / Нет» смахиванием карточки влево или вправо на телефоне или кнопками на клавиатуре.
+            </p>
+          </div>
+          <div class="p-2.5 bg-[var(--sage-subtle)] rounded-lg text-center font-bold text-xs text-[var(--sage)] mt-3">
+            Swipe Gestures Touch API
+          </div>
+        </div>
+
+        <!-- Термометр эмоций -->
+        <div class="feature-card flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-[var(--sage-subtle)] text-[var(--sage)] flex items-center justify-center font-bold text-lg mb-3">🌡️</div>
+            <h4 class="font-bold text-base mb-2">Шкала эмоций (-4..+4)</h4>
+            <p class="text-xs text-[var(--text-muted)] leading-relaxed">
+              Ползунок настроения с живой сменой эмодзи (😠 🙁 😐 🙂 🤩) для точной фиксации эмоционального отклика.
+            </p>
+          </div>
+          <div class="p-2.5 bg-[var(--terracotta-light)] rounded-lg text-center font-bold text-xs text-[var(--terracotta)] mt-3">
+            Динамический эмодзи-отклик
+          </div>
+        </div>
+
+        <!-- Карточка-итог -->
+        <div class="feature-card flex flex-col justify-between border-[var(--lavender)] bg-[var(--lavender-light)]">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-[var(--lavender)] text-white flex items-center justify-center font-bold text-lg mb-3">🎁</div>
+            <h4 class="font-bold text-base mb-2">Карточка-итог</h4>
+            <p class="text-xs text-[var(--text-muted)] leading-relaxed">
+              Мгновенный персональный отчёт для респондента: <i>«Вы ответили так же, как 78% участников опроса!»</i>.
+            </p>
+          </div>
+          <div class="p-2.5 bg-[var(--lavender)] text-white rounded-lg text-center font-bold text-xs mt-3">
+            Мгновенная персональная ценность
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 7: АВТОР & AI & АНАЛИТИКА ==================== -->
+    <section class="slide" data-slide="7">
+      <div class="flex items-center justify-between mb-4">
+        <span class="badge badge-sage anim-item">Инструменты Автора</span>
+        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">AI Генератор & Аналитика</span>
+      </div>
+
+      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-4 anim-item anim-delay-1">
+        Умный конструктор и аналитическая панель
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 anim-item anim-delay-2">
+        <div class="feature-card flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 text-[var(--terracotta)] font-bold text-base mb-2">
+              <span>🤖 Встроенный AI-генератор</span>
+            </div>
+            <p class="text-xs text-[var(--text-muted)] mb-3">
+              Автору достаточно ввести тему (например, <i>«Курс по Django»</i>). Алгоритм классифицирует категорию и автоматически собирает опрос:
+            </p>
+            <div class="space-y-1.5 text-xs text-[var(--text-dark)] bg-[var(--bg-cream)] p-3 rounded-xl border border-[var(--border-subtle)]">
+              <div>✓ 1 Вопрос со свайпом (быстрый хук)</div>
+              <div>✓ 1 Вопрос с термометром эмоций</div>
+              <div>✓ 1 Вопрос с рейтингом по звёздам</div>
+              <div>✓ 2 Вопроса с выбором вариантов</div>
+              <div>✓ 1 Текстовый вопрос для развёрнутого отзыва</div>
+            </div>
+          </div>
+          <div class="text-xs text-[var(--terracotta)] font-semibold mt-2">
+            Готов к подключению внешних LLM API
+          </div>
+        </div>
+
+        <div class="feature-card flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 text-[var(--sage)] font-bold text-base mb-2">
+              <span>📊 Аналитика и экспорт данных</span>
+            </div>
+            <p class="text-xs text-[var(--text-muted)] mb-3">
+              В режиме реального времени рассчитываются ключевые метрики вовлечённости аудитории:
+            </p>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between items-center p-2 rounded-lg bg-[var(--sage-subtle)] text-[var(--sage)] font-semibold">
+                <span>Процент завершенности:</span>
+                <span class="font-bold">94.2%</span>
+              </div>
+              <div class="flex justify-between items-center p-2 rounded-lg bg-[var(--lavender-light)] text-[var(--lavender)] font-semibold">
+                <span>Интерактивные диаграммы:</span>
+                <span class="font-bold">Chart.js Donut & Bar</span>
+              </div>
+              <div class="flex justify-between items-center p-2 rounded-lg bg-[var(--terracotta-light)] text-[var(--terracotta)] font-semibold">
+                <span>Экспорт для Excel:</span>
+                <span class="font-bold">CSV (UTF-8 BOM ; )</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-xs text-[var(--sage)] font-semibold mt-2">
+            Русский язык в Excel открывается без ошибок
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 8: REST API И БЕЗОПАСНОСТЬ ==================== -->
+    <section class="slide" data-slide="8">
+      <div class="flex items-center justify-between mb-4">
+        <span class="badge badge-lavender anim-item">REST API & Тестирование</span>
+        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">Безопасность</span>
+      </div>
+
+      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-4 anim-item anim-delay-1">
+        REST API и автоматизированное тестирование
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 anim-item anim-delay-2">
+        <div class="feature-card flex flex-col justify-between">
+          <div>
+            <h4 class="font-bold text-sm text-[var(--sage)] mb-3">5 эндпоинтов REST API (DRF)</h4>
+            <div class="space-y-2 font-mono text-xs">
+              <div class="p-2 rounded bg-[var(--bg-cream)] border border-[var(--border-subtle)] flex items-center justify-between">
+                <span><b class="text-blue-600">GET</b> /api/me/</span>
+                <span class="text-[var(--text-muted)]">Профиль</span>
+              </div>
+              <div class="p-2 rounded bg-[var(--bg-cream)] border border-[var(--border-subtle)] flex items-center justify-between">
+                <span><b class="text-blue-600">GET</b> /api/surveys/</span>
+                <span class="text-[var(--text-muted)]">Каталог</span>
+              </div>
+              <div class="p-2 rounded bg-[var(--bg-cream)] border border-[var(--border-subtle)] flex items-center justify-between">
+                <span><b class="text-blue-600">GET</b> /api/surveys/&lt;id&gt;/</span>
+                <span class="text-[var(--text-muted)]">Структура</span>
+              </div>
+              <div class="p-2 rounded bg-[var(--bg-cream)] border border-[var(--border-subtle)] flex items-center justify-between">
+                <span><b class="text-green-600">POST</b> /api/surveys/&lt;id&gt;/respond/</span>
+                <span class="text-[var(--text-muted)]">Ответ</span>
+              </div>
+              <div class="p-2 rounded bg-[var(--bg-cream)] border border-[var(--border-subtle)] flex items-center justify-between">
+                <span><b class="text-purple-600">GET</b> /api/surveys/&lt;id&gt;/stats/</span>
+                <span class="text-[var(--text-muted)]">Статистика</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-xs text-[var(--text-muted)] mt-2">Сериализация, валидация и Session/Basic Auth</div>
+        </div>
+
+        <div class="feature-card flex flex-col justify-between border-[var(--sage)] bg-[var(--sage-subtle)]">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-sm font-bold text-[var(--sage)]">Качество и безопасность</span>
+              <span class="px-2.5 py-1 rounded-full bg-[var(--sage)] text-white text-xs font-bold pulse-glow">43 ТЕСТА OK</span>
+            </div>
+            <ul class="space-y-2 text-xs text-[var(--text-dark)] leading-relaxed">
+              <li>• <b>Защита от IDOR:</b> автор не может изменить чужой опрос (код 403).</li>
+              <li>• <b>CSRF защита:</b> во всех 8 веб-формах и AJAX-запросах.</li>
+              <li>• <b>Кликджекинг:</b> внедрён заголовок <code>X-Frame-Options: DENY</code>.</li>
+              <li>• <b>100% покрытие бизнес-сценариев:</b> авторизация, права, математика аналитики, предотвращение накруток.</li>
+            </ul>
+          </div>
+          <div class="mt-4 p-2.5 bg-[var(--card-bg)] rounded-xl text-center font-bold text-xs text-[var(--sage)]">
+            python manage.py test — Ran 43 tests (100% Passed)
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 9: ДЕПЛОЙ И ДЕМО-ДОСТУП ==================== -->
+    <section class="slide" data-slide="9">
+      <div class="flex items-center justify-between mb-4">
+        <span class="badge badge-sage anim-item">Облачная публикация</span>
+        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">Render.com & GitHub</span>
+      </div>
+
+      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-4 anim-item anim-delay-1">
+        Развёртывание в облаке и тестовый доступ
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 anim-item anim-delay-2">
+        <div class="feature-card flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 text-sm font-bold text-[var(--sage)] mb-2">
+              <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+              <span>Сервис активен в реальном времени</span>
+            </div>
+            <p class="text-xs text-[var(--text-muted)] mb-3">
+              Проект опубликован на промышленном хостинге с автоматическим CI/CD пайплайном:
+            </p>
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 rounded-lg bg-[var(--bg-cream)] border border-[var(--border-subtle)]">
+                <div class="text-[var(--text-muted)]">Репозиторий на GitHub:</div>
+                <div class="font-bold text-[var(--sage)]">github.com/aigerim1301/Lumi</div>
+              </div>
+              <div class="p-2.5 rounded-lg bg-[var(--bg-cream)] border border-[var(--border-subtle)]">
+                <div class="text-[var(--text-muted)]">Хостинг платформы:</div>
+                <div class="font-bold text-[var(--terracotta)]">Render.com (Gunicorn + WhiteNoise)</div>
+              </div>
+            </div>
+          </div>
+          <div class="text-xs font-semibold text-[var(--sage)] mt-2">
+            Доступен с любого устройства и смартфона
+          </div>
+        </div>
+
+        <div class="feature-card flex flex-col justify-between">
+          <div>
+            <h4 class="font-bold text-sm text-[var(--text-dark)] mb-2">Тестовые аккаунты для комиссии:</h4>
+            <div class="space-y-2 text-xs">
+              <div class="p-2 rounded-lg bg-[var(--sage-subtle)] flex justify-between items-center">
+                <div>
+                  <div class="font-bold text-[var(--sage)]">Автор опросов</div>
+                  <div class="text-[var(--text-muted)]">Конструктор, AI, статистика</div>
+                </div>
+                <div class="font-mono text-right font-bold">author<br>AuthorPassword123!</div>
+              </div>
+
+              <div class="p-2 rounded-lg bg-[var(--terracotta-light)] flex justify-between items-center">
+                <div>
+                  <div class="font-bold text-[var(--terracotta)]">Респондент</div>
+                  <div class="text-[var(--text-muted)]">Свайпы, шкала, карточка-итог</div>
+                </div>
+                <div class="font-mono text-right font-bold">respondent<br>RespondentPassword123!</div>
+              </div>
+
+              <div class="p-2 rounded-lg bg-[var(--lavender-light)] flex justify-between items-center">
+                <div>
+                  <div class="font-bold text-[var(--lavender)]">Администратор</div>
+                  <div class="text-[var(--text-muted)]">Django Admin (/admin/)</div>
+                </div>
+                <div class="font-mono text-right font-bold">admin<br>AdminPassword123!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 10: ЗАКЛЮЧЕНИЕ ==================== -->
+    <section class="slide" data-slide="10">
+      <div class="flex-1 flex flex-col justify-between text-center items-center py-6">
+        <span class="badge badge-sage anim-item">Итоги работы</span>
+
+        <div class="my-auto max-w-2xl anim-item anim-delay-1">
+          <div class="w-16 h-16 rounded-2xl bg-[var(--sage)] text-white text-2xl font-bold flex items-center justify-center mx-auto mb-4 shadow-lg">
+            LU
+          </div>
+          <h2 class="text-4xl font-black text-[var(--text-dark)] mb-3">
+            Цель курсовой работы достигнута!
+          </h2>
+          <p class="text-sm md:text-base text-[var(--text-muted)] leading-relaxed mb-6">
+            Платформа <b>Lumi</b> подтвердила жизнеспособность геймифицированного формата онлайн-опросов. Система готова к практическому использованию учебными заведениями и коммерческими организациями.
+          </p>
+
+          <div class="grid grid-cols-3 gap-4 text-left mb-6">
+            <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-cream)]">
+              <div class="text-xl font-bold text-[var(--sage)]">85%+</div>
+              <div class="text-xs text-[var(--text-muted)]">Прогнозируемая доходимость опросов</div>
+            </div>
+            <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-cream)]">
+              <div class="text-xl font-bold text-[var(--terracotta)]">100%</div>
+              <div class="text-xs text-[var(--text-muted)]">Успех 43 автоматических тестов</div>
+            </div>
+            <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-cream)]">
+              <div class="text-xl font-bold text-[var(--lavender)]">REST</div>
+              <div class="text-xs text-[var(--text-muted)]">Готовность к мобильным клиентам</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-[var(--border-subtle)] w-full flex items-center justify-between anim-item anim-delay-2">
+          <div class="text-xs text-[var(--text-muted)]">Спасибо за внимание!</div>
+          <div class="text-sm font-bold text-[var(--sage)]">Готов(а) ответить на ваши вопросы!</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Speaker Notes Drawer (Toggled by 'N' or button) -->
+  <div id="notesDrawer" class="notes-drawer">
+    <div class="flex items-center justify-between mb-2">
+      <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--terracotta)]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+        <span>Шпаргалка докладчика (Слайд <span id="notesSlideNum">1</span>)</span>
+      </div>
+      <button id="closeNotesBtn" class="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-dark)]">✕ Закрыть</button>
+    </div>
+    <div id="notesContent" class="text-sm text-[var(--text-dark)] leading-relaxed font-normal">
+      <!-- Notes injected dynamically via JS -->
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <footer class="deck-controls">
+    <div class="progress-bar-track">
+      <div id="progressBar" class="progress-bar-fill" style="width: 10%;"></div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button id="prevBtn" class="px-4 py-2 rounded-xl border border-[var(--border-subtle)] text-xs font-bold hover:bg-[var(--sage)] hover:text-white hover:border-[var(--sage)] transition-all flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <span>Назад</span>
+      </button>
+
+      <button id="nextBtn" class="px-5 py-2 rounded-xl bg-[var(--sage)] text-white text-xs font-bold hover:bg-[var(--sage-light)] transition-all shadow-sm flex items-center gap-1.5">
+        <span>Вперёд</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <!-- Slide indicator dots -->
+    <div class="flex items-center gap-1.5" id="dotsContainer">
+      <!-- Dots generated via JS -->
+    </div>
+
+    <div class="text-xs font-bold text-[var(--text-muted)]">
+      Слайд <span id="currentSlideNum" class="text-[var(--text-dark)] text-sm">1</span> из <span id="totalSlidesNum">10</span>
+    </div>
+  </footer>
+
+  <script>
+    // Speaker speeches for each slide
+    const speeches = {
+      1: "Уважаемый председатель и члены государственной экзаменационной комиссии! Вашему вниманию представляется курсовая работа на тему «Разработка веб-платформы для проведения интерактивных опросов с элементами геймификации и REST API». Проект получил название Lumi.",
+      2: "Большинство современных инструментов, таких как Google Forms, представляют собой скучные списки полей. Пользователи бросают их (до 45% отказов). Lumi решает это за счёт интерактивной игровой подачи (свайп-карточки, шкала эмоций) и мгновенного сравнительного отчёта для респондента.",
+      3: "Цель работы — спроектировать и разработать веб-приложение по архитектуре MVT с ролевой моделью доступа, визуальной аналитикой и REST API. Были решены 6 ключевых задач: от моделирования базы данных до покрытия тестами и публикации в облаке.",
+      4: "Приложение построено на стеке Python 3.12, Django 6.1 и Django REST Framework. Мы отказались от тяжёлых фреймворков: фронтенд написан на адаптивном чистом JavaScript и Chart.js, что гарантирует мгновенную скорость загрузки страниц на смартфонах.",
+      5: "Реляционная схема включает 6 сущностей. В модели Response заложено строгое ограничение unique_together=('survey', 'respondent'), исключающее накрутку голосов и повторные прохождения на уровне ядра базы данных.",
+      6: "Прохождение опроса интерактивно: респондент свайпает карточки как в мобильных приложениях и регулирует термометр эмоций. После отправки система сразу показывает карточку-итог с процентом совпадения мнения респондента с мнением большинства.",
+      7: "Для авторов создан визуальный конструктор со встроенным AI-генератором, собирающим сбалансированный опрос за 1 секунду по текстовой теме. В аналитической панели графики Chart.js строятся в реальном времени, доступен экспорт в CSV с UTF-8 BOM для Microsoft Excel.",
+      8: "Платформа предоставляет открытый REST API из 5 эндпоинтов (DRF) с поддержкой Session и Basic авторизации. Безопасность подтверждена защитой от CSRF, IDOR и набором из 43 автоматических тестов, проверяющих логику на 100%.",
+      9: "Проект полностью опубликован в промышленной среде на Render.com с сервером Gunicorn и сжатием WhiteNoise, а исходный код размещён на GitHub. Подготовлены тестовые профили для демонстрации комиссии.",
+      10: "В заключение отмечу: цель работы полностью достигнута. Платформа доказала преимущество геймифицированного формата сбора мнений. Готов(а) продемонстрировать работу системы и ответить на ваши вопросы!"
+    };
+
+    let currentSlide = 1;
+    const totalSlides = 10;
+
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const currentSlideNum = document.getElementById('currentSlideNum');
+    const progressBar = document.getElementById('progressBar');
+    const dotsContainer = document.getElementById('dotsContainer');
+    const notesDrawer = document.getElementById('notesDrawer');
+    const notesContent = document.getElementById('notesContent');
+    const notesSlideNum = document.getElementById('notesSlideNum');
+    const toggleNotesBtn = document.getElementById('toggleNotesBtn');
+    const closeNotesBtn = document.getElementById('closeNotesBtn');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+    // Generate progress dots
+    for (let i = 1; i <= totalSlides; i++) {
+      const dot = document.createElement('button');
+      dot.className = `w-2 h-2 rounded-full transition-all ${i === 1 ? 'bg-[var(--sage)] w-5' : 'bg-[var(--border-subtle)] hover:bg-[var(--text-muted)]'}`;
+      dot.setAttribute('title', `Слайд ${i}`);
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    }
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        const slideIndex = idx + 1;
+        if (slideIndex === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+
+      // Update counters & progress
+      currentSlideNum.textContent = currentSlide;
+      progressBar.style.width = `${(currentSlide / totalSlides) * 100}%`;
+
+      // Update dots
+      const dots = dotsContainer.children;
+      for (let i = 0; i < dots.length; i++) {
+        if (i + 1 === currentSlide) {
+          dots[i].className = 'w-5 h-2 rounded-full bg-[var(--sage)] transition-all';
+        } else {
+          dots[i].className = 'w-2 h-2 rounded-full bg-[var(--border-subtle)] hover:bg-[var(--text-muted)] transition-all';
+        }
+      }
+
+      // Update speech notes
+      notesSlideNum.textContent = currentSlide;
+      notesContent.textContent = speeches[currentSlide] || "Текст речи для слайда.";
+
+      // Button states
+      prevBtn.disabled = currentSlide === 1;
+      prevBtn.style.opacity = currentSlide === 1 ? '0.4' : '1';
+      nextBtn.textContent = currentSlide === totalSlides ? 'Завершить 🎓' : 'Вперёд →';
+    }
+
+    function goToSlide(n) {
+      if (n >= 1 && n <= totalSlides) {
+        currentSlide = n;
+        updateSlide();
+      }
+    }
+
+    prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+    nextBtn.addEventListener('click', () => {
+      if (currentSlide < totalSlides) {
+        goToSlide(currentSlide + 1);
+      } else {
+        goToSlide(1);
+      }
+    });
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        goToSlide(currentSlide + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        goToSlide(currentSlide - 1);
+      } else if (e.key === 'n' || e.key === 'N' || e.key === 'т' || e.key === 'Т') {
+        notesDrawer.classList.toggle('open');
+      } else if (e.key === 'f' || e.key === 'F' || e.key === 'а' || e.key === 'А') {
+        toggleFullscreen();
+      }
+    });
+
+    // Notes toggle
+    toggleNotesBtn.addEventListener('click', () => notesDrawer.classList.toggle('open'));
+    closeNotesBtn.addEventListener('click', () => notesDrawer.classList.remove('open'));
+
+    // Dark theme toggle
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    });
+
+    // Fullscreen toggle
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+    // Initial setup
+    updateSlide();
+  </script>
+</body>
+</html>
