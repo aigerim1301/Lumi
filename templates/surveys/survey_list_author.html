@@ -4,7 +4,7 @@
 {% block title %}Мои опросы | {{ BRAND_NAME }}{% endblock %}
 
 {% block content %}
-<div style="max-width: 900px; margin: 0 auto;">
+<div style="max-width: 900px; margin: 0 auto; width: 100%; min-width: 0;">
     <!-- Заголовок и кнопка создания -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
         <div>
@@ -34,7 +34,7 @@
         </p>
         <form method="post" action="{% url 'survey_create_with_ai' %}" style="display: flex; gap: 10px; flex-wrap: wrap;">
             {% csrf_token %}
-            <input type="text" name="topic" class="form-control" placeholder="Введите тему опроса..." required style="flex: 1; min-width: 240px;">
+            <input type="text" name="topic" class="form-control" placeholder="Введите тему опроса..." required style="flex: 1 1 200px; min-width: 0; width: 100%;">
             <button type="submit" class="btn btn-primary" style="background-color: var(--accent-tertiary); border-color: var(--accent-tertiary);">
                 🪄 Сгенерировать опрос
             </button>
@@ -62,7 +62,7 @@
         <div style="display: flex; flex-direction: column; gap: 14px;">
             {% for survey in surveys %}
             <div class="lumi-card" style="margin-bottom: 0; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 260px;">
+                <div style="display: flex; align-items: center; gap: 14px; flex: 1 1 200px; min-width: 0;">
                     <!-- Цветная иконка статуса -->
                     <div style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
                         {% if survey.status == 'published' %}
