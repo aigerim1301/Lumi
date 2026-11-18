@@ -575,6 +575,51 @@ img {
     margin-top: 4px;
 }
 
+/* Поле ввода пароля с кнопкой-глазком видимости */
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-input-wrapper input {
+    padding-right: 46px !important;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    transition: color 0.2s ease, transform 0.15s ease;
+    z-index: 2;
+}
+
+.password-toggle-btn:hover {
+    color: var(--accent-primary);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.password-toggle-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 /* Тумблеры / Переключатели (Toggle switches) */
 .toggle-switch-wrapper {
     display: flex;

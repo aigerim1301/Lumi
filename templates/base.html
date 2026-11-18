@@ -167,13 +167,41 @@
         </main>
     </div>
 
-    <!-- Клиентский скрипт для мгновенного переключения тёмной темы -->
+    <!-- Клиентский скрипт для мгновенного переключения тёмной темы и глазка паролей -->
     <script>
         // Проверяем сохраненную тему в localStorage для гостей
         const savedTheme = localStorage.getItem('lumi-theme');
         if (savedTheme) {
             document.documentElement.setAttribute('data-theme', savedTheme);
         }
+
+        // Универсальный переключатель видимости пароля (глазок)
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.password-toggle-btn');
+            if (!btn) return;
+            e.preventDefault();
+            const wrapper = btn.closest('.password-input-wrapper');
+            if (!wrapper) return;
+            const input = wrapper.querySelector('input');
+            if (!input) return;
+
+            const eyeOpen = btn.querySelector('.eye-open');
+            const eyeClosed = btn.querySelector('.eye-closed');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (eyeOpen) eyeOpen.style.display = 'none';
+                if (eyeClosed) eyeClosed.style.display = 'block';
+                btn.setAttribute('title', 'Скрыть пароль');
+                btn.setAttribute('aria-label', 'Скрыть пароль');
+            } else {
+                input.type = 'password';
+                if (eyeOpen) eyeOpen.style.display = 'block';
+                if (eyeClosed) eyeClosed.style.display = 'none';
+                btn.setAttribute('title', 'Показать пароль');
+                btn.setAttribute('aria-label', 'Показать пароль');
+            }
+        });
     </script>
     {% block extra_js %}{% endblock %}
 </body>
