@@ -25,6 +25,9 @@ urlpatterns = [
     path('test-403/', views.test_403_view, name='test_403'),
     path('test-404/', views.test_404_view, name='test_404'),
 
+    # Интерактивная презентация курсовой работы
+    path('presentation/', views.presentation_view, name='presentation'),
+
     # Надёжная раздача статических файлов (CSS, картинки) в облаке
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
 ]
