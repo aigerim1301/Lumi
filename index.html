@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0D1311">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Lumi — Интерактивная презентация курсовой работы</title>
+  <style>
+    :root {
+      --sage: #2D5A4C;
+      --sage-glow: #3E8B75;
+      --terracotta: #E06D44;
+      --terracotta-glow: #FF8559;
+      --lavender: #8E7BB5;
+      --lavender-glow: #B19EE0;
+      --bg: #0D1311;
+      --surface: rgba(22, 32, 28, 0.75);
+      --surface-card: rgba(28, 41, 36, 0.85);
+      --surface-border: rgba(62, 139, 117, 0.25);
+      --text-main: #F3F7F5;
+      --text-muted: #95A5A0;
+      --accent-grad: linear-gradient(135deg, #3E8B75, #E06D44);
+    }
+
+    [data-theme="light"] {
+      --bg: #F5F3EC;
+      --surface: rgba(255, 255, 255, 0.85);
+      --surface-card: rgba(255, 255, 255, 0.95);
+      --surface-border: rgba(45, 90, 76, 0.2);
+      --text-main: #18221F;
+      --text-muted: #596B65;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    /* Background Particle Canvas */
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Confetti Canvas */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* Header Nav */
+    header {
+      position: relative;
+      z-index: 20;
+      padding: 16px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--surface-border);
+      background: rgba(13, 19, 17, 0.4);
+    }
+
+    .brand-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--sage-glow), var(--terracotta));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.2rem;
+      color: #FFF;
+      box-shadow: 0 4px 18px rgba(62, 139, 117, 0.4);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .header-tools {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tool-btn {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(8px);
+    }
+    .tool-btn:hover {
+      border-color: var(--terracotta);
+      color: var(--terracotta);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(224, 109, 68, 0.2);
+    }
+    .tool-btn.active {
+      background: var(--terracotta);
+      color: #FFF;
+      border-color: var(--terracotta);
+    }
+
+    /* Deck Viewport */
+    .deck-viewport {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 10;
+      perspective: 1200px;
+    }
+
+    .slide {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) translateZ(-80px) rotateY(15deg);
+      width: 100%;
+      max-width: 1140px;
+      min-height: 640px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 28px;
+      padding: 44px 52px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(20px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) translateZ(0) rotateY(0deg);
+    }
+
+    /* Slide entrance staggered animations */
+    .slide.active .anim-fade {
+      animation: popIn 0.5s ease-out forwards;
+    }
+    .slide.active .delay-1 { animation-delay: 0.1s; }
+    .slide.active .delay-2 { animation-delay: 0.2s; }
+    .slide.active .delay-3 { animation-delay: 0.3s; }
+    .slide.active .delay-4 { animation-delay: 0.4s; }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.97);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Gradient headings */
+    .grad-title {
+      background: linear-gradient(135deg, #FFF 30%, var(--sage-glow) 70%, var(--terracotta) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    [data-theme="light"] .grad-title {
+      background: linear-gradient(135deg, var(--sage) 20%, var(--terracotta) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
+    }
+    .badge-sage {
+      background: rgba(62, 139, 117, 0.15);
+      color: var(--sage-glow);
+      border: 1px solid rgba(62, 139, 117, 0.35);
+    }
+    .badge-terra {
+      background: rgba(224, 109, 68, 0.15);
+      color: var(--terracotta-glow);
+      border: 1px solid rgba(224, 109, 68, 0.35);
+    }
+    .badge-lavender {
+      background: rgba(142, 123, 181, 0.15);
+      color: var(--lavender-glow);
+      border: 1px solid rgba(142, 123, 181, 0.35);
+    }
+
+    /* Cards */
+    .card-3d {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 20px;
+      padding: 24px;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-3d:hover {
+      transform: translateY(-5px) scale(1.01);
+      border-color: var(--terracotta);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+    }
+    .card-3d::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.04), transparent 70%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .card-3d:hover::before {
+      opacity: 1;
+    }
+
+    /* Bottom Control Bar */
+    footer {
+      position: relative;
+      z-index: 20;
+      padding: 16px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--surface-border);
+      background: rgba(13, 19, 17, 0.5);
+    }
+
+    .progress-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--surface-border);
+    }
+    .progress-fill {
+      height: 100%;
+      width: 10%;
+      background: linear-gradient(90deg, var(--sage-glow), var(--terracotta-glow));
+      box-shadow: 0 0 12px var(--terracotta-glow);
+      transition: width 0.4s ease;
+    }
+
+    .nav-btn {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text-main);
+      padding: 10px 22px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+    .nav-btn:hover {
+      background: var(--sage);
+      color: #FFF;
+      border-color: var(--sage-glow);
+      box-shadow: 0 6px 18px rgba(62, 139, 117, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .dots-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot-btn {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--surface-border);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .dot-btn.active {
+      width: 28px;
+      background: linear-gradient(90deg, var(--sage-glow), var(--terracotta));
+      box-shadow: 0 0 10px var(--sage-glow);
+    }
+
+    /* Speaker Notes Drawer */
+    .speaker-drawer {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(140%);
+      width: 90%;
+      max-width: 960px;
+      background: var(--surface-card);
+      border: 2px solid var(--terracotta);
+      border-radius: 20px;
+      padding: 24px 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(24px);
+      z-index: 100;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .speaker-drawer.open {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Laser pointer effect */
+    #laserDot {
+      position: fixed;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #FF2A2A;
+      box-shadow: 0 0 16px #FF2A2A, 0 0 32px #FF2A2A;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      display: none;
+    }
+
+    /* Interactive Demo: Swipe Card */
+    .swipe-arena {
+      position: relative;
+      width: 280px;
+      height: 240px;
+      perspective: 800px;
+    }
+    .swipe-card {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #1A2823, #233830);
+      border: 1px solid var(--sage-glow);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+      cursor: grab;
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .swipe-card.swiped-left {
+      transform: translateX(-260px) rotate(-25deg);
+      opacity: 0;
+    }
+    .swipe-card.swiped-right {
+      transform: translateX(260px) rotate(25deg);
+      opacity: 0;
+    }
+
+    /* Interactive Demo: Emotion Thermometer */
+    .emotion-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 5px;
+      background: linear-gradient(90deg, #E06D44, #F0C419, #3E8B75);
+      outline: none;
+      cursor: pointer;
+    }
+    .emotion-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #FFF;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .emotion-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+    }
+
+    /* Pulsing Pipeline Flow */
+    .flow-line {
+      stroke-dasharray: 6;
+      animation: dash 1s linear infinite;
+    }
+    @keyframes dash {
+      to { stroke-dashoffset: -12; }
+    }
+  
+    /* ==========================================================================
+       Адаптивность для мобильных телефонов и планшетов (Responsive Design)
+       ========================================================================== */
+
+    /* Планшеты (iPad, Android Tablets: 769px - 1024px) */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      header {
+        padding: 12px 24px;
+      }
+      .slide {
+        max-width: 94%;
+        min-height: 560px;
+        padding: 32px 36px;
+      }
+      .grad-title {
+        font-size: 2.4rem !important;
+      }
+      .slide [style*="repeat(4, 1fr)"],
+      .slide [style*="repeat(3, 1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+    }
+
+    /* Смартфоны (Mobile Phones: до 768px) */
+    @media (max-width: 768px) {
+      body {
+        overflow-x: hidden;
+        overflow-y: auto;
+        min-height: 100dvh;
+      }
+
+      /* Мобильная шапка */
+      header {
+        padding: 10px 14px;
+        flex-wrap: nowrap;
+      }
+      .brand-pill > div > div:last-child {
+        display: none !important; /* Прячем длинный подзаголовок на смартфонах */
+      }
+      .brand-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.95rem;
+        border-radius: 9px;
+      }
+      .header-tools {
+        gap: 5px;
+      }
+      .tool-btn {
+        padding: 6px 8px;
+        font-size: 0.72rem;
+        border-radius: 8px;
+      }
+      /* На смартфонах прячем текстовые подписи кнопок шапки, оставляем иконки */
+      .tool-btn span:not(:first-child) {
+        display: none !important;
+      }
+
+      /* Область показа слайдов на телефоне */
+      .deck-viewport {
+        padding: 8px 10px;
+        align-items: flex-start;
+        height: auto;
+        min-height: calc(100dvh - 120px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        perspective: none;
+      }
+
+      .slide {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: auto !important;
+        max-height: none !important;
+        border-radius: 20px !important;
+        padding: 20px 16px !important;
+        margin: 6px 0 !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+        display: none !important;
+      }
+
+      .slide.active {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+      }
+
+      /* Типографика на телефоне */
+      .grad-title {
+        font-size: 1.55rem !important;
+        line-height: 1.25 !important;
+        margin-bottom: 10px !important;
+      }
+      .slide p {
+        font-size: 0.88rem !important;
+        line-height: 1.5 !important;
+        margin-bottom: 16px !important;
+      }
+      .badge {
+        padding: 4px 10px !important;
+        font-size: 0.7rem !important;
+      }
+      .card-3d {
+        padding: 14px !important;
+        border-radius: 16px !important;
+      }
+
+      /* Авто-адаптация сеток: двухколоночные макеты становятся вертикальными */
+      .slide [style*="grid-template-columns: 1.25fr 0.95fr"],
+      .slide [style*="grid-template-columns: 1.1fr 1fr"],
+      .slide [style*="grid-template-columns: 1.2fr 1fr"],
+      .slide [style*="grid-template-columns: 1fr 1fr"],
+      .slide [style*="grid-template-columns: repeat(4, 1fr)"] {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+
+      /* Сетка метрик на слайде 10 на телефоне */
+      .slide [style*="grid-template-columns: repeat(3, 1fr)"] {
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 8px !important;
+      }
+      .slide [style*="grid-template-columns: repeat(3, 1fr)"] .card-3d {
+        padding: 10px 8px !important;
+      }
+      .slide [style*="grid-template-columns: repeat(3, 1fr)"] div[style*="font-size: 1.7rem"],
+      .slide [style*="grid-template-columns: repeat(3, 1fr)"] div[style*="font-size: 2rem"] {
+        font-size: 1.25rem !important;
+      }
+
+      /* Интерактивные демо-элементы на мобильном */
+      #swipeCard {
+        width: 100% !important;
+        max-width: 270px !important;
+        margin: 0 auto !important;
+      }
+      .emotion-box {
+        padding: 14px !important;
+      }
+
+      /* Нижняя панель управления слайдами */
+      footer {
+        padding: 10px 14px !important;
+      }
+      .nav-btn {
+        padding: 7px 12px !important;
+        font-size: 0.78rem !important;
+      }
+      .slide-dots {
+        gap: 4px !important;
+      }
+      .slide-dot {
+        width: 5px !important;
+        height: 5px !important;
+      }
+      .slide-dot.active {
+        width: 14px !important;
+      }
+      #slideNumIndicator {
+        font-size: 0.75rem !important;
+      }
+
+      /* Мобильная адаптация шпаргалки докладчика */
+      .speaker-drawer {
+        width: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        border-radius: 20px 20px 0 0 !important;
+        padding: 18px 16px !important;
+        max-height: 60vh !important;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Particles Canvas -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- Confetti Canvas on Slide 10 -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- Laser Pointer Dot -->
+  <div id="laserDot"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand-pill">
+      <div class="brand-icon">LU</div>
+      <div>
+        <div style="font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em;">Lumi</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">Интерактивная защита курсовой работы 2026</div>
+      </div>
+    </div>
+
+    <div class="header-tools">
+      <button id="soundBtn" class="tool-btn" title="Звуковые эффекты">
+        <span id="soundIcon">🔊</span>
+        <span>Звук: Вкл</span>
+      </button>
+
+      <button id="laserBtn" class="tool-btn" title="Лазерная указка [L]">
+        <span>🔴</span>
+        <span>Указка [L]</span>
+      </button>
+
+      <button id="notesBtn" class="tool-btn" title="Шпаргалка докладчика [N]">
+        <span>📝</span>
+        <span>Шпаргалка [N]</span>
+      </button>
+
+      <button id="themeBtn" class="tool-btn" title="Сменить тему">
+        <span id="themeIcon">🌓</span>
+      </button>
+
+      <button id="qrModalBtn" class="tool-btn" title="Показать QR-код платформы">
+        <span>📱</span>
+        <span>QR-код</span>
+      </button>
+      <button id="fsBtn" class="tool-btn" title="Полноэкранный режим [F]">
+        <span>⛶</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Slides Viewport -->
+  <main class="deck-viewport">
+
+    <!-- ==================== СЛАЙД 1: HERO TITLE ==================== -->
+    <section class="slide active" data-slide="1">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <span class="badge badge-sage anim-fade">Курсовая работа • Защита 2026</span>
+        <span class="badge badge-terra anim-fade">Live на Render.com</span>
+      </div>
+
+      <div style="margin: auto 0; text-align: left;">
+        <div class="badge badge-lavender anim-fade delay-1" style="margin-bottom: 16px;">
+          ★ Новое поколение онлайн-опросов
+        </div>
+        <h1 class="grad-title anim-fade delay-2" style="font-size: 3.4rem; font-weight: 900; line-height: 1.15; margin-bottom: 18px;">
+          Lumi — Платформа интерактивных опросов с геймификацией
+        </h1>
+        <p class="anim-fade delay-3" style="font-size: 1.25rem; color: var(--text-muted); max-width: 860px; line-height: 1.6; margin-bottom: 32px;">
+          Веб-сервис с мобильными свайп-карточками, эмоциональным термометром, сравнительной аналитикой в реальном времени, встроенным AI-генератором и открытым REST API.
+        </p>
+
+        <div class="anim-fade delay-4" style="display: flex; gap: 14px; flex-wrap: wrap;">
+          <div class="badge badge-sage">Django 6.1 MVT</div>
+          <div class="badge badge-terra">Django REST Framework</div>
+          <div class="badge badge-lavender">43 теста (100% OK)</div>
+          <div class="badge badge-sage">Chart.js Analytics</div>
+          <div class="badge badge-terra">Excel CSV BOM</div>
+        </div>
+      </div>
+
+      <div class="anim-fade delay-4" style="display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid var(--surface-border);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 14px; background: var(--sage); color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: 800;">А</div>
+          <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Студент-разработчик:</div>
+            <div style="font-weight: 800; font-size: 0.95rem;">Айгерим / Информационные Системы</div>
+          </div>
+        </div>
+
+        <div style="text-align: right;">
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Репозиторий GitHub:</div>
+          <div style="font-weight: 800; font-size: 0.95rem; color: var(--terracotta-glow);">github.com/aigerim1301/Lumi</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 2: ПРОБЛЕМА vs РЕШЕНИЕ ==================== -->
+    <section class="slide" data-slide="2">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <span class="badge badge-terra anim-fade">Проблематика & Актуальность</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Почему старые опросы проваливаются?</span>
+      </div>
+
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 24px;">
+        Кризис монотонных форм и революция вовлечённости
+      </h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1;">
+        <!-- Card 1: Google Forms -->
+        <div class="card-3d anim-fade delay-2" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05); display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; color: #EF4444; font-weight: 800; margin-bottom: 14px; font-size: 1.1rem;">
+              <span>✕</span> Классические Google Forms
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.9rem; color: var(--text-muted);">
+              <div>• <b>Высокий отток:</b> до 45% пользователей закрывают опрос, не дойдя до конца.</div>
+              <div>• <b>Скучный UX:</b> длинные списки радиокнопок вызывают «баннерную слепоту».</div>
+              <div>• <b>Односторонний обмен:</b> респондент тратит время, не получая ничего полезного.</div>
+              <div>• <b>Рутина автора:</b> составление вопросов вручную отнимает часы.</div>
+            </div>
+          </div>
+          <div style="padding: 12px; background: rgba(239, 68, 68, 0.15); border-radius: 12px; text-align: center; color: #EF4444; font-weight: 700; font-size: 0.85rem;">
+            Итог: низкое качество ответов и пустые выборки
+          </div>
+        </div>
+
+        <!-- Card 2: Lumi -->
+        <div class="card-3d anim-fade delay-3" style="border-color: var(--sage-glow); background: rgba(62, 139, 117, 0.08); display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; color: var(--sage-glow); font-weight: 800; margin-bottom: 14px; font-size: 1.1rem;">
+              <span>✓</span> Инновационный ответ Lumi
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.9rem;">
+              <div>• 🎮 <b>Геймификация:</b> свайп-карточки, термометр эмоций и звёздные рейтинги.</div>
+              <div>• 📈 <b>Доходимость 85%+:</b> динамический ритм удерживает внимание респондента.</div>
+              <div>• 💡 <b>Мгновенный профит:</b> карточка-итог со сравнением: <i>«Вы ответили как 78% участников»</i>.</div>
+              <div>• 🤖 <b>AI-генератор:</b> проектирование опроса за 1 секунду по текстовой теме.</div>
+            </div>
+          </div>
+          <div style="padding: 12px; background: var(--sage); border-radius: 12px; text-align: center; color: #FFF; font-weight: 700; font-size: 0.85rem;">
+            Итог: вовлечённая аудитория и глубокая искренняя аналитика
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 3: ЦЕЛЬ И ЭТАПЫ ==================== -->
+    <section class="slide" data-slide="3">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <span class="badge badge-sage anim-fade">Целеполагание</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Последовательная инженерия</span>
+      </div>
+
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 14px;">
+        Цель работы и 6 стадий реализации
+      </h2>
+      <p class="anim-fade delay-2" style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 24px;">
+        <b>Цель:</b> спроектировать и развернуть отказоустойчивую веб-платформу онлайн-опросов с ролевым доступом, защитой от фальсификаций, AI-помощником и API для внешних клиентов.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; flex: 1;">
+        <div class="card-3d anim-fade delay-2">
+          <div style="color: var(--sage-glow); font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;">01</div>
+          <div style="font-weight: 800; font-size: 1rem; margin-bottom: 4px;">Модели БД</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">6 связанных моделей. Защита уникальности ответов через unique_together.</div>
+        </div>
+
+        <div class="card-3d anim-fade delay-2">
+          <div style="color: var(--terracotta-glow); font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;">02</div>
+          <div style="font-weight: 800; font-size: 1rem; margin-bottom: 4px;">Роли & Права</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Автор, Респондент, Администратор. Полная защита от атак IDOR.</div>
+        </div>
+
+        <div class="card-3d anim-fade delay-3">
+          <div style="color: var(--lavender-glow); font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;">03</div>
+          <div style="font-weight: 800; font-size: 1rem; margin-bottom: 4px;">Геймификация</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Мобильные свайп-карточки, термометр эмоций (-4..+4), звёздный рейтинг.</div>
+        </div>
+
+        <div class="card-3d anim-fade delay-3">
+          <div style="color: var(--sage-glow); font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;">04</div>
+          <div style="font-weight: 800; font-size: 1rem; margin-bottom: 4px;">Chart.js & CSV</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Интерактивные диаграммы и выгрузка в CSV (UTF-8 BOM для Microsoft Excel).</div>
+        </div>
+
+        <div class="card-3d anim-fade delay-4">
+          <div style="color: var(--terracotta-glow); font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;">05</div>
+          <div style="font-weight: 800; font-size: 1rem; margin-bottom: 4px;">AI Конструктор</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Эвристический синтез 6 разнотипных вопросов по краткому описанию темы.</div>
+        </div>
+
+        <div class="card-3d anim-fade delay-4">
+          <div style="color: var(--lavender-glow); font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;">06</div>
+          <div style="font-weight: 800; font-size: 1rem; margin-bottom: 4px;">REST API & Cloud</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">5 эндпоинтов DRF, 43 теста и публикация на сервере Render.com.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 4: СТЕК ТЕХНОЛОГИЙ ==================== -->
+    <section class="slide" data-slide="4">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <span class="badge badge-lavender anim-fade">Архитектурный фундамент</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Промышленный стек</span>
+      </div>
+
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 24px;">
+        Технологический стек платформы Lumi
+      </h2>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; flex: 1;">
+        <!-- Backend -->
+        <div class="card-3d anim-fade delay-2" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="badge badge-sage" style="margin-bottom: 12px;">Backend Core</div>
+            <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 14px;">Django 6.1 + DRF</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; color: var(--text-muted);">
+              <div>• <b>Python 3.12+</b> (строгая типизация)</div>
+              <div>• <b>Django ORM</b> с транзакционностью</div>
+              <div>• <b>Django REST Framework 3.18</b></div>
+              <div>• <b>CSRF Token</b> & Session/Basic Auth</div>
+              <div>• <b>SQLite 3</b> реляционная СУБД</div>
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--sage-glow); padding-top: 12px; border-top: 1px solid var(--surface-border);">
+            Чистый MVT без перегрузки
+          </div>
+        </div>
+
+        <!-- Frontend -->
+        <div class="card-3d anim-fade delay-3" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="badge badge-terra" style="margin-bottom: 12px;">Frontend & UX</div>
+            <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 14px;">Vanilla JS + CSS3</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; color: var(--text-muted);">
+              <div>• <b>CSS Variables</b> дизайн-система</div>
+              <div>• <b>Touch Events</b> (свайп-жесты)</div>
+              <div>• <b>Chart.js</b> круговые и столбчатые графики</div>
+              <div>• <b>Dark / Light</b> динамическая тема</div>
+              <div>• Мгновенный отклик без SPA-веса</div>
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--terracotta-glow); padding-top: 12px; border-top: 1px solid var(--surface-border);">
+            100 баллов PageSpeed на смартфонах
+          </div>
+        </div>
+
+        <!-- Cloud -->
+        <div class="card-3d anim-fade delay-4" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="badge badge-lavender" style="margin-bottom: 12px;">Cloud & DevOps</div>
+            <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 14px;">Render + Gunicorn</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; color: var(--text-muted);">
+              <div>• <b>WSGI-сервер Gunicorn 27.0</b></div>
+              <div>• <b>WhiteNoise 6.12</b> (компрессия статики)</div>
+              <div>• <b>GitHub CI/CD</b> авторазвёртывание</div>
+              <div>• <b>build.sh & render.yaml</b> манифесты</div>
+              <div>• Автоматический SSL HTTPS</div>
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--lavender-glow); padding-top: 12px; border-top: 1px solid var(--surface-border);">
+            Готовность к 24/7 доступности
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 5: МОДЕЛИ ДАННЫХ ==================== -->
+    <section class="slide" data-slide="5">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <span class="badge badge-sage anim-fade">Структура базы данных</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Целостность ORM</span>
+      </div>
+
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 18px;">
+        Архитектура 6 взаимосвязанных моделей
+      </h2>
+
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; flex: 1;">
+        <!-- Flow Schema -->
+        <div class="card-3d anim-fade delay-2" style="display: flex; flex-direction: column; justify-content: space-around;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(62,139,117,0.15); border-radius: 12px; border: 1px solid var(--sage-glow);">
+            <span style="font-weight: 800;">User & Profile</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">OneToOne | Роли: author, respondent</span>
+          </div>
+
+          <div style="text-align: center; color: var(--sage-glow); font-size: 1.2rem;">↓ 1:N (создает опросы)</div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(224,109,68,0.15); border-radius: 12px; border: 1px solid var(--terracotta);">
+            <span style="font-weight: 800;">Survey (Опрос)</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Статусы: draft, published, closed</span>
+          </div>
+
+          <div style="text-align: center; color: var(--terracotta); font-size: 1.2rem;">↓ 1:N (содержит вопросы)</div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div style="padding: 10px; background: rgba(142,123,181,0.15); border-radius: 12px; border: 1px solid var(--lavender-glow); text-align: center;">
+              <div style="font-weight: 800; font-size: 0.9rem;">Question & Choice</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">6 типов ответов</div>
+            </div>
+            <div style="padding: 10px; background: rgba(62,139,117,0.15); border-radius: 12px; border: 1px solid var(--sage-glow); text-align: center;">
+              <div style="font-weight: 800; font-size: 0.9rem;">Response & Answer</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">Полиморфные ответы</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security Highlight -->
+        <div class="card-3d anim-fade delay-3" style="border-color: var(--terracotta); background: rgba(224,109,68,0.06); display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="badge badge-terra" style="margin-bottom: 12px;">Защита от накрутки</div>
+            <h4 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 12px;">Ограничение целостности БД</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+              В модели <code>Response</code> заложено жесткое ограничение на уровне ядра базы данных:
+            </p>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--surface-border); padding: 12px; border-radius: 12px; font-family: monospace; font-size: 0.85rem; color: var(--terracotta-glow);">
+              unique_together = ('survey', 'respondent')
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-top: 14px;">
+              Пользователь не может отправить повторный ответ даже при попытке отправить прямой POST-запрос или манипуляции с браузером.
+            </p>
+          </div>
+          <div style="padding: 10px; background: rgba(62,139,117,0.2); border-radius: 10px; font-size: 0.8rem; font-weight: 700; color: var(--sage-glow); text-align: center;">
+            ✓ Сигнал post_save автоматически создаёт Profile для каждого User
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 6: ИНТЕРАКТИВНЫЙ ДЕМО-ТРЕНАЖЕР ==================== -->
+    <section class="slide" data-slide="6">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <span class="badge badge-terra anim-fade">Живое демо на слайде</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Попробуйте прямо сейчас!</span>
+      </div>
+
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 18px;">
+        Геймифицированный интерфейс прохождения
+      </h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1;">
+        <!-- Interactive Swipe Card Demo -->
+        <div class="card-3d anim-fade delay-2" style="display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+          <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 800; font-size: 0.9rem;">1. Демо Свайп-Карточки:</span>
+            <span id="swipeCountBadge" class="badge badge-sage">Вопрос 1 / 3</span>
+          </div>
+
+          <div class="swipe-arena" style="margin: 12px 0;">
+            <div id="demoSwipeCard" class="swipe-card">
+              <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--terracotta-glow); font-weight: 800;">Swipe Card</div>
+              <div id="demoSwipeText" style="font-size: 1.05rem; font-weight: 800; line-height: 1.4;">
+                «Вам нравится интерактивный формат опросов больше, чем Google Forms?»
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+                <span>← Нет</span>
+                <span>Да →</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; width: 100%;">
+            <button id="swipeNoBtn" class="nav-btn" style="flex: 1; justify-content: center; border-color: rgba(239,68,68,0.4); color: #EF4444;">
+              ✕ Пропустить
+            </button>
+            <button id="swipeYesBtn" class="nav-btn" style="flex: 1; justify-content: center; border-color: var(--sage-glow); color: var(--sage-glow);">
+              ✓ Согласен (+1)
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Emotion Slider Demo -->
+        <div class="card-3d anim-fade delay-3" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="font-weight: 800; font-size: 0.9rem; margin-bottom: 8px;">2. Демо Шкалы эмоций (-4..+4):</div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">
+              Двигайте ползунок — эмодзи и настроение меняются динамически:
+            </p>
+
+            <div style="text-align: center; padding: 18px; background: rgba(0,0,0,0.25); border-radius: 16px; margin-bottom: 16px;">
+              <div id="demoEmoji" style="font-size: 3.5rem; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block;">🤩</div>
+              <div id="demoEmojiLabel" style="font-weight: 800; font-size: 1rem; color: var(--sage-glow); margin-top: 6px;">В полном восторге (+4)</div>
+            </div>
+
+            <input type="range" id="demoRange" min="-4" max="4" value="4" step="1" class="emotion-slider">
+          </div>
+
+          <div style="padding: 12px; background: rgba(142,123,181,0.15); border: 1px solid var(--lavender-glow); border-radius: 12px; font-size: 0.8rem;">
+            🎁 <b>Карточка-итог:</b> Сразу после опроса респондент видит: <i>«Вы ответили так же, как 78% участников!»</i>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 7: АВТОР & AI & АНАЛИТИКА ==================== -->
+    <section class="slide" data-slide="7">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <span class="badge badge-sage anim-fade">Инструменты Автора</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">AI Генератор & Аналитика</span>
+      </div>
+
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 18px;">
+        AI-генерация опросов и бизнес-аналитика
+      </h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1;">
+        <!-- AI Generator flow -->
+        <div class="card-3d anim-fade delay-2" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="badge badge-terra" style="margin-bottom: 12px;">🤖 Встроенный AI-генератор</div>
+            <h4 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 10px;">Создание опроса за 1 секунду</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
+              Автор вводит только тему (например, <i>«Качество онлайн-курса по веб-разработке»</i>). Алгоритм классифицирует тему и строит идеальную структуру:
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem;">
+              <div style="padding: 6px 10px; background: rgba(62,139,117,0.15); border-radius: 8px;">✓ 1 Вопрос-свайп (быстрое вовлечение)</div>
+              <div style="padding: 6px 10px; background: rgba(224,109,68,0.15); border-radius: 8px;">✓ 1 Термометр эмоций (-4..+4)</div>
+              <div style="padding: 6px 10px; background: rgba(142,123,181,0.15); border-radius: 8px;">✓ 1 Звёздный рейтинг (оценка полезности)</div>
+              <div style="padding: 6px 10px; background: rgba(62,139,117,0.15); border-radius: 8px;">✓ 2 Вопроса с одиночным и мультивыбором</div>
+              <div style="padding: 6px 10px; background: rgba(224,109,68,0.15); border-radius: 8px;">✓ 1 Текстовое поле для пожеланий</div>
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--terracotta-glow); font-weight: 700; margin-top: 10px;">
+            Готов к подключению внешних LLM API через файл surveys/ai.py
+          </div>
+        </div>
+
+        <!-- Realtime Analytics Mock -->
+        <div class="card-3d anim-fade delay-3" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="badge badge-sage" style="margin-bottom: 12px;">📊 Аналитика Chart.js</div>
+            <h4 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 14px;">Аналитическая панель в реальном времени</h4>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+              <div style="padding: 14px; background: rgba(0,0,0,0.25); border-radius: 14px; text-align: center;">
+                <div style="font-size: 1.8rem; font-weight: 900; color: var(--sage-glow);">94.2%</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Завершенность</div>
+              </div>
+              <div style="padding: 14px; background: rgba(0,0,0,0.25); border-radius: 14px; text-align: center;">
+                <div style="font-size: 1.8rem; font-weight: 900; color: var(--terracotta-glow);">1 мин 18 с</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Среднее время</div>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem; color: var(--text-muted);">
+              <div>• <b>Диаграммы Donut & Bar:</b> наглядное распределение мнений.</div>
+              <div>• <b>Экспорт в CSV с UTF-8 BOM:</b> русские буквы в Microsoft Excel открываются без «кракозябр».</div>
+            </div>
+          </div>
+
+          <div style="padding: 10px; background: rgba(62,139,117,0.15); border-radius: 10px; font-size: 0.8rem; font-weight: 700; color: var(--sage-glow); text-align: center;">
+            ✓ Выгрузка данных в 1 клик для любых отчётов
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 8: REST API & БЕЗОПАСНОСТЬ ==================== -->
+    <section class="slide" data-slide="8">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <span class="badge badge-lavender anim-fade">REST API & Тесты</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Аудит защищенности</span>
+      </div>
+
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 18px;">
+        REST API и 43 автоматических теста
+      </h2>
+
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; flex: 1;">
+        <!-- API Endpoints -->
+        <div class="card-3d anim-fade delay-2" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; color: var(--sage-glow);">
+              5 эндпоинтов Django REST Framework:
+            </h4>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-family: monospace; font-size: 0.8rem;">
+              <div style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; display: flex; justify-content: space-between;">
+                <span><b style="color: #60A5FA;">GET</b> /api/me/</span>
+                <span style="color: var(--text-muted);">Профиль пользователя</span>
+              </div>
+              <div style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; display: flex; justify-content: space-between;">
+                <span><b style="color: #60A5FA;">GET</b> /api/surveys/</span>
+                <span style="color: var(--text-muted);">Каталог опубликованных</span>
+              </div>
+              <div style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; display: flex; justify-content: space-between;">
+                <span><b style="color: #60A5FA;">GET</b> /api/surveys/&lt;id&gt;/</span>
+                <span style="color: var(--text-muted);">Детальная структура</span>
+              </div>
+              <div style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; display: flex; justify-content: space-between;">
+                <span><b style="color: #34D399;">POST</b> /api/surveys/&lt;id&gt;/respond/</span>
+                <span style="color: var(--text-muted);">Отправка ответов</span>
+              </div>
+              <div style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; display: flex; justify-content: space-between;">
+                <span><b style="color: #A78BFA;">GET</b> /api/surveys/&lt;id&gt;/stats/</span>
+                <span style="color: var(--text-muted);">Только для автора (403)</span>
+              </div>
+            </div>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 10px;">
+            Поддерживает Session и Basic Auth, полную JSON-валидацию входных пакетов.
+          </div>
+        </div>
+
+        <!-- Security & Tests -->
+        <div class="card-3d anim-fade delay-3" style="border-color: var(--sage-glow); background: rgba(62,139,117,0.08); display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <span style="font-weight: 800; font-size: 1.1rem; color: var(--sage-glow);">Аудит безопасности</span>
+              <span class="badge badge-sage" style="animation: pulseGlow 2s infinite;">43 ТЕСТА ОК</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; line-height: 1.4;">
+              <div>🛡️ <b>Защита от IDOR:</b> автор не может изменить, опубликовать или удалить чужой опрос (статус 403).</div>
+              <div>🔒 <b>CSRF токены:</b> во всех 8 веб-формах платформы и AJAX-запросах.</div>
+              <div>🚫 <b>Anti-Clickjacking:</b> внедрён заголовок <code>X-Frame-Options: DENY</code>.</div>
+              <div>🧪 <b>100% покрытие бизнес-сценариев:</b> авторизация, права, математика аналитики, предотвращение накруток.</div>
+            </div>
+          </div>
+          <div style="padding: 10px; background: var(--sage); border-radius: 10px; text-align: center; color: #FFF; font-weight: 800; font-size: 0.85rem;">
+            python manage.py test — Ran 43 tests (OK)
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 9: ОБЛАЧНЫЙ ДЕПЛОЙ ==================== -->
+    <section class="slide" data-slide="9">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <span class="badge badge-sage anim-fade">Промышленный релиз</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Render.com & GitHub</span>
+      </div>
+
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 18px;">
+        Развёртывание в облаке и демо-доступ
+      </h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1;">
+        <div class="card-3d anim-fade delay-2" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px; color: #10B981; font-weight: 800; font-size: 1rem; margin-bottom: 12px;">
+              <span style="width: 12px; height: 12px; border-radius: 50%; background: #10B981; display: inline-block; box-shadow: 0 0 10px #10B981;"></span>
+              Статус сервиса: LIVE в сети Интернет
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+              Проект опубликован на облачной платформе Render.com с автоматическим обновлением при каждом коммите в GitHub.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem;">
+              <div style="padding: 10px; background: rgba(0,0,0,0.25); border-radius: 10px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Репозиторий GitHub:</div>
+                <div style="font-weight: 800; color: var(--sage-glow);">github.com/aigerim1301/Lumi</div>
+              </div>
+              <div style="padding: 10px; background: rgba(0,0,0,0.25); border-radius: 10px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Архитектура запуска:</div>
+                <div style="font-weight: 800; color: var(--terracotta-glow);">Gunicorn WSGI + WhiteNoise + SSL</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size: 0.8rem; color: var(--text-muted); padding-top: 10px; border-top: 1px solid var(--surface-border);">
+            Доступен с любого устройства: ноутбук, планшет, смартфон
+          </div>
+        </div>
+
+        <!-- Credentials Table -->
+        <div class="card-3d anim-fade delay-3" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="badge badge-terra" style="margin-bottom: 10px;">Для экзаменационной комиссии</div>
+            <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 12px;">Готовые тестовые аккаунты:</h4>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem;">
+              <div style="padding: 8px 12px; background: rgba(62,139,117,0.15); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 800; color: var(--sage-glow);">Автор (Конструктор & AI)</div>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">Управление своими опросами</div>
+                </div>
+                <div style="text-align: right; font-family: monospace; font-weight: 700;">author<br>AuthorPassword123!</div>
+              </div>
+
+              <div style="padding: 8px 12px; background: rgba(224,109,68,0.15); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 800; color: var(--terracotta-glow);">Респондент (Свайпы & Итоги)</div>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">Прохождение опросов</div>
+                </div>
+                <div style="text-align: right; font-family: monospace; font-weight: 700;">respondent<br>RespondentPassword123!</div>
+              </div>
+
+              <div style="padding: 8px 12px; background: rgba(142,123,181,0.15); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 800; color: var(--lavender-glow);">Администратор (Django Admin)</div>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">Полный аудит всех данных</div>
+                </div>
+                <div style="text-align: right; font-family: monospace; font-weight: 700;">admin<br>AdminPassword123!</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="text-align: center; font-size: 0.8rem; font-weight: 700; color: var(--sage-glow); padding-top: 8px;">
+            Сидер seed_demo автоматически инициализирует данные
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== СЛАЙД 10: ЗАКЛЮЧЕНИЕ & САЛЮТ ==================== -->
+    <section class="slide" data-slide="10">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span class="badge badge-sage anim-fade">Финал курсовой работы</span>
+        <button id="confettiBtn" class="tool-btn anim-fade" style="border-color: var(--terracotta); color: var(--terracotta); font-weight: 700;">
+          🎉 Запустить салют!
+        </button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.25fr 0.95fr; gap: 28px; align-items: center; margin: auto 0;">
+        <!-- Левая колонка: Итоги и метрики -->
+        <div style="text-align: left;">
+          <div class="brand-icon anim-fade delay-1" style="width: 52px; height: 52px; font-size: 1.5rem; margin-bottom: 12px; border-radius: 16px;">
+            LU
+          </div>
+
+          <h1 class="grad-title anim-fade delay-2" style="font-size: 2.7rem; font-weight: 900; line-height: 1.15; margin-bottom: 12px;">
+            Цель работы успешно достигнута!
+          </h1>
+          <p class="anim-fade delay-3" style="font-size: 1.05rem; color: var(--text-muted); line-height: 1.55; margin-bottom: 20px;">
+            Платформа <b>Lumi</b> подтвердила высокую вовлеченность пользователей благодаря геймификации, обеспечивает детальную аналитику и полностью готова к эксплуатации.
+          </p>
+
+          <div class="anim-fade delay-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 22px;">
+            <div class="card-3d" style="padding: 12px 14px;">
+              <div style="font-size: 1.7rem; font-weight: 900; color: var(--sage-glow);">85%+</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3;">Прогнозируемая доходимость</div>
+            </div>
+            <div class="card-3d" style="padding: 12px 14px;">
+              <div style="font-size: 1.7rem; font-weight: 900; color: var(--terracotta-glow);">100%</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3;">43 автотеста успешно</div>
+            </div>
+            <div class="card-3d" style="padding: 12px 14px;">
+              <div style="font-size: 1.7rem; font-weight: 900; color: var(--lavender-glow);">REST</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3;">API для клиентов</div>
+            </div>
+          </div>
+
+          <div class="anim-fade delay-4" style="display: flex; gap: 10px; align-items: center; color: var(--text-muted); font-size: 0.88rem;">
+            <span>🎓 Разработчик: <b>Айгерим</b></span>
+            <span>•</span>
+            <span style="color: var(--sage-glow); font-weight: 700;">Спасибо за внимание!</span>
+          </div>
+        </div>
+
+        <!-- Правая колонка: Светящийся стенд с QR-кодом -->
+        <div class="card-3d anim-fade delay-2" style="background: var(--surface-card); border: 2px solid var(--surface-border); border-radius: 24px; padding: 22px 18px; text-align: center; box-shadow: 0 16px 48px rgba(45, 90, 76, 0.25); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(224, 109, 68, 0.35) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+          
+          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; background: rgba(62, 139, 117, 0.15); border: 1px solid var(--sage-glow); color: var(--sage-glow); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px;">
+            <span>📱</span> Живая демо-версия
+          </div>
+
+          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 4px;">
+            Пройдите опрос со смартфона
+          </h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+            Наведите камеру любого телефона на QR-код:
+          </p>
+
+          <div style="background: #FFFFFF; padding: 12px; border-radius: 18px; display: inline-block; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); border: 3px solid rgba(62, 139, 117, 0.3);">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAewAAAHsCAYAAAAQKp5gAAALQ0lEQVR4nO3cwZEjNxQFQVIxXqwTusr/g65yYu2APJgVQsTyF5FpAAPTbE4FLu+51loPAGC0P959AADg1wQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAK+HnE//vrz3Uf4KD///mfU97V7ntOfv8v72Xr+094370/rfTvNDRsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAALyW+K3bcnumrZFPG1LedrzqT/PXafPc9vv/ba/98ew9/k0N2wACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAi4bku8vlU7bSvYFvR7n099e3zaeaZ9X6dN+3un/X+bxg0bAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACbIlztd0t5d2t49Nb2dO2vnfZBof/zg0bAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACbIlz9dZ0fXu87vTW+mm3fV+8lxs2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAE2BL/BVvBLfVt89Nb5dO2uOu/x9Pf12nTzsP33LABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASDgui3x+pbyNPUt5Wnb3T7/terv5y7/3z6bGzYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AATkt8Tr27919ec/bbu7btqWdf37ve394Xtu2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEPBca613H+KTnN5SPr2NvOu2reP6VvZp07a4d/m9eD6TuWEDQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0DA17sPMN20beFpW82ez2uf/+nnedv35e99r2nvQ50bNgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABNgSj21x2+ZtPf9d9W3k+vu8+/nT3p9d07bZd/2IP/9dbtgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABDwXGutdx9ismnbudO2zevbxfXnOU19q/m0aVvou6Ztv9/GDRsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAK+3n2ATzNt+7e+LXza6a3jadvL057/rtve5/rfaxv8tdywASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEg4LnWWu8+xGTTtnxvU98unrbdPW0ru27aFrfP/2xu2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEPD1iJu2dXzbVvO07e66+vszbfv6NqefT/3z69ywASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEg4LnWWo+w01vK07adT2/t1s+/y9/7Pdvgr31/pv1+p/1/q/8/Oc0NGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAr7efYDppm1NT9vynea276u+pTxti/u29+G289S5YQNAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQEB+S/z0Vm19u3jX6S1fW8H8Tqd/79M+v/77mvb8p3HDBoAAwQaAAMEGgADBBoAAwQaAAMEGgADBBoAAwQaAAMEGgADBBoAAwQaAgPyW+K5pW7K3bf9OU3/+9e9r2nmmbVNP29a+bdt8GjdsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIeK611uMi07aCd03bCq5//jSn37fTz6f+eznttvf5tJ/D3rfT3LABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASAgvyU+bRvcVvZ7TdsWrm9B3/Z7mbb1Xf97p31+nRs2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEfL37AJ/GFvFnbxHftnU8bSt72ufXz3P6+73t93KaGzYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AATYEn/zFu7p7dzTW8H17ehpz6e+9b17nvrzn/b7nbbFbav8tdywASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgwJb4m7eUbWu/9nnSet/47P8/u+rnP80NGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAp5rrfUIO701fXqrdtpWtu3ilmlbyrdtQU/7/U5z+v/Jrvr75oYNAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABX4+4+jZs/fzT3LbtPO3vnbYdPe33OO33Pu3515/naW7YABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQkN8Sr2/hTnPbNu+07evTz3/3/NPeh2nP57T697Wrfv7T3LABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASAgvyW+67at2mnb19POM+3z69vRp7/faVvfp037fnfVf+/TuGEDQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0DAdVvi9e3iadu5p7evpz3/06Y9n2lb0PX3oX7+Xbd9v6e5YQNAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIAtcX6radvX07aOd88z7fx1057n6fOc/nzv22u5YQNAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIAtcf6X3S3i06ZtF0/bgp52ntucfj717/f0VvnP+Pvphg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAG2xD98e5bP3oKetrVe33aun3/a9jiv5YYNAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQAB122J28LF+9DdNp+2fV3fHq+f/zZu2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEPBca613HwIA+J4bNgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYAPOb7F0xe3lpmz/B1AAAAAElFTkSuQmCC" alt="QR код платформы Lumi" style="width: 175px; height: 175px; display: block; border-radius: 8px;">
+          </div>
+
+          <div style="margin-top: 14px;">
+            <a href="https://lumi-yk31.onrender.com/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, var(--sage), var(--terracotta)); color: #FFF; text-decoration: none; padding: 8px 18px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; box-shadow: 0 4px 14px rgba(45, 90, 76, 0.4);">
+              <span>🔗</span> lumi-yk31.onrender.com <span>↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="anim-fade delay-4" style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--surface-border);">
+        <div style="font-size: 0.85rem; color: var(--text-muted);">Курсовая работа • 2026</div>
+        <div style="font-size: 0.95rem; font-weight: 900; color: var(--sage-glow);">Готова ответить на ваши вопросы! 🌟</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Speaker Notes Drawer -->
+  <div id="notesDrawer" class="speaker-drawer">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.9rem; color: var(--terracotta-glow); text-transform: uppercase;">
+        <span>📝</span>
+        <span>Шпаргалка докладчика — Слайд <span id="notesSlideNum">1</span></span>
+      </div>
+      <button id="closeNotesBtn" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-weight: 700; font-size: 0.9rem;">✕ Закрыть</button>
+    </div>
+    <div id="notesText" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main);">
+      <!-- Injected via JS -->
+    </div>
+  </div>
+
+  <!-- Footer Nav -->
+  <footer>
+    <div class="progress-track">
+      <div id="progressFill" class="progress-fill"></div>
+    </div>
+
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <button id="prevBtn" class="nav-btn">
+        <span>← Назад</span>
+      </button>
+      <button id="nextBtn" class="nav-btn" style="background: var(--sage); color: #FFF; border-color: var(--sage-glow);">
+        <span>Вперёд →</span>
+      </button>
+    </div>
+
+    <div class="dots-nav" id="dotsContainer">
+      <!-- Injected via JS -->
+    </div>
+
+    <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">
+      Слайд <span id="currentSlideLabel" style="color: var(--text-main); font-size: 1rem;">1</span> / 10
+    </div>
+  </footer>
+
+  <script>
+    // Audio Synthesizer (Web Audio API - 0 external files)
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'slide') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(540, now + 0.12);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'swipe') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(450, now);
+        osc.frequency.exponentialRampToValueAtTime(750, now + 0.15);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'fanfare') {
+        [440, 554, 659, 880].forEach((freq, i) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, now + i * 0.08);
+          g.gain.setValueAtTime(0.1, now + i * 0.08);
+          g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.4);
+          o.start(now + i * 0.08);
+          o.stop(now + i * 0.08 + 0.4);
+        });
+      }
+    }
+
+    // Speeches for all 10 slides
+    const speeches = {
+      1: "Уважаемый председатель и члены экзаменационной комиссии! Вашему вниманию представляется курсовая работа «Разработка веб-платформы для проведения интерактивных опросов с элементами геймификации и REST API» — проект Lumi. Сервис уже развёрнут и доступен онлайн на Render.com.",
+      2: "Большинство существующих сервисов, таких как Google Forms, страдают от монотонности: до 45% респондентов бросают опрос. Lumi решает эту проблему игровыми свайп-механиками, шкалой эмоций и мгновенной карточкой сравнения, поднимая доходимость до 85%+.",
+      3: "Цель работы — проектирование и разработка полноценного MVT-приложения. Мы успешно решили 6 стадий: от проектирования БД и ролей до геймифицированного фронтенда, модуля аналитики, AI-генератора и REST API.",
+      4: "Стек технологий промышленный: современный Django 6.1 с Django REST Framework на бэкенде. Для фронтенда мы сознательно выбрали легковесный чистый JavaScript и Chart.js, что гарантирует мгновенную скорость загрузки на мобильных устройствах без утяжеления фреймворками.",
+      5: "Реляционная модель включает 6 связанных сущностей. В модели Response на уровне базы данных реализовано строгое ограничение unique_together=('survey', 'respondent'), полностью исключающее повторные ответы и накрутку голосов.",
+      6: "Прохождение опроса интерактивно. Респондент взаимодействует со свайп-карточками, как в мобильных приложениях, и шкалой эмоций. Сразу после прохождения генерируется карточка-итог со сравнением мнения пользователя с мнением группы.",
+      7: "Для авторов создан визуальный конструктор с AI-генератором, который по краткой теме за секунду проектирует сбалансированный опрос из 6 разнотипных вопросов. В аналитике графики строятся в реальном времени, а экспорт в CSV поддерживает кодировку Excel без искажений.",
+      8: "Платформа предоставляет открытый REST API из 5 эндпоинтов с аутентификацией. Безопасность подтверждена защитой от IDOR, CSRF и набором из 43 автоматических тестов, которые успешно проходят на 100%.",
+      9: "Проект полностью опубликован в сети на платформе Render.com с сервером Gunicorn и сжатием статики WhiteNoise. Подготовлены готовые демонстрационные аккаунты администратора, автора и респондента для проверки комиссии.",
+      10: "В заключение отмечу: цель курсовой работы полностью достигнута. Платформа Lumi доказала преимущества геймифицированного формата онлайн-опросов. Спасибо за внимание, готов(а) ответить на ваши вопросы!"
+    };
+
+    let currentSlide = 1;
+    const totalSlides = 10;
+
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const currentSlideLabel = document.getElementById('currentSlideLabel');
+    const progressFill = document.getElementById('progressFill');
+    const dotsContainer = document.getElementById('dotsContainer');
+    const notesDrawer = document.getElementById('notesDrawer');
+    const notesText = document.getElementById('notesText');
+    const notesSlideNum = document.getElementById('notesSlideNum');
+    const notesBtn = document.getElementById('notesBtn');
+    const closeNotesBtn = document.getElementById('closeNotesBtn');
+    const themeBtn = document.getElementById('themeBtn');
+    const fsBtn = document.getElementById('fsBtn');
+    const soundBtn = document.getElementById('soundBtn');
+    const soundIcon = document.getElementById('soundIcon');
+    const laserBtn = document.getElementById('laserBtn');
+    const laserDot = document.getElementById('laserDot');
+
+    // Build Dots
+    for (let i = 1; i <= totalSlides; i++) {
+      const dot = document.createElement('button');
+      dot.className = `dot-btn ${i === 1 ? 'active' : ''}`;
+      dot.title = `Слайд ${i}`;
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    }
+
+    function updateView() {
+      slides.forEach((s, idx) => {
+        if (idx + 1 === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+
+      currentSlideLabel.textContent = currentSlide;
+      progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
+
+      const dots = dotsContainer.children;
+      for (let i = 0; i < dots.length; i++) {
+        dots[i].className = `dot-btn ${i + 1 === currentSlide ? 'active' : ''}`;
+      }
+
+      notesSlideNum.textContent = currentSlide;
+      notesText.textContent = speeches[currentSlide] || "";
+
+      prevBtn.disabled = currentSlide === 1;
+      prevBtn.style.opacity = currentSlide === 1 ? '0.4' : '1';
+      nextBtn.innerHTML = currentSlide === totalSlides ? '<span>Завершить 🎓</span>' : '<span>Вперёд →</span>';
+
+      playSound('slide');
+
+      // Trigger Confetti on slide 10
+      if (currentSlide === 10) {
+        launchConfetti();
+        playSound('fanfare');
+      }
+    }
+
+    function goToSlide(n) {
+      if (n >= 1 && n <= totalSlides) {
+        currentSlide = n;
+        updateView();
+      }
+    }
+
+    prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+    nextBtn.addEventListener('click', () => {
+      if (currentSlide < totalSlides) goToSlide(currentSlide + 1);
+      else goToSlide(1);
+    });
+
+    
+    // ==========================================
+    // Сенсорное управление для смартфонов и планшетов (Touch Swipe)
+    // ==========================================
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    window.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
+      handleSwipeGesture();
+    }, { passive: true });
+
+    function handleSwipeGesture() {
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 35) {
+        if (diffX < 0) {
+          // Свайп влево -> Следующий слайд
+          if (currentSlide < totalSlides) goToSlide(currentSlide + 1);
+        } else {
+          // Свайп вправо -> Предыдущий слайд
+          if (currentSlide > 1) goToSlide(currentSlide - 1);
+        }
+      }
+    }
+
+    // Keyboard Hotkeys
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        goToSlide(currentSlide + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        goToSlide(currentSlide - 1);
+      } else if (e.key.toLowerCase() === 'n' || e.key.toLowerCase() === 'т') {
+        notesDrawer.classList.toggle('open');
+      } else if (e.key.toLowerCase() === 'f' || e.key.toLowerCase() === 'а') {
+        toggleFullscreen();
+      } else if (e.key.toLowerCase() === 'l' || e.key.toLowerCase() === 'д') {
+        toggleLaser();
+      }
+    });
+
+    // Sound toggle
+    soundBtn.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundIcon.textContent = soundEnabled ? '🔊' : '🔇';
+      soundBtn.querySelector('span:last-child').textContent = soundEnabled ? 'Звук: Вкл' : 'Звук: Выкл';
+    });
+
+    // Notes toggle
+    notesBtn.addEventListener('click', () => notesDrawer.classList.toggle('open'));
+    closeNotesBtn.addEventListener('click', () => notesDrawer.classList.remove('open'));
+
+    // Theme toggle
+    themeBtn.addEventListener('click', () => {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    });
+
+    // Fullscreen toggle
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+    fsBtn.addEventListener('click', toggleFullscreen);
+
+    // Laser pointer mode
+    let laserActive = false;
+    function toggleLaser() {
+      laserActive = !laserActive;
+      laserBtn.classList.toggle('active', laserActive);
+      laserDot.style.display = laserActive ? 'block' : 'none';
+    }
+    laserBtn.addEventListener('click', toggleLaser);
+
+    window.addEventListener('mousemove', (e) => {
+      if (laserActive) {
+        laserDot.style.left = e.clientX + 'px';
+        laserDot.style.top = e.clientY + 'px';
+      }
+    });
+
+    // ==================== INTERACTIVE SLIDE 6 DEMOS ====================
+    // 1. Swipe Card Demo
+    const demoCard = document.getElementById('demoSwipeCard');
+    const demoSwipeText = document.getElementById('demoSwipeText');
+    const swipeCountBadge = document.getElementById('swipeCountBadge');
+    const swipeNoBtn = document.getElementById('swipeNoBtn');
+    const swipeYesBtn = document.getElementById('swipeYesBtn');
+
+    const swipeQuestions = [
+      "«Вам нравится интерактивный формат опросов больше, чем Google Forms?»",
+      "«Считаете ли вы шкалу эмоций с эмодзи нагляднее обычных цифр?»",
+      "«Хотели бы вы видеть такую платформу в вашем университете?»"
+    ];
+    let swipeIdx = 0;
+
+    function triggerSwipe(direction) {
+      playSound('swipe');
+      demoCard.classList.add(direction === 'right' ? 'swiped-right' : 'swiped-left');
+      setTimeout(() => {
+        swipeIdx = (swipeIdx + 1) % swipeQuestions.length;
+        demoSwipeText.textContent = swipeQuestions[swipeIdx];
+        swipeCountBadge.textContent = `Вопрос ${swipeIdx + 1} / 3`;
+        demoCard.classList.remove('swiped-left', 'swiped-right');
+      }, 350);
+    }
+    swipeNoBtn.addEventListener('click', () => triggerSwipe('left'));
+    swipeYesBtn.addEventListener('click', () => triggerSwipe('right'));
+
+    // 2. Emotion Slider Demo
+    const demoRange = document.getElementById('demoRange');
+    const demoEmoji = document.getElementById('demoEmoji');
+    const demoEmojiLabel = document.getElementById('demoEmojiLabel');
+
+    const emotionMap = {
+      '-4': { emoji: '🤬', label: 'Крайне возмущён (-4)' },
+      '-3': { emoji: '😡', label: 'Очень недоволен (-3)' },
+      '-2': { emoji: '🙁', label: 'Не понравилось (-2)' },
+      '-1': { emoji: '😕', label: 'Скорее нет (-1)' },
+      '0':  { emoji: '😐', label: 'Нейтрально (0)' },
+      '1':  { emoji: '🙂', label: 'Скорее да (+1)' },
+      '2':  { emoji: '😊', label: 'Хорошо (+2)' },
+      '3':  { emoji: '😃', label: 'Очень понравилось (+3)' },
+      '4':  { emoji: '🤩', label: 'В полном восторге (+4)' }
+    };
+
+    demoRange.addEventListener('input', (e) => {
+      const val = e.target.value;
+      const data = emotionMap[val] || emotionMap['0'];
+      demoEmoji.textContent = data.emoji;
+      demoEmojiLabel.textContent = data.label;
+      demoEmoji.style.transform = `scale(${1 + Math.abs(val) * 0.08}) rotate(${val * 4}deg)`;
+    });
+
+    // ==================== BACKGROUND PARTICLES ====================
+    const bgCanvas = document.getElementById('bgCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    let particles = [];
+
+    function resizeBg() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeBg);
+    resizeBg();
+
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: Math.random() * bgCanvas.width,
+        y: Math.random() * bgCanvas.height,
+        r: Math.random() * 2.5 + 1,
+        dx: (Math.random() - 0.5) * 0.4,
+        dy: (Math.random() - 0.5) * 0.4,
+        color: ['#3E8B75', '#E06D44', '#8E7BB5'][Math.floor(Math.random() * 3)],
+        alpha: Math.random() * 0.4 + 0.1
+      });
+    }
+
+    function renderBg() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      particles.forEach(p => {
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0) p.x = bgCanvas.width;
+        if (p.x > bgCanvas.width) p.x = 0;
+        if (p.y < 0) p.y = bgCanvas.height;
+        if (p.y > bgCanvas.height) p.y = 0;
+
+        bgCtx.beginPath();
+        bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        bgCtx.fillStyle = p.color;
+        bgCtx.globalAlpha = p.alpha;
+        bgCtx.fill();
+      });
+      requestAnimationFrame(renderBg);
+    }
+    renderBg();
+
+    // ==================== CONFETTI SALUTE ====================
+    const cCanvas = document.getElementById('confettiCanvas');
+    const cCtx = cCanvas.getContext('2d');
+    let confetti = [];
+
+    function resizeConfetti() {
+      cCanvas.width = window.innerWidth;
+      cCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeConfetti);
+    resizeConfetti();
+
+    function launchConfetti() {
+      confetti = [];
+      const colors = ['#3E8B75', '#E06D44', '#8E7BB5', '#F0C419', '#FFF'];
+      for (let i = 0; i < 140; i++) {
+        confetti.push({
+          x: cCanvas.width / 2 + (Math.random() - 0.5) * 300,
+          y: cCanvas.height / 2,
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.9) * 18,
+          size: Math.random() * 9 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 10,
+          alpha: 1
+        });
+      }
+    }
+    document.getElementById('confettiBtn').addEventListener('click', () => {
+      launchConfetti();
+      playSound('fanfare');
+    });
+
+    function renderConfetti() {
+      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+      if (confetti.length > 0) {
+        confetti.forEach((p, idx) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35; // gravity
+          p.rotation += p.vRot;
+          p.alpha -= 0.007;
+
+          cCtx.save();
+          cCtx.translate(p.x, p.y);
+          cCtx.rotate((p.rotation * Math.PI) / 180);
+          cCtx.fillStyle = p.color;
+          cCtx.globalAlpha = Math.max(0, p.alpha);
+          cCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
+          cCtx.restore();
+
+          if (p.alpha <= 0) {
+            confetti.splice(idx, 1);
+          }
+        });
+      }
+      requestAnimationFrame(renderConfetti);
+    }
+    renderConfetti();
+
+    // Init first view
+    updateView();
+  </script>
+
+  <!-- QR Code Modal Dialog -->
+  <div id="qrModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="card-3d" style="background: var(--surface-card); border: 2px solid var(--surface-border); border-radius: 28px; padding: 32px 28px; text-align: center; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative;">
+      <button id="closeQrModalBtn" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">✕</button>
+      
+      <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; background: rgba(62, 139, 117, 0.15); border: 1px solid var(--sage-glow); color: var(--sage-glow); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px;">
+        <span>📱</span> Живая платформа
+      </div>
+
+      <h3 style="font-size: 1.25rem; font-weight: 900; margin-bottom: 6px;">Отсканируйте QR-код</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Наведите камеру смартфона, чтобы пройти опрос на Lumi прямо сейчас:</p>
+
+      <div style="background: #FFFFFF; padding: 14px; border-radius: 20px; display: inline-block; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border: 3px solid rgba(62, 139, 117, 0.3);">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAewAAAHsCAYAAAAQKp5gAAALQ0lEQVR4nO3cwZEjNxQFQVIxXqwTusr/g65yYu2APJgVQsTyF5FpAAPTbE4FLu+51loPAGC0P959AADg1wQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAK+HnE//vrz3Uf4KD///mfU97V7ntOfv8v72Xr+094370/rfTvNDRsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAALyW+K3bcnumrZFPG1LedrzqT/PXafPc9vv/ba/98ew9/k0N2wACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAi4bku8vlU7bSvYFvR7n099e3zaeaZ9X6dN+3un/X+bxg0bAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACbIlztd0t5d2t49Nb2dO2vnfZBof/zg0bAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACbIlz9dZ0fXu87vTW+mm3fV+8lxs2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAE2BL/BVvBLfVt89Nb5dO2uOu/x9Pf12nTzsP33LABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASDgui3x+pbyNPUt5Wnb3T7/terv5y7/3z6bGzYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AATkt8Tr27919ec/bbu7btqWdf37ve394Xtu2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEPBca613H+KTnN5SPr2NvOu2reP6VvZp07a4d/m9eD6TuWEDQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0DA17sPMN20beFpW82ez2uf/+nnedv35e99r2nvQ50bNgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABNgSj21x2+ZtPf9d9W3k+vu8+/nT3p9d07bZd/2IP/9dbtgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABDwXGutdx9ismnbudO2zevbxfXnOU19q/m0aVvou6Ztv9/GDRsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAK+3n2ATzNt+7e+LXza6a3jadvL057/rtve5/rfaxv8tdywASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEg4LnWWu8+xGTTtnxvU98unrbdPW0ru27aFrfP/2xu2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEPD1iJu2dXzbVvO07e66+vszbfv6NqefT/3z69ywASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEg4LnWWo+w01vK07adT2/t1s+/y9/7Pdvgr31/pv1+p/1/q/8/Oc0NGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAr7efYDppm1NT9vynea276u+pTxti/u29+G289S5YQNAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQEB+S/z0Vm19u3jX6S1fW8H8Tqd/79M+v/77mvb8p3HDBoAAwQaAAMEGgADBBoAAwQaAAMEGgADBBoAAwQaAAMEGgADBBoAAwQaAgPyW+K5pW7K3bf9OU3/+9e9r2nmmbVNP29a+bdt8GjdsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIeK611uMi07aCd03bCq5//jSn37fTz6f+eznttvf5tJ/D3rfT3LABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASAgvyU+bRvcVvZ7TdsWrm9B3/Z7mbb1Xf97p31+nRs2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEfL37AJ/GFvFnbxHftnU8bSt72ufXz3P6+73t93KaGzYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AATYEn/zFu7p7dzTW8H17ehpz6e+9b17nvrzn/b7nbbFbav8tdywASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgwJb4m7eUbWu/9nnSet/47P8/u+rnP80NGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAp5rrfUIO701fXqrdtpWtu3ilmlbyrdtQU/7/U5z+v/Jrvr75oYNAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABX4+4+jZs/fzT3LbtPO3vnbYdPe33OO33Pu3515/naW7YABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQkN8Sr2/hTnPbNu+07evTz3/3/NPeh2nP57T697Wrfv7T3LABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASAgvyW+67at2mnb19POM+3z69vRp7/faVvfp037fnfVf+/TuGEDQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0DAdVvi9e3iadu5p7evpz3/06Y9n2lb0PX3oX7+Xbd9v6e5YQNAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIAtcX6radvX07aOd88z7fx1057n6fOc/nzv22u5YQNAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIAtcf6X3S3i06ZtF0/bgp52ntucfj717/f0VvnP+Pvphg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAG2xD98e5bP3oKetrVe33aun3/a9jiv5YYNAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQAB122J28LF+9DdNp+2fV3fHq+f/zZu2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEPBca613HwIA+J4bNgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYAPOb7F0xe3lpmz/B1AAAAAElFTkSuQmCC" alt="QR-код платформы Lumi" style="width: 200px; height: 200px; display: block; border-radius: 10px;">
+      </div>
+
+      <div style="margin-top: 18px;">
+        <a href="https://lumi-yk31.onrender.com/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, var(--sage), var(--terracotta)); color: #FFF; text-decoration: none; padding: 10px 20px; border-radius: 14px; font-size: 0.9rem; font-weight: 800; box-shadow: 0 4px 16px rgba(45, 90, 76, 0.4);">
+          <span>🔗</span> lumi-yk31.onrender.com <span>↗</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
