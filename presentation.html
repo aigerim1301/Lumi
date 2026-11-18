@@ -2,7 +2,10 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0D1311">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Lumi — Интерактивная презентация курсовой работы</title>
   <style>
     :root {
@@ -444,6 +447,186 @@
     @keyframes dash {
       to { stroke-dashoffset: -12; }
     }
+  
+    /* ==========================================================================
+       Адаптивность для мобильных телефонов и планшетов (Responsive Design)
+       ========================================================================== */
+
+    /* Планшеты (iPad, Android Tablets: 769px - 1024px) */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      header {
+        padding: 12px 24px;
+      }
+      .slide {
+        max-width: 94%;
+        min-height: 560px;
+        padding: 32px 36px;
+      }
+      .grad-title {
+        font-size: 2.4rem !important;
+      }
+      .slide [style*="repeat(4, 1fr)"],
+      .slide [style*="repeat(3, 1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+    }
+
+    /* Смартфоны (Mobile Phones: до 768px) */
+    @media (max-width: 768px) {
+      body {
+        overflow-x: hidden;
+        overflow-y: auto;
+        min-height: 100dvh;
+      }
+
+      /* Мобильная шапка */
+      header {
+        padding: 10px 14px;
+        flex-wrap: nowrap;
+      }
+      .brand-pill > div > div:last-child {
+        display: none !important; /* Прячем длинный подзаголовок на смартфонах */
+      }
+      .brand-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.95rem;
+        border-radius: 9px;
+      }
+      .header-tools {
+        gap: 5px;
+      }
+      .tool-btn {
+        padding: 6px 8px;
+        font-size: 0.72rem;
+        border-radius: 8px;
+      }
+      /* На смартфонах прячем текстовые подписи кнопок шапки, оставляем иконки */
+      .tool-btn span:not(:first-child) {
+        display: none !important;
+      }
+
+      /* Область показа слайдов на телефоне */
+      .deck-viewport {
+        padding: 8px 10px;
+        align-items: flex-start;
+        height: auto;
+        min-height: calc(100dvh - 120px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        perspective: none;
+      }
+
+      .slide {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: auto !important;
+        max-height: none !important;
+        border-radius: 20px !important;
+        padding: 20px 16px !important;
+        margin: 6px 0 !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+        display: none !important;
+      }
+
+      .slide.active {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+      }
+
+      /* Типографика на телефоне */
+      .grad-title {
+        font-size: 1.55rem !important;
+        line-height: 1.25 !important;
+        margin-bottom: 10px !important;
+      }
+      .slide p {
+        font-size: 0.88rem !important;
+        line-height: 1.5 !important;
+        margin-bottom: 16px !important;
+      }
+      .badge {
+        padding: 4px 10px !important;
+        font-size: 0.7rem !important;
+      }
+      .card-3d {
+        padding: 14px !important;
+        border-radius: 16px !important;
+      }
+
+      /* Авто-адаптация сеток: двухколоночные макеты становятся вертикальными */
+      .slide [style*="grid-template-columns: 1.25fr 0.95fr"],
+      .slide [style*="grid-template-columns: 1.1fr 1fr"],
+      .slide [style*="grid-template-columns: 1.2fr 1fr"],
+      .slide [style*="grid-template-columns: 1fr 1fr"],
+      .slide [style*="grid-template-columns: repeat(4, 1fr)"] {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+
+      /* Сетка метрик на слайде 10 на телефоне */
+      .slide [style*="grid-template-columns: repeat(3, 1fr)"] {
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 8px !important;
+      }
+      .slide [style*="grid-template-columns: repeat(3, 1fr)"] .card-3d {
+        padding: 10px 8px !important;
+      }
+      .slide [style*="grid-template-columns: repeat(3, 1fr)"] div[style*="font-size: 1.7rem"],
+      .slide [style*="grid-template-columns: repeat(3, 1fr)"] div[style*="font-size: 2rem"] {
+        font-size: 1.25rem !important;
+      }
+
+      /* Интерактивные демо-элементы на мобильном */
+      #swipeCard {
+        width: 100% !important;
+        max-width: 270px !important;
+        margin: 0 auto !important;
+      }
+      .emotion-box {
+        padding: 14px !important;
+      }
+
+      /* Нижняя панель управления слайдами */
+      footer {
+        padding: 10px 14px !important;
+      }
+      .nav-btn {
+        padding: 7px 12px !important;
+        font-size: 0.78rem !important;
+      }
+      .slide-dots {
+        gap: 4px !important;
+      }
+      .slide-dot {
+        width: 5px !important;
+        height: 5px !important;
+      }
+      .slide-dot.active {
+        width: 14px !important;
+      }
+      #slideNumIndicator {
+        font-size: 0.75rem !important;
+      }
+
+      /* Мобильная адаптация шпаргалки докладчика */
+      .speaker-drawer {
+        width: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        border-radius: 20px 20px 0 0 !important;
+        padding: 18px 16px !important;
+        max-height: 60vh !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1312,6 +1495,40 @@
       if (currentSlide < totalSlides) goToSlide(currentSlide + 1);
       else goToSlide(1);
     });
+
+    
+    // ==========================================
+    // Сенсорное управление для смартфонов и планшетов (Touch Swipe)
+    // ==========================================
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    window.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
+      handleSwipeGesture();
+    }, { passive: true });
+
+    function handleSwipeGesture() {
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 35) {
+        if (diffX < 0) {
+          // Свайп влево -> Следующий слайд
+          if (currentSlide < totalSlides) goToSlide(currentSlide + 1);
+        } else {
+          // Свайп вправо -> Предыдущий слайд
+          if (currentSlide > 1) goToSlide(currentSlide - 1);
+        }
+      }
+    }
 
     // Keyboard Hotkeys
     window.addEventListener('keydown', (e) => {
