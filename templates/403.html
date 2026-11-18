@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}403 — Доступ ограничен | {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="error-page-container">
+    <div class="lumi-card error-card">
+        <div class="error-code" style="color: var(--accent-secondary);">403</div>
+        <h1 class="error-title">Доступ ограничен</h1>
+        <p class="error-desc">
+            У вас нет прав для просмотра этого раздела или действия. Респонденты не могут открывать конструктор или чужую статистику.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'survey_list' %}" class="btn btn-primary">
+                Вернуться к опросам
+            </a>
+            <a href="{% url 'profile' %}" class="btn btn-secondary">
+                В мой профиль
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

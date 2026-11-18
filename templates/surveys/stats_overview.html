@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Обзор статистики | {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 820px; margin: 0 auto;">
+    <div style="margin-bottom: 24px;">
+        <h1 style="font-size: 1.9rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">
+            Статистика опросов
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+            Аналитика ответов, демография, интерактивные круговые диаграммы и экспорт данных
+        </p>
+    </div>
+
+    {% if surveys %}
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+            {% for s in surveys %}
+            <div class="lumi-card" style="display: flex; justify-content: space-between; align-items: center; padding: 20px; flex-wrap: wrap; gap: 14px;">
+                <div>
+                    <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+                        {{ s.title }}
+                    </h2>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">
+                        Ответов: <b>{{ s.response_count }}</b> • Статус: {{ s.get_status_display }}
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <a href="{% url 'stats_summary' %}?survey={{ s.pk }}" class="btn btn-primary btn-sm">
+                        📊 Открыть диаграммы
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="lumi-card" style="text-align: center; padding: 48px 24px;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">📊</div>
+            <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+                Пока нет данных для отображения
+            </h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+                Создайте и опубликуйте опрос, чтобы собрать первые ответы участников.
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

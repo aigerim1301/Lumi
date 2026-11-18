@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление опроса | {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="lumi-container-narrow" style="margin: 40px auto;">
+    <div class="lumi-card" style="padding: 36px 32px; text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 12px; color: var(--accent-secondary);">⚠️</div>
+        <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px;">
+            Удалить опрос «{{ survey.title }}»?
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px;">
+            Это действие необратимо. Опрос будет удалён вместе со всеми вопросами ({{ survey.questions.count }}) и уже полученными ответами участников ({{ survey.response_count }}).
+        </p>
+
+        <form method="post" action="{% url 'survey_delete' survey.pk %}">
+            {% csrf_token %}
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <button type="submit" class="btn btn-terracotta">
+                    Да, удалить опрос
+                </button>
+                <a href="{% url 'survey_list' %}" class="btn btn-secondary">
+                    Отмена
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

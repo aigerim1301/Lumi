@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Итоги опроса | {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="lumi-container-narrow" style="margin: 20px auto; padding-bottom: 50px;">
+    <!-- Главная карточка-итог (Result Summary Card) -->
+    <div class="lumi-card" style="text-align: center; padding: 40px 28px; background: linear-gradient(135deg, var(--card-bg) 0%, var(--accent-primary-light) 100%); border: 2px solid var(--accent-primary); box-shadow: var(--shadow-lg);">
+        <div style="font-size: 3.5rem; margin-bottom: 8px;">🎉</div>
+        <span class="badge badge-published" style="padding: 6px 14px; font-size: 0.88rem; margin-bottom: 14px;">
+            ✓ Опрос успешно пройден
+        </span>
+
+        <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px; line-height: 1.3;">
+            {{ survey.title }}
+        </h1>
+
+        <!-- Ключевой блок сравнения: «Вы ответили так же, как X% участников» -->
+        <div style="background-color: var(--card-bg); border-radius: var(--radius-lg); padding: 24px 20px; margin: 24px 0 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+            <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">
+                СХОДСТВО С ДРУГИМИ УЧАСТНИКАМИ
+            </div>
+            <div style="font-size: 3rem; font-weight: 900; color: var(--accent-primary); line-height: 1.1;">
+                {{ overall_match_pct }}%
+            </div>
+            <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-top: 6px;">
+                Вы ответили так же, как {{ overall_match_pct }}% участников!
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+                Всего в этом опросе приняли участие: <b>{{ total_responses }} человек</b>
+            </div>
+        </div>
+
+        <p style="font-size: 0.92rem; color: var(--text-muted); margin-bottom: 0;">
+            Благодарим за ваше время! Ваш голос сохранён и учтён в общей аналитике.
+        </p>
+    </div>
+
+    <!-- Детализация ответов и сравнение со средним по каждому вопросу -->
+    <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin: 32px 0 16px;">
+        Сравнение ваших ответов со средней статистикой:
+    </h2>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+        {% for item in summary_items %}
+        <div class="lumi-card" style="margin-bottom: 0; padding: 20px 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+                <div style="font-weight: 700; font-size: 1rem; color: var(--text-primary); line-height: 1.35;">
+                    {{ item.question_text }}
+                </div>
+                {% if item.is_majority %}
+                <span class="badge badge-published" style="flex-shrink: 0;">
+                    👑 Мнение большинства
+                </span>
+                {% endif %}
+            </div>
+
+            <div style="background-color: var(--bg-primary); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 8px;">
+                <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 2px;">
+                    Ваш выбор:
+                </div>
+                <div style="font-size: 1.05rem; font-weight: 700; color: var(--accent-primary);">
+                    {{ item.user_display }}
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-muted); padding: 0 4px;">
+                <span>📊 {{ item.comparison_text }}</span>
+                {% if item.avg_display %}
+                <span style="font-weight: 600; color: var(--accent-secondary);">Среднее: {{ item.avg_display }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Кнопки возврата -->
+    <div style="display: flex; gap: 12px; justify-content: center; margin-top: 32px; flex-wrap: wrap;">
+        <a href="{% url 'survey_list' %}" class="btn btn-primary btn-lg">
+            ← Вернуться к опросам
+        </a>
+        <a href="{% url 'profile' %}" class="btn btn-secondary btn-lg">
+            В мой профиль
+        </a>
+    </div>
+</div>
+{% endblock %}

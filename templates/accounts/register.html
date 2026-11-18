@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Регистрация | {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="lumi-container-narrow" style="margin: 24px auto;">
+    <div class="lumi-card" style="padding: 36px 32px;">
+        <!-- Логотип по центру -->
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="{% static 'img/logo.png' %}" alt="{{ BRAND_NAME }}" style="height: 68px; width: auto; margin: 0 auto; background: transparent;">
+        </div>
+
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary); text-align: center; margin-bottom: 6px;">
+            Создать аккаунт в {{ BRAND_NAME }}
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; text-align: center; margin-bottom: 24px;">
+            Присоединяйтесь к платформе интерактивных опросов
+        </p>
+
+        <form method="post" action="{% url 'register' %}" novalidate>
+            {% csrf_token %}
+
+            <!-- Выбор роли (Автор или Респондент) -->
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label class="form-label" style="margin-bottom: 8px;">Кем вы будете в Lumi?</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="role" value="respondent" checked style="display: none;" id="role_respondent">
+                        <div class="role-card" id="card_respondent" style="padding: 14px 12px; border-radius: var(--radius-md); border: 2px solid var(--accent-primary); background-color: var(--accent-primary-light); text-align: center; transition: var(--transition);">
+                            <div style="font-size: 1.5rem; margin-bottom: 4px;">🙋‍♂️</div>
+                            <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Респондент</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Проходить опросы</div>
+                        </div>
+                    </label>
+
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="role" value="author" style="display: none;" id="role_author">
+                        <div class="role-card" id="card_author" style="padding: 14px 12px; border-radius: var(--radius-md); border: 2px solid var(--border-color); background-color: var(--card-bg); text-align: center; transition: var(--transition);">
+                            <div style="font-size: 1.5rem; margin-bottom: 4px;">✍️</div>
+                            <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Автор</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Создавать и анализировать</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="id_username">{{ form.username.label }} *</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="form-error">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-group">
+                    <label class="form-label" for="id_first_name">{{ form.first_name.label }}</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="form-error">{{ form.first_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_email">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="form-error">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="id_password">{{ form.password.label }} *</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="form-error">{{ form.password.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label class="form-label" for="id_password_confirm">{{ form.password_confirm.label }} *</label>
+                {{ form.password_confirm }}
+                {% if form.password_confirm.errors %}
+                    <div class="form-error">{{ form.password_confirm.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-bottom: 20px;">
+                Зарегистрироваться
+            </button>
+
+            <div style="text-align: center; font-size: 0.92rem; color: var(--text-muted);">
+                Уже есть учетная запись? 
+                <a href="{% url 'login' %}" style="font-weight: 600; color: var(--accent-secondary);">
+                    Войти
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Подсветка выбранной роли при клике
+    const radioRespondent = document.getElementById('role_respondent');
+    const radioAuthor = document.getElementById('role_author');
+    const cardRespondent = document.getElementById('card_respondent');
+    const cardAuthor = document.getElementById('card_author');
+
+    function updateRoleCards() {
+        if (radioRespondent.checked) {
+            cardRespondent.style.borderColor = 'var(--accent-primary)';
+            cardRespondent.style.backgroundColor = 'var(--accent-primary-light)';
+            cardAuthor.style.borderColor = 'var(--border-color)';
+            cardAuthor.style.backgroundColor = 'var(--card-bg)';
+        } else {
+            cardAuthor.style.borderColor = 'var(--accent-primary)';
+            cardAuthor.style.backgroundColor = 'var(--accent-primary-light)';
+            cardRespondent.style.borderColor = 'var(--border-color)';
+            cardRespondent.style.backgroundColor = 'var(--card-bg)';
+        }
+    }
+
+    radioRespondent.addEventListener('change', updateRoleCards);
+    radioAuthor.addEventListener('change', updateRoleCards);
+    updateRoleCards();
+</script>
+{% endblock %}

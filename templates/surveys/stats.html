@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Статистика: {{ survey.title }} | {{ BRAND_NAME }}{% endblock %}
+
+{% block extra_head %}
+<!-- Подключение Chart.js для интерактивных диаграмм -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+    .metric-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .metric-tile {
+        padding: 24px;
+        border-radius: var(--radius-lg);
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        text-align: left;
+    }
+    .metric-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+    }
+    .metric-value {
+        font-size: 2.6rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        line-height: 1.1;
+    }
+    .chart-card {
+        padding: 24px;
+        border-radius: var(--radius-lg);
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 24px;
+    }
+    .chart-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .chart-container-box {
+        position: relative;
+        height: 260px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto; padding-bottom: 50px;">
+    <!-- Шапка статистики и переключатель опросов -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <h1 style="font-size: 1.9rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">
+                Статистика
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+                Аналитика ответов респондентов, диаграммы и экспорт данных
+            </p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <!-- Селектор переключения между опросами автора -->
+            {% if author_surveys|length > 1 %}
+            <select class="form-select" onchange="window.location.href=this.value" style="width: auto; padding: 8px 14px; font-weight: 600;">
+                {% for s in author_surveys %}
+                    <option value="{% url 'survey_stats' s.pk %}" {% if s.pk == survey.pk %}selected{% endif %}>
+                        {{ s.title|truncatechars:35 }} ({{ s.response_count }})
+                    </option>
+                {% endfor %}
+            </select>
+            {% endif %}
+
+            <!-- Кнопка экспорта в CSV -->
+            <a href="{% url 'survey_export_csv' survey.pk %}" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px;">
+                <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                <span>Экспорт в CSV</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Название активного опроса -->
+    <div class="lumi-card" style="padding: 18px 24px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div>
+            <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">
+                ТЕКУЩИЙ ОПРОС
+            </div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">
+                {{ survey.title }}
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <a href="{% url 'survey_builder' survey.pk %}" class="btn btn-secondary btn-sm">
+                ✏️ Редактировать опрос
+            </a>
+            <a href="{% url 'survey_respond' survey.pk %}" class="btn btn-secondary btn-sm">
+                👁️ Предпросмотр
+            </a>
+        </div>
+    </div>
+
+    <!-- Верхние плитки метрик (по скриншоту #3: Всего ответов и Завершенность) -->
+    <div class="metric-grid">
+        <div class="metric-tile">
+            <div class="metric-title">Всего ответов</div>
+            <div class="metric-value">{{ total_responses }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">
+                Уникальных участников опроса
+            </div>
+        </div>
+
+        <div class="metric-tile">
+            <div class="metric-title">Завершенность</div>
+            <div class="metric-value" style="color: var(--accent-primary);">{{ completion_rate }}%</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">
+                Дошли до последнего вопроса
+            </div>
+        </div>
+    </div>
+
+    <!-- Диаграммы Chart.js (в фирменных цветах Lumi) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-bottom: 24px;">
+        <!-- 1. Круговая диаграмма (Donut Chart) -->
+        <div class="chart-card" style="margin-bottom: 0;">
+            <div class="chart-title">
+                <span>{{ primary_chart.title|truncatechars:45 }}</span>
+                <span class="badge" style="background-color: var(--accent-tertiary-light); color: var(--accent-tertiary);">Круговая</span>
+            </div>
+            <div class="chart-container-box">
+                <canvas id="donutChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 2. Столбчатая диаграмма (Ответы по дням) -->
+        <div class="chart-card" style="margin-bottom: 0;">
+            <div class="chart-title">
+                <span>Ответы по дням</span>
+                <span class="badge" style="background-color: var(--accent-primary-light); color: var(--accent-primary);">Динамика</span>
+            </div>
+            <div class="chart-container-box">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подробная аналитика по каждому вопросу -->
+    <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--text-primary); margin: 32px 0 16px;">
+        Подробные результаты по вопросам
+    </h2>
+
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+        {% for q in questions_analysis %}
+        <div class="lumi-card" style="margin-bottom: 0; padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;">
+                <div>
+                    <span class="badge" style="background-color: var(--bg-primary); color: var(--text-muted); margin-bottom: 6px;">
+                        {{ q.qtype_display }}
+                    </span>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">
+                        {{ forloop.counter }}. {{ q.text }}
+                    </h3>
+                </div>
+                <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">
+                    Ответов: {{ q.total_answers }}
+                </span>
+            </div>
+
+            <!-- Анализ вариантов (single, multiple) -->
+            {% if q.choices_stats %}
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    {% for c in q.choices_stats %}
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 4px;">
+                            <span style="font-weight: 600; color: var(--text-primary);">{{ c.text }}</span>
+                            <span style="color: var(--text-muted); font-weight: 700;">{{ c.count }} ({{ c.pct }}%)</span>
+                        </div>
+                        <div style="height: 10px; background-color: var(--bg-primary); border-radius: var(--radius-pill); overflow: hidden;">
+                            <div style="height: 100%; width: {{ c.pct }}%; background-color: var(--accent-primary); border-radius: var(--radius-pill);"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            <!-- Звёздный рейтинг -->
+            {% elif q.qtype == 'rating' %}
+                <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap; background-color: var(--bg-primary); padding: 18px; border-radius: var(--radius-md);">
+                    <div style="text-align: center; min-width: 120px;">
+                        <div style="font-size: 2.8rem; font-weight: 900; color: #F5A623; line-height: 1;">
+                            {{ q.avg_rating }}
+                        </div>
+                        <div style="color: #F5A623; font-size: 1.2rem; margin: 4px 0;">★ ★ ★ ★ ★</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Средняя оценка</div>
+                    </div>
+                    <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+                        {% for count in q.rating_counts reversed %}
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem;">
+                            <span style="width: 40px; color: var(--text-muted);">{{ forloop.revcounter }} ★</span>
+                            <div style="flex: 1; height: 8px; background-color: var(--card-bg); border-radius: 4px; overflow: hidden;">
+                                <div style="height: 100%; width: {% if q.total_answers > 0 %}{% widthratio count q.total_answers 100 %}{% else %}0{% endif %}%; background-color: #F5A623;"></div>
+                            </div>
+                            <span style="width: 25px; text-align: right; font-weight: 600;">{{ count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            <!-- Термометр эмоций -->
+            {% elif q.qtype == 'emotion' %}
+                <div style="background-color: var(--bg-primary); padding: 18px; border-radius: var(--radius-md);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 2rem;">{% if q.avg_emotion > 0 %}🔥{% elif q.avg_emotion < 0 %}🥶{% else %}😐{% endif %}</span>
+                            <div>
+                                <div style="font-size: 1.4rem; font-weight: 800; color: var(--accent-secondary);">
+                                    {% if q.avg_emotion > 0 %}+{% endif %}{{ q.avg_emotion }}°C
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Средняя температура настроения</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <span class="badge" style="background-color: var(--accent-primary-light); color: var(--accent-primary);">
+                                Позитив: {{ q.positive_count }}
+                            </span>
+                            <span class="badge" style="background-color: #FFF6E5; color: #B57A00;">
+                                Нейтрально: {{ q.neutral_count }}
+                            </span>
+                            <span class="badge" style="background-color: var(--accent-secondary-light); color: var(--accent-secondary);">
+                                Негатив: {{ q.negative_count }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Свайп-карточка -->
+            {% elif q.qtype == 'swipe' %}
+                <div style="background-color: var(--bg-primary); padding: 18px; border-radius: var(--radius-md);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 700; font-size: 0.95rem;">
+                        <span style="color: var(--accent-secondary);">← Нет / Трудно ({{ q.left_pct }}%)</span>
+                        <span style="color: var(--accent-primary);">Да / Легко ({{ q.right_pct }}%) →</span>
+                    </div>
+                    <div style="height: 14px; background-color: var(--card-bg); border-radius: var(--radius-pill); overflow: hidden; display: flex;">
+                        <div style="width: {{ q.left_pct }}%; background-color: var(--accent-secondary);"></div>
+                        <div style="width: {{ q.right_pct }}%; background-color: var(--accent-primary);"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted); margin-top: 6px;">
+                        <span>Ответов влево: {{ q.left_count }}</span>
+                        <span>Ответов вправо: {{ q.right_count }}</span>
+                    </div>
+                </div>
+
+            <!-- Текстовые ответы -->
+            {% elif q.qtype == 'text' %}
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    {% for ans in q.text_answers %}
+                    <div style="background-color: var(--bg-primary); padding: 12px 16px; border-radius: var(--radius-md);">
+                        <p style="font-size: 0.95rem; color: var(--text-primary); margin-bottom: 4px;">«{{ ans.text }}»</p>
+                        <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                            <span>{{ ans.user }}</span>
+                            <span>{{ ans.date }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="color: var(--text-muted); font-size: 0.9rem; font-style: italic;">Текстовых отзывов пока нет.</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Проверяем доступность Chart.js
+    if (typeof Chart !== 'undefined') {
+        // Палитра Lumi: Шалфей, Терракота, Лаванда, Золотистый, Бирюзовый
+        const lumiColors = [
+            '#2D5A4C', // Шалфей
+            '#8A79AF', // Лаванда
+            '#D96B43', // Терракота
+            '#E07A54',
+            '#4B947E',
+            '#9E8EC2'
+        ];
+
+        // 1. Инициализация круговой (Donut) диаграммы
+        const donutCtx = document.getElementById('donutChart');
+        if (donutCtx) {
+            new Chart(donutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: {{ primary_chart.labels|safe }},
+                    datasets: [{
+                        data: {{ primary_chart.counts|safe }},
+                        backgroundColor: lumiColors,
+                        borderWidth: 2,
+                        borderColor: '#FFFFFF',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 14,
+                                padding: 16,
+                                font: { size: 12, family: "-apple-system, sans-serif" }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // 2. Инициализация столбчатой (Bar) диаграммы «Ответы по дням»
+        const barCtx = document.getElementById('barChart');
+        if (barCtx) {
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ days_labels|safe }},
+                    datasets: [{
+                        label: 'Ответов в день',
+                        data: {{ days_counts|safe }},
+                        backgroundColor: '#2D5A4C',
+                        borderRadius: 6,
+                        maxBarThickness: 36
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 },
+                            grid: { color: 'rgba(45, 90, 76, 0.08)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

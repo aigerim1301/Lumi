@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Вход в систему | {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="lumi-container-narrow" style="margin: 30px auto;">
+    <div class="lumi-card" style="padding: 40px 32px; text-align: center;">
+        <!-- Логотип по центру -->
+        <div style="margin-bottom: 24px;">
+            <img src="{% static 'img/logo.png' %}" alt="{{ BRAND_NAME }}" style="height: 72px; width: auto; margin: 0 auto; background: transparent;">
+        </div>
+
+        <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">
+            Вход в {{ BRAND_NAME }}
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 28px;">
+            Войдите в свой аккаунт, чтобы продолжить работу
+        </p>
+
+        <form method="post" action="{% url 'login' %}" style="text-align: left;">
+            {% csrf_token %}
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <div class="form-group">
+                <label class="form-label" for="id_username">{{ form.username.label }}</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="form-error">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label class="form-label" for="id_password">{{ form.password.label }}</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="form-error">{{ form.password.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-bottom: 20px;">
+                Войти в аккаунт
+            </button>
+
+            <div style="text-align: center; font-size: 0.92rem; color: var(--text-muted);">
+                Нет аккаунта в Lumi? 
+                <a href="{% url 'register' %}" style="font-weight: 600; color: var(--accent-secondary);">
+                    Зарегистрироваться
+                </a>
+            </div>
+        </form>
+
+        <!-- Подсказка с демо-аккаунтами для удобства на защите -->
+        <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: left; font-size: 0.82rem; color: var(--text-muted);">
+            <div style="font-weight: 600; margin-bottom: 6px; color: var(--text-primary);">💡 Быстрый вход для проверки:</div>
+            <div>• <b>Автор</b>: <code>author</code> / <code>AuthorPassword123!</code></div>
+            <div>• <b>Респондент</b>: <code>respondent</code> / <code>RespondentPassword123!</code></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

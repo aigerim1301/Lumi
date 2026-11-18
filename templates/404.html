@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}404 — Страница не найдена | {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="error-page-container">
+    <div class="lumi-card error-card">
+        <div class="error-code" style="color: var(--accent-tertiary);">404</div>
+        <h1 class="error-title">Страница не найдена</h1>
+        <p class="error-desc">
+            Кажется, запрашиваемый опрос или страница были удалены, перемещены или ссылка содержит опечатку.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'survey_list' %}" class="btn btn-primary">
+                Перейти к списку опросов
+            </a>
+            <a href="javascript:history.back()" class="btn btn-secondary">
+                Назад
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

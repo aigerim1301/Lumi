@@ -1,0 +1,487 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Конструктор: {{ survey.title }} | {{ BRAND_NAME }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .builder-qblock {
+        position: relative;
+        border-left: 4px solid var(--accent-primary);
+        transition: var(--transition);
+    }
+    .builder-qblock:hover {
+        border-left-color: var(--accent-secondary);
+    }
+    .choice-item-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 820px; margin: 0 auto; padding-bottom: 80px;">
+    <!-- Навигация назад и статус -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+        <a href="{% url 'survey_list' %}" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span>← Назад к опросам</span>
+        </a>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="badge {% if survey.status == 'published' %}badge-published{% elif survey.status == 'draft' %}badge-draft{% else %}badge-closed{% endif %}">
+                Статус: {{ survey.get_status_display }}
+            </span>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">
+                Ответов: <b>{{ survey.response_count }}</b>
+            </span>
+        </div>
+    </div>
+
+    <!-- Карточка метаданных опроса (Название и описание) -->
+    <div class="lumi-card" style="padding: 24px;">
+        <div class="form-group">
+            <label class="form-label" style="font-size: 0.85rem; color: var(--text-muted);">НАЗВАНИЕ ОПРОСА</label>
+            <input type="text" id="surveyTitle" class="form-control" value="{{ survey.title }}" style="font-size: 1.35rem; font-weight: 700;">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.85rem; color: var(--text-muted);">ОПИСАНИЕ И ИНСТРУКЦИЯ ДЛЯ РЕСПОНДЕНТОВ</label>
+            <textarea id="surveyDescription" class="form-control" rows="2" placeholder="Опишите цель опроса..." style="resize: vertical;">{{ survey.description }}</textarea>
+        </div>
+    </div>
+
+    <!-- Блок AI Конструктора (дизайн по скриншоту #2) -->
+    <div class="lumi-card" style="border: 2px dashed var(--accent-tertiary); background: linear-gradient(135deg, var(--card-bg) 0%, var(--accent-tertiary-light) 100%); padding: 22px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; color: var(--text-primary);">
+                <span>🪄</span> AI Конструктор опроса
+            </div>
+            <span class="badge badge-ai">Beta</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+            Введите любую тему, и умный генератор за секунду составит 6 разнообразных вопросов с игровыми механиками:
+        </p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="text" id="aiTopicInput" class="form-control" placeholder="Например: Узнать, почему студенты бросают курсы" style="flex: 1; min-width: 240px;">
+            <button type="button" class="btn btn-primary" onclick="generateWithAI()" id="btnGenerateAI" style="background-color: var(--accent-primary);">
+                <span>✨ Сгенерировать</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Заголовок списка вопросов -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 28px 0 16px;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">
+            Вопросы анкеты (<span id="questionsCount">{{ questions|length }}</span>)
+        </h2>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="addNewQuestionBlock()">
+            + Добавить блок
+        </button>
+    </div>
+
+    <!-- Контейнер для блоков вопросов -->
+    <div id="questionsContainer" style="display: flex; flex-direction: column; gap: 16px;">
+        {% for q in questions %}
+        <div class="lumi-card builder-qblock" data-qindex="{{ forloop.counter0 }}" data-qtype="{{ q.qtype }}">
+            <!-- Шапка вопроса: Номер, Тип, Удаление -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: 700; color: var(--text-muted);" class="q-number">#{{ forloop.counter }}</span>
+                    <select class="form-select q-type-select" style="width: auto; padding: 4px 10px; font-size: 0.85rem;" onchange="changeQuestionType(this)">
+                        {% for val, label in question_types %}
+                            <option value="{{ val }}" {% if q.qtype == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="deleteQuestionBlock(this)" style="color: var(--accent-secondary); padding: 4px 8px;" title="Удалить вопрос">
+                        🗑️ Удалить
+                    </button>
+                </div>
+            </div>
+
+            <!-- Текст вопроса -->
+            <div class="form-group" style="margin-bottom: 12px;">
+                <input type="text" class="form-control q-text-input" value="{{ q.text }}" placeholder="Введите текст вопроса...">
+            </div>
+
+            <!-- Область предпросмотра / редактирования вариантов ответа -->
+            <div class="q-content-area">
+                {% if q.qtype == 'single' or q.qtype == 'multiple' %}
+                    <div class="choices-list" style="margin-bottom: 10px;">
+                        {% for c in q.choices.all %}
+                        <div class="choice-item-row">
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">
+                                {% if q.qtype == 'single' %}○{% else %}□{% endif %}
+                            </span>
+                            <input type="text" class="form-control choice-text-input" value="{{ c.text }}" placeholder="Вариант ответа" style="padding: 6px 12px; font-size: 0.9rem;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="removeChoice(this)" style="padding: 4px 8px;">✕</button>
+                        </div>
+                        {% empty %}
+                        <div class="choice-item-row">
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">○</span>
+                            <input type="text" class="form-control choice-text-input" value="Вариант 1" style="padding: 6px 12px; font-size: 0.9rem;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="removeChoice(this)" style="padding: 4px 8px;">✕</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addChoice(this)">
+                        + Добавить вариант
+                    </button>
+                {% elif q.qtype == 'rating' %}
+                    <div style="background-color: var(--bg-primary); padding: 12px; border-radius: var(--radius-md); text-align: center;">
+                        <span style="font-size: 1.5rem; color: var(--accent-tertiary);">★ ★ ★ ★ ★</span>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Шкала звёздного рейтинга от 1 до 5</div>
+                    </div>
+                {% elif q.qtype == 'emotion' %}
+                    <div style="background-color: var(--bg-primary); padding: 14px; border-radius: var(--radius-md);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 1.4rem;">☹️ -4</span>
+                            <span class="badge" style="background-color: var(--accent-secondary); color: #FFFFFF;">Термометр настроения (°C)</span>
+                            <span style="font-size: 1.4rem;">+4 😊</span>
+                        </div>
+                        <input type="range" min="-4" max="4" value="0" disabled style="width: 100%;">
+                    </div>
+                {% elif q.qtype == 'swipe' %}
+                    <div style="background-color: var(--bg-primary); padding: 14px; border-radius: var(--radius-md); text-align: center;">
+                        <div style="display: flex; justify-content: space-around; align-items: center;">
+                            <span style="color: var(--accent-secondary); font-weight: 700;">← Свайп влево (Нет / Тяжело)</span>
+                            <span style="font-size: 1.4rem;">👆</span>
+                            <span style="color: var(--accent-primary); font-weight: 700;">Свайп вправо (Да / Легко) →</span>
+                        </div>
+                    </div>
+                {% elif q.qtype == 'text' %}
+                    <div style="background-color: var(--bg-primary); padding: 12px; border-radius: var(--radius-md);">
+                        <div style="color: var(--text-muted); font-size: 0.85rem;">Поле для свободного развернутого ответа респондента</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div id="noQuestionsNotice" class="lumi-card" style="text-align: center; padding: 32px;">
+            <p style="color: var(--text-muted); margin-bottom: 12px;">В этом опросе пока нет вопросов.</p>
+            <button type="button" class="btn btn-primary btn-sm" onclick="addNewQuestionBlock()">
+                + Добавить первый вопрос
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Кнопка добавления нового блока -->
+    <div style="text-align: center; margin: 24px 0;">
+        <button type="button" class="btn btn-secondary" onclick="addNewQuestionBlock()" style="border-radius: var(--radius-pill); padding: 12px 28px;">
+            + Добавить блок вопроса
+        </button>
+    </div>
+
+    <!-- Нижняя панель действий (Сохранить черновик, Опубликовать, Удалить) -->
+    <div class="lumi-card" style="position: sticky; bottom: 20px; z-index: 50; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; box-shadow: var(--shadow-lg); background-color: var(--card-bg); border-color: var(--border-color);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button type="button" class="btn btn-secondary" onclick="saveSurvey('draft')" id="btnSaveDraft">
+                💾 Сохранить черновик
+            </button>
+            <span id="saveStatusIndicator" style="font-size: 0.85rem; color: var(--text-muted);"></span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+            {% if survey.status != 'published' %}
+                <button type="button" class="btn btn-primary btn-lg" onclick="saveSurvey('published')" style="padding: 12px 26px;">
+                    🚀 Опубликовать опрос
+                </button>
+            {% else %}
+                <button type="button" class="btn btn-terracotta" onclick="saveSurvey('closed')">
+                    ⏹ Завершить опрос
+                </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Шаблоны разметки для разных типов вопросов
+    function getQuestionContentHtml(qtype) {
+        if (qtype === 'single' || qtype === 'multiple') {
+            const bullet = qtype === 'single' ? '○' : '□';
+            return `
+                <div class="choices-list" style="margin-bottom: 10px;">
+                    <div class="choice-item-row">
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">${bullet}</span>
+                        <input type="text" class="form-control choice-text-input" value="Вариант 1" style="padding: 6px 12px; font-size: 0.9rem;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="removeChoice(this)" style="padding: 4px 8px;">✕</button>
+                    </div>
+                    <div class="choice-item-row">
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">${bullet}</span>
+                        <input type="text" class="form-control choice-text-input" value="Вариант 2" style="padding: 6px 12px; font-size: 0.9rem;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="removeChoice(this)" style="padding: 4px 8px;">✕</button>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="addChoice(this)">
+                    + Добавить вариант
+                </button>
+            `;
+        } else if (qtype === 'rating') {
+            return `
+                <div style="background-color: var(--bg-primary); padding: 12px; border-radius: var(--radius-md); text-align: center;">
+                    <span style="font-size: 1.5rem; color: var(--accent-tertiary);">★ ★ ★ ★ ★</span>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Шкала звёздного рейтинга от 1 до 5</div>
+                </div>
+            `;
+        } else if (qtype === 'emotion') {
+            return `
+                <div style="background-color: var(--bg-primary); padding: 14px; border-radius: var(--radius-md);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 1.4rem;">☹️ -4</span>
+                        <span class="badge" style="background-color: var(--accent-secondary); color: #FFFFFF;">Термометр настроения (°C)</span>
+                        <span style="font-size: 1.4rem;">+4 😊</span>
+                    </div>
+                    <input type="range" min="-4" max="4" value="0" disabled style="width: 100%;">
+                </div>
+            `;
+        } else if (qtype === 'swipe') {
+            return `
+                <div style="background-color: var(--bg-primary); padding: 14px; border-radius: var(--radius-md); text-align: center;">
+                    <div style="display: flex; justify-content: space-around; align-items: center;">
+                        <span style="color: var(--accent-secondary); font-weight: 700;">← Свайп влево (Нет / Тяжело)</span>
+                        <span style="font-size: 1.4rem;">👆</span>
+                        <span style="color: var(--accent-primary); font-weight: 700;">Свайп вправо (Да / Легко) →</span>
+                    </div>
+                </div>
+            `;
+        } else if (qtype === 'text') {
+            return `
+                <div style="background-color: var(--bg-primary); padding: 12px; border-radius: var(--radius-md);">
+                    <div style="color: var(--text-muted); font-size: 0.85rem;">Поле для свободного развернутого ответа респондента</div>
+                </div>
+            `;
+        }
+    }
+
+    // Смена типа вопроса на лету
+    function changeQuestionType(selectElem) {
+        const qBlock = selectElem.closest('.builder-qblock');
+        const newType = selectElem.value;
+        qBlock.dataset.qtype = newType;
+        const contentArea = qBlock.querySelector('.q-content-area');
+        contentArea.innerHTML = getQuestionContentHtml(newType);
+    }
+
+    // Добавление нового варианта ответа
+    function addChoice(btnElem) {
+        const qBlock = btnElem.closest('.builder-qblock');
+        const qtype = qBlock.dataset.qtype;
+        const bullet = qtype === 'single' ? '○' : '□';
+        const choicesList = qBlock.querySelector('.choices-list');
+        const count = choicesList.querySelectorAll('.choice-item-row').length + 1;
+
+        const row = document.createElement('div');
+        row.className = 'choice-item-row';
+        row.innerHTML = `
+            <span style="color: var(--text-muted); font-size: 0.9rem;">${bullet}</span>
+            <input type="text" class="form-control choice-text-input" value="Вариант ${count}" style="padding: 6px 12px; font-size: 0.9rem;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="removeChoice(this)" style="padding: 4px 8px;">✕</button>
+        `;
+        choicesList.appendChild(row);
+    }
+
+    // Удаление варианта ответа
+    function removeChoice(btnElem) {
+        const row = btnElem.closest('.choice-item-row');
+        const list = row.closest('.choices-list');
+        if (list.querySelectorAll('.choice-item-row').length > 1) {
+            row.remove();
+        } else {
+            alert('У вопроса должен остаться хотя бы один вариант ответа.');
+        }
+    }
+
+    // Добавление нового блока вопроса
+    function addNewQuestionBlock(qtype = 'single', text = 'Новый вопрос', choices = ['Вариант 1', 'Вариант 2']) {
+        const container = document.getElementById('questionsContainer');
+        const notice = document.getElementById('noQuestionsNotice');
+        if (notice) notice.remove();
+
+        const count = container.querySelectorAll('.builder-qblock').length + 1;
+        const block = document.createElement('div');
+        block.className = 'lumi-card builder-qblock';
+        block.dataset.qtype = qtype;
+
+        block.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: 700; color: var(--text-muted);" class="q-number">#${count}</span>
+                    <select class="form-select q-type-select" style="width: auto; padding: 4px 10px; font-size: 0.85rem;" onchange="changeQuestionType(this)">
+                        <option value="single" ${qtype === 'single' ? 'selected' : ''}>Один вариант</option>
+                        <option value="multiple" ${qtype === 'multiple' ? 'selected' : ''}>Несколько вариантов</option>
+                        <option value="text" ${qtype === 'text' ? 'selected' : ''}>Текстовый ответ</option>
+                        <option value="rating" ${qtype === 'rating' ? 'selected' : ''}>Звёздный рейтинг</option>
+                        <option value="emotion" ${qtype === 'emotion' ? 'selected' : ''}>Термометр эмоций</option>
+                        <option value="swipe" ${qtype === 'swipe' ? 'selected' : ''}>Свайп-карточка</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="deleteQuestionBlock(this)" style="color: var(--accent-secondary); padding: 4px 8px;">
+                    🗑️ Удалить
+                </button>
+            </div>
+            <div class="form-group" style="margin-bottom: 12px;">
+                <input type="text" class="form-control q-text-input" value="${text}" placeholder="Введите текст вопроса...">
+            </div>
+            <div class="q-content-area">
+                ${getQuestionContentHtml(qtype)}
+            </div>
+        `;
+        container.appendChild(block);
+        updateQuestionsCount();
+    }
+
+    // Удаление блока вопроса
+    function deleteQuestionBlock(btnElem) {
+        if (confirm('Удалить этот вопрос?')) {
+            const block = btnElem.closest('.builder-qblock');
+            block.remove();
+            updateQuestionsCount();
+        }
+    }
+
+    // Пересчет номеров и общего счетчика
+    function updateQuestionsCount() {
+        const blocks = document.querySelectorAll('.builder-qblock');
+        document.getElementById('questionsCount').innerText = blocks.length;
+        blocks.forEach((b, i) => {
+            const num = b.querySelector('.q-number');
+            if (num) num.innerText = `#${i + 1}`;
+        });
+    }
+
+    // Сохранение структуры опроса на сервер через AJAX
+    async function saveSurvey(newStatus = null) {
+        const title = document.getElementById('surveyTitle').value.trim();
+        const description = document.getElementById('surveyDescription').value.trim();
+        const indicator = document.getElementById('saveStatusIndicator');
+
+        if (!title) {
+            alert('Пожалуйста, введите название опроса.');
+            return;
+        }
+
+        const blocks = document.querySelectorAll('.builder-qblock');
+        if (newStatus === 'published' && blocks.length === 0) {
+            alert('Нельзя опубликовать опрос без единого вопроса. Добавьте хотя бы один блок.');
+            return;
+        }
+
+        const questionsData = [];
+        blocks.forEach((block, index) => {
+            const qtype = block.dataset.qtype;
+            const qtext = block.querySelector('.q-text-input').value.trim();
+            const qObj = {
+                text: qtext,
+                qtype: qtype,
+                choices: []
+            };
+
+            if (qtype === 'single' || qtype === 'multiple') {
+                const choiceInputs = block.querySelectorAll('.choice-text-input');
+                choiceInputs.forEach(ci => {
+                    const val = ci.value.trim();
+                    if (val) qObj.choices.push(val);
+                });
+            }
+
+            questionsData.push(qObj);
+        });
+
+        const payload = {
+            title: title,
+            description: description,
+            questions: questionsData
+        };
+
+        if (newStatus) {
+            payload.status = newStatus;
+        }
+
+        indicator.innerText = '⏳ Сохраняем...';
+
+        try {
+            const res = await fetch("{% url 'survey_builder' survey.pk %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                indicator.innerText = '✅ Сохранено в ' + new Date().toLocaleTimeString();
+                if (newStatus === 'published') {
+                    window.location.href = "{% url 'survey_list' %}";
+                }
+            } else {
+                indicator.innerText = '❌ Ошибка сохранения';
+                alert(data.message || 'Ошибка сохранения');
+            }
+        } catch (err) {
+            indicator.innerText = '❌ Ошибка сети';
+            console.error(err);
+        }
+    }
+
+    // AI Генератор: обращается к бэкенду surveys/ai.py
+    async function generateWithAI() {
+        const topic = document.getElementById('aiTopicInput').value.trim();
+        if (!topic) {
+            alert('Опишите тему, которую хотите узнать (например: «Узнать, почему студенты бросают курсы»)');
+            return;
+        }
+
+        const btn = document.getElementById('btnGenerateAI');
+        const oldBtnText = btn.innerHTML;
+        btn.innerHTML = '<span>⏳ AI думает...</span>';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch("{% url 'survey_ai_generate' survey.pk %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ topic: topic, save_to_db: true })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.status === 'ok') {
+                // Обновляем заголовок и описание
+                document.getElementById('surveyTitle').value = data.data.title;
+                document.getElementById('surveyDescription').value = data.data.description;
+
+                // Очищаем контейнер и добавляем 6 сгенерированных вопросов
+                const container = document.getElementById('questionsContainer');
+                container.innerHTML = '';
+
+                data.data.questions.forEach((q) => {
+                    addNewQuestionBlock(q.qtype, q.text, q.choices || []);
+                });
+
+                document.getElementById('saveStatusIndicator').innerText = '✅ AI сгенерировал опрос: ' + data.data.category_name;
+            } else {
+                alert(data.message || 'Ошибка генерации.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Ошибка соединения с сервером.');
+        } finally {
+            btn.innerHTML = oldBtnText;
+            btn.disabled = false;
+        }
+    }
+</script>
+{% endblock %}
