@@ -908,16 +908,12 @@ img {
     }
 
     .fab-create {
-        bottom: calc(var(--bottom-nav-height) + 16px);
-        right: 16px;
-        padding: 12px 18px;
+        display: none !important;
     }
-}
-
 
     /* Дополнительная мобильная адаптация */
     .lumi-main-content {
-        padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 8px) + 24px) !important;
+        padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 12px) + 36px) !important;
     }
     .home-hero-card {
         padding: 24px 16px !important;
@@ -956,6 +952,13 @@ img {
         justify-content: center !important;
     }
 
+    /* Гарантия кликабельности всех кнопок и ссылок */
+    .btn, button, a, .bottom-nav-item {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        pointer-events: auto !important;
+        cursor: pointer;
+    }
 }
 
 @media (min-width: 769px) {
