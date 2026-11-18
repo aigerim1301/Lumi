@@ -1,0 +1,826 @@
+/* ==========================================================================
+   Lumi Platform — Design System: Цифровой шалфей и терракота
+   Все ключевые цвета вынесены в CSS-переменные для легкой смены тем
+   ========================================================================== */
+
+:root {
+    /* Основная цветовая палитра (Светлая тема) */
+    --bg-primary: #F7F5F0;           /* Тёплый бежевый фон страницы */
+    --card-bg: #FFFFFF;              /* Белый фон карточек */
+    --card-hover-bg: #FAF9F6;        /* Фон карточки при наведении */
+    --accent-primary: #2D5A4C;       /* Шалфей/хвоя — кнопки, активные пункты */
+    --accent-primary-hover: #23473C; /* Тёмный оттенок шалфея при наведении */
+    --accent-primary-light: #EBF2EE; /* Светлый шалфей для подложек */
+    --accent-secondary: #D96B43;     /* Терракота — акценты, предупреждения, свайп */
+    --accent-secondary-hover: #C25B35;
+    --accent-secondary-light: #FBEFEA;
+    --accent-tertiary: #8A79AF;      /* Лаванда — AI бейджи, графики */
+    --accent-tertiary-light: #F2EEF8;
+    --text-primary: #1E2422;         /* Основной темный цвет текста */
+    --text-muted: #6E7975;           /* Приглушенный цвет текста */
+    --text-light: #9DA7A3;           /* Очень светлый второстепенный текст */
+    --border-color: rgba(45, 90, 76, 0.12); /* Мягкие разделители */
+    --border-color-focus: #2D5A4C;   /* Рамка полей ввода при фокусе */
+
+    /* Статусы опросов */
+    --status-draft: #8A79AF;         /* Черновик — лавандовый */
+    --status-published: #2D5A4C;     /* Опубликован — шалфей */
+    --status-closed: #D96B43;        /* Завершен — терракота */
+
+    /* Геометрия и тени */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;               /* Стандартный радиус карточек Lumi */
+    --radius-xl: 24px;
+    --radius-pill: 9999px;
+
+    --shadow-sm: 0 2px 8px rgba(30, 36, 34, 0.04);
+    --shadow-md: 0 6px 20px rgba(30, 36, 34, 0.06);
+    --shadow-lg: 0 12px 32px rgba(30, 36, 34, 0.08);
+
+    /* Типографика */
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --transition: all 0.2s ease-in-out;
+
+    /* Размеры навигации */
+    --sidebar-width: 260px;
+    --bottom-nav-height: 68px;
+    --header-height: 64px;
+}
+
+/* ==========================================================================
+   Тёмная тема (активируется через data-theme="dark" на теге <html>)
+   ========================================================================== */
+[data-theme="dark"] {
+    --bg-primary: #141A18;           /* Глубокий тёмно-шалфейный фон */
+    --card-bg: #1E2724;              /* Тёмные карточки */
+    --card-hover-bg: #26322E;
+    --accent-primary: #3D7A68;       /* Чуть более яркий шалфей для контраста */
+    --accent-primary-hover: #4B947E;
+    --accent-primary-light: rgba(61, 122, 104, 0.2);
+    --accent-secondary: #E07A54;     /* Тёплая терракота */
+    --accent-secondary-hover: #EA8A66;
+    --accent-secondary-light: rgba(224, 122, 84, 0.2);
+    --accent-tertiary: #9E8EC2;      /* Светлая лаванда */
+    --accent-tertiary-light: rgba(158, 142, 194, 0.2);
+    --text-primary: #EDEFEA;         /* Светлый тёплый текст */
+    --text-muted: #9EABA5;           /* Приглушенный серо-зеленый текст */
+    --text-light: #6C7A74;
+    --border-color: rgba(237, 239, 234, 0.1);
+    --border-color-focus: #4B947E;
+
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   Базовый сброс и типографика
+   ========================================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    min-height: 100vh;
+    font-family: var(--font-family);
+    background-color: var(--bg-primary);
+    background-image: 
+        /* Мягкое шалфейное свечение сверху справа */
+        radial-gradient(circle at 85% 12%, rgba(45, 90, 76, 0.08) 0%, transparent 45%),
+        /* Тёплое терракотовое свечение снизу слева */
+        radial-gradient(circle at 15% 85%, rgba(217, 107, 67, 0.06) 0%, transparent 45%),
+        /* Мягкий лавандовый акцент по центру */
+        radial-gradient(circle at 50% 50%, rgba(138, 121, 175, 0.04) 0%, transparent 60%),
+        /* Деликатная микро-сетка точек (dot matrix) для технологичности */
+        radial-gradient(rgba(45, 90, 76, 0.07) 1.2px, transparent 1.2px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px;
+    background-attachment: fixed;
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Фоновые градиенты для тёмной темы */
+[data-theme="dark"] body {
+    background-image: 
+        radial-gradient(circle at 85% 12%, rgba(61, 122, 104, 0.16) 0%, transparent 50%),
+        radial-gradient(circle at 15% 85%, rgba(217, 107, 67, 0.11) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(138, 121, 175, 0.08) 0%, transparent 60%),
+        radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+}
+
+a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--accent-primary-hover);
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* ==========================================================================
+   Макет приложения (App Shell)
+   ========================================================================== */
+.lumi-app {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Декоративные мягкие световые пятна (Aurora Orbs) на фоне */
+.lumi-app::before {
+    content: '';
+    position: fixed;
+    top: -100px;
+    right: -100px;
+    width: 450px;
+    height: 450px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(45, 90, 76, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(50px);
+}
+
+.lumi-app::after {
+    content: '';
+    position: fixed;
+    bottom: -120px;
+    left: 220px;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(217, 107, 67, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(60px);
+}
+
+[data-theme="dark"] .lumi-app::before {
+    background: radial-gradient(circle, rgba(61, 122, 104, 0.18) 0%, transparent 70%);
+}
+
+[data-theme="dark"] .lumi-app::after {
+    background: radial-gradient(circle, rgba(217, 107, 67, 0.12) 0%, transparent 70%);
+}
+
+/* Боковая навигация (для ПК экрана) */
+.lumi-sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--card-bg);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    padding: 24px 16px;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 8px 24px 8px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 24px;
+}
+
+.sidebar-logo img {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+    background: transparent;
+}
+
+.sidebar-logo .brand-text {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+}
+
+.sidebar-menu {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.sidebar-menu a svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+}
+
+.sidebar-menu a:hover {
+    background-color: var(--accent-primary-light);
+    color: var(--accent-primary);
+}
+
+.sidebar-menu a.active {
+    background-color: var(--accent-primary);
+    color: #FFFFFF;
+}
+
+.sidebar-menu a.active svg {
+    stroke: #FFFFFF;
+}
+
+.sidebar-footer {
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.user-profile-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-radius: var(--radius-md);
+    background-color: var(--bg-primary);
+}
+
+.user-avatar-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--accent-primary);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.user-badge-info {
+    overflow: hidden;
+}
+
+.user-badge-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.user-badge-role {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Основная рабочая область контента */
+.lumi-main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+/* Верхняя полоса на мобильных устройствах */
+.lumi-mobile-header {
+    display: none;
+    height: var(--header-height);
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.lumi-mobile-header .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.lumi-mobile-header .mobile-brand img {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+    background: transparent;
+}
+
+/* Контейнер страницы */
+.lumi-container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.lumi-container-narrow {
+    max-width: 540px;
+}
+
+/* Нижняя панель навигации (для мобильных телефонов) */
+.lumi-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--bottom-nav-height);
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+    padding: 6px 12px 10px;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 500;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.bottom-nav-item svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+}
+
+.bottom-nav-item.active {
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.bottom-nav-item:hover {
+    color: var(--accent-primary);
+}
+
+/* ==========================================================================
+   Компоненты интерфейса: Карточки, Кнопки, Бейджи
+   ========================================================================== */
+.lumi-card {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 16px rgba(45, 90, 76, 0.05);
+    padding: 26px 28px;
+    margin-bottom: 22px;
+    transition: var(--transition);
+    position: relative;
+    backdrop-filter: blur(10px);
+}
+
+.lumi-card:hover {
+    box-shadow: 0 8px 24px rgba(45, 90, 76, 0.09);
+    border-color: rgba(45, 90, 76, 0.22);
+}
+
+[data-theme="dark"] .lumi-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    border-color: rgba(61, 122, 104, 0.25);
+}
+
+[data-theme="dark"] .lumi-card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    border-color: rgba(61, 122, 104, 0.45);
+}
+
+/* Кнопки */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: var(--transition);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background-color: var(--accent-primary);
+    color: #FFFFFF;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-primary-hover);
+    color: #FFFFFF;
+}
+
+.btn-secondary {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-primary);
+}
+
+.btn-terracotta {
+    background-color: var(--accent-secondary);
+    color: #FFFFFF;
+}
+
+.btn-terracotta:hover {
+    background-color: var(--accent-secondary-hover);
+    color: #FFFFFF;
+}
+
+.btn-lavender {
+    background-color: var(--accent-tertiary);
+    color: #FFFFFF;
+}
+
+.btn-lavender:hover {
+    opacity: 0.9;
+    color: #FFFFFF;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    border-radius: var(--radius-sm);
+}
+
+.btn-lg {
+    padding: 14px 28px;
+    font-size: 1.05rem;
+    border-radius: var(--radius-md);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+/* Плавающая кнопка создания (+ Создать) */
+.fab-create {
+    position: fixed;
+    right: 28px;
+    bottom: 28px;
+    background-color: var(--accent-primary);
+    color: #FFFFFF;
+    padding: 14px 22px;
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-lg);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    z-index: 80;
+    transition: var(--transition);
+}
+
+.fab-create:hover {
+    transform: translateY(-2px);
+    background-color: var(--accent-primary-hover);
+    color: #FFFFFF;
+}
+
+/* Бейджи */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.badge-draft {
+    background-color: var(--accent-tertiary-light);
+    color: var(--accent-tertiary);
+}
+
+.badge-published {
+    background-color: var(--accent-primary-light);
+    color: var(--accent-primary);
+}
+
+.badge-closed {
+    background-color: var(--accent-secondary-light);
+    color: var(--accent-secondary);
+}
+
+.badge-ai {
+    background-color: var(--accent-tertiary);
+    color: #FFFFFF;
+}
+
+/* Сообщения Django Messages */
+.messages-container {
+    margin-bottom: 24px;
+}
+
+.alert {
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: var(--accent-primary-light);
+    color: var(--accent-primary);
+    border-color: rgba(45, 90, 76, 0.2);
+}
+
+.alert-error, .alert-danger {
+    background-color: var(--accent-secondary-light);
+    color: var(--accent-secondary);
+    border-color: rgba(217, 107, 67, 0.2);
+}
+
+.alert-warning {
+    background-color: #FFF6E5;
+    color: #B57A00;
+    border-color: rgba(181, 122, 0, 0.2);
+}
+
+.alert-info {
+    background-color: var(--accent-tertiary-light);
+    color: var(--accent-tertiary);
+    border-color: rgba(138, 121, 175, 0.2);
+}
+
+/* Поля ввода и формы */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.form-control, .form-select {
+    width: 100%;
+    padding: 11px 14px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--border-color-focus);
+    box-shadow: 0 0 0 3px var(--accent-primary-light);
+}
+
+.form-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.form-error {
+    font-size: 0.82rem;
+    color: var(--accent-secondary);
+    margin-top: 4px;
+}
+
+/* Поле ввода пароля с кнопкой-глазком видимости */
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-input-wrapper input {
+    padding-right: 46px !important;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    transition: color 0.2s ease, transform 0.15s ease;
+    z-index: 2;
+}
+
+.password-toggle-btn:hover {
+    color: var(--accent-primary);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.password-toggle-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Тумблеры / Переключатели (Toggle switches) */
+.toggle-switch-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: .3s;
+    border-radius: 26px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #FFFFFF;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: var(--accent-primary);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+}
+
+/* ==========================================================================
+   Страницы ошибок (403 и 404)
+   ========================================================================== */
+.error-page-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px 16px;
+}
+
+.error-card {
+    max-width: 520px;
+    padding: 48px 32px;
+}
+
+.error-code {
+    font-size: 5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--accent-secondary);
+    margin-bottom: 12px;
+    letter-spacing: -2px;
+}
+
+.error-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.error-desc {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-bottom: 28px;
+    line-height: 1.6;
+}
+
+/* ==========================================================================
+   Адаптивность для мобильных телефонов (Mobile First)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .lumi-sidebar {
+        display: none; /* Скрываем боковое меню на мобильных экранах */
+    }
+
+    .lumi-main-content {
+        margin-left: 0;
+        padding-bottom: calc(var(--bottom-nav-height) + 20px); /* Место для нижней панели */
+    }
+
+    .lumi-mobile-header {
+        display: flex; /* Показываем мобильную шапку */
+    }
+
+    .lumi-bottom-nav {
+        display: flex; /* Показываем нижнюю панель навигации */
+    }
+
+    .lumi-container {
+        padding: 16px;
+    }
+
+    .fab-create {
+        bottom: calc(var(--bottom-nav-height) + 16px);
+        right: 16px;
+        padding: 12px 18px;
+    }
+}
+
+@media (min-width: 769px) {
+    .lumi-bottom-nav {
+        display: none !important;
+    }
+}

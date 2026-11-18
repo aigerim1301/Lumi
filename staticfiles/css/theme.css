@@ -87,11 +87,31 @@ html, body {
     min-height: 100vh;
     font-family: var(--font-family);
     background-color: var(--bg-primary);
+    background-image: 
+        /* Мягкое шалфейное свечение сверху справа */
+        radial-gradient(circle at 85% 12%, rgba(45, 90, 76, 0.08) 0%, transparent 45%),
+        /* Тёплое терракотовое свечение снизу слева */
+        radial-gradient(circle at 15% 85%, rgba(217, 107, 67, 0.06) 0%, transparent 45%),
+        /* Мягкий лавандовый акцент по центру */
+        radial-gradient(circle at 50% 50%, rgba(138, 121, 175, 0.04) 0%, transparent 60%),
+        /* Деликатная микро-сетка точек (dot matrix) для технологичности */
+        radial-gradient(rgba(45, 90, 76, 0.07) 1.2px, transparent 1.2px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px;
+    background-attachment: fixed;
     color: var(--text-primary);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Фоновые градиенты для тёмной темы */
+[data-theme="dark"] body {
+    background-image: 
+        radial-gradient(circle at 85% 12%, rgba(61, 122, 104, 0.16) 0%, transparent 50%),
+        radial-gradient(circle at 15% 85%, rgba(217, 107, 67, 0.11) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(138, 121, 175, 0.08) 0%, transparent 60%),
+        radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
 }
 
 a {
@@ -115,6 +135,45 @@ img {
 .lumi-app {
     display: flex;
     min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Декоративные мягкие световые пятна (Aurora Orbs) на фоне */
+.lumi-app::before {
+    content: '';
+    position: fixed;
+    top: -100px;
+    right: -100px;
+    width: 450px;
+    height: 450px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(45, 90, 76, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(50px);
+}
+
+.lumi-app::after {
+    content: '';
+    position: fixed;
+    bottom: -120px;
+    left: 220px;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(217, 107, 67, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(60px);
+}
+
+[data-theme="dark"] .lumi-app::before {
+    background: radial-gradient(circle, rgba(61, 122, 104, 0.18) 0%, transparent 70%);
+}
+
+[data-theme="dark"] .lumi-app::after {
+    background: radial-gradient(circle, rgba(217, 107, 67, 0.12) 0%, transparent 70%);
 }
 
 /* Боковая навигация (для ПК экрана) */
@@ -253,6 +312,8 @@ img {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    position: relative;
+    z-index: 1;
 }
 
 /* Верхняя полоса на мобильных устройствах */
@@ -353,14 +414,27 @@ img {
     background-color: var(--card-bg);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    padding: 24px;
-    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(45, 90, 76, 0.05);
+    padding: 26px 28px;
+    margin-bottom: 22px;
     transition: var(--transition);
+    position: relative;
+    backdrop-filter: blur(10px);
 }
 
 .lumi-card:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 8px 24px rgba(45, 90, 76, 0.09);
+    border-color: rgba(45, 90, 76, 0.22);
+}
+
+[data-theme="dark"] .lumi-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    border-color: rgba(61, 122, 104, 0.25);
+}
+
+[data-theme="dark"] .lumi-card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    border-color: rgba(61, 122, 104, 0.45);
 }
 
 /* Кнопки */
