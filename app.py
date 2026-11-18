@@ -16,17 +16,18 @@ if str(BASE_DIR) not in sys.path:
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-from django.core.wsgi import get_wsgi_application
+import django
+django.setup()
 
-# Создаём WSGI-приложение Django
-application = get_wsgi_application()
-app = application
-
-# Автоматическая инициализация базы данных и сидера при первом запуске на хостинге
+# Автоматическая инициализация базы данных, сидера и сбор статики
 try:
     from django.db import connection
     from django.core.management import call_command
 
+    # Сбор статических файлов перед запуском WSGI-приложения
+    call_command('collectstatic', interactive=False)
+
+    # Применение миграций и создание демо-данных при первом старте
     with connection.cursor() as cursor:
         tables = connection.introspection.table_names(cursor)
         if 'surveys_survey' not in tables:
@@ -34,8 +35,12 @@ try:
             call_command('migrate', interactive=False)
             print("[Lumi Init] Заполнение демонстрационных данных (seed_demo)...")
             call_command('seed_demo')
-            print("[Lumi Init] Сбор статических файлов...")
-            call_command('collectstatic', interactive=False)
             print("[Lumi Init] Инициализация успешно завершена!")
 except Exception as e:
-    print(f"[Lumi Init Warning] Не удалось выполнить автоинициализацию: {e}")
+    print(f"[Lumi Init Warning]: {e}")
+
+from django.core.wsgi import get_wsgi_application
+
+# Создаём WSGI-приложение Django (WhiteNoise теперь видит все статические файлы)
+application = get_wsgi_application()
+app = application
