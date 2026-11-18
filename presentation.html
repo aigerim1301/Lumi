@@ -3,39 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Презентация курсовой работы — Lumi</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Lumi — Интерактивная презентация курсовой работы</title>
   <style>
     :root {
       --sage: #2D5A4C;
-      --sage-light: #3D7A68;
-      --sage-subtle: #E8F0ED;
-      --terracotta: #D96B43;
-      --terracotta-light: #FBF0EC;
-      --lavender: #8A79AF;
-      --lavender-light: #F2EFF8;
-      --bg-cream: #F7F5F0;
-      --card-bg: #FFFFFF;
-      --text-dark: #1E2422;
-      --text-muted: #606864;
-      --border-subtle: #E3DFD5;
-      --shadow-sm: 0 4px 12px rgba(45, 90, 76, 0.06);
-      --shadow-md: 0 10px 25px rgba(45, 90, 76, 0.10);
-      --shadow-lg: 0 20px 40px rgba(45, 90, 76, 0.15);
+      --sage-glow: #3E8B75;
+      --terracotta: #E06D44;
+      --terracotta-glow: #FF8559;
+      --lavender: #8E7BB5;
+      --lavender-glow: #B19EE0;
+      --bg: #0D1311;
+      --surface: rgba(22, 32, 28, 0.75);
+      --surface-card: rgba(28, 41, 36, 0.85);
+      --surface-border: rgba(62, 139, 117, 0.25);
+      --text-main: #F3F7F5;
+      --text-muted: #95A5A0;
+      --accent-grad: linear-gradient(135deg, #3E8B75, #E06D44);
     }
 
-    [data-theme="dark"] {
-      --bg-cream: #141A18;
-      --card-bg: #1B2421;
-      --text-dark: #F3F5F4;
-      --text-muted: #9BA4A0;
-      --border-subtle: #293632;
-      --sage-subtle: #1F2E29;
-      --terracotta-light: #38241D;
-      --lavender-light: #2A2536;
-      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
-      --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.35);
-      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.50);
+    [data-theme="light"] {
+      --bg: #F5F3EC;
+      --surface: rgba(255, 255, 255, 0.85);
+      --surface-card: rgba(255, 255, 255, 0.95);
+      --surface-border: rgba(45, 90, 76, 0.2);
+      --text-main: #18221F;
+      --text-muted: #596B65;
     }
 
     * {
@@ -46,17 +38,111 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-cream);
-      color: var(--text-dark);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      overflow: hidden;
+      transition: background 0.4s ease, color 0.4s ease;
     }
 
-    /* Slides Container */
+    /* Background Particle Canvas */
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Confetti Canvas */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* Header Nav */
+    header {
+      position: relative;
+      z-index: 20;
+      padding: 16px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--surface-border);
+      background: rgba(13, 19, 17, 0.4);
+    }
+
+    .brand-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--sage-glow), var(--terracotta));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.2rem;
+      color: #FFF;
+      box-shadow: 0 4px 18px rgba(62, 139, 117, 0.4);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .header-tools {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tool-btn {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(8px);
+    }
+    .tool-btn:hover {
+      border-color: var(--terracotta);
+      color: var(--terracotta);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(224, 109, 68, 0.2);
+    }
+    .tool-btn.active {
+      background: var(--terracotta);
+      color: #FFF;
+      border-color: var(--terracotta);
+    }
+
+    /* Deck Viewport */
     .deck-viewport {
       flex: 1;
       position: relative;
@@ -64,25 +150,28 @@
       align-items: center;
       justify-content: center;
       padding: 24px;
+      z-index: 10;
+      perspective: 1200px;
     }
 
     .slide {
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) scale(0.96);
+      transform: translate(-50%, -50%) translateZ(-80px) rotateY(15deg);
       width: 100%;
-      max-width: 1100px;
-      min-height: 600px;
-      background: var(--card-bg);
-      border: 1px solid var(--border-subtle);
-      border-radius: 24px;
-      padding: 48px;
-      box-shadow: var(--shadow-lg);
+      max-width: 1140px;
+      min-height: 640px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 28px;
+      padding: 44px 52px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(20px);
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
       display: flex;
       flex-direction: column;
     }
@@ -91,28 +180,39 @@
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
-      transform: translate(-50%, -50%) scale(1);
+      transform: translate(-50%, -50%) translateZ(0) rotateY(0deg);
     }
 
-    /* Staggered entrance for slide elements */
-    .slide.active .anim-item {
-      animation: fadeInUp 0.45s ease forwards;
+    /* Slide entrance staggered animations */
+    .slide.active .anim-fade {
+      animation: popIn 0.5s ease-out forwards;
     }
+    .slide.active .delay-1 { animation-delay: 0.1s; }
+    .slide.active .delay-2 { animation-delay: 0.2s; }
+    .slide.active .delay-3 { animation-delay: 0.3s; }
+    .slide.active .delay-4 { animation-delay: 0.4s; }
 
-    .slide.active .anim-delay-1 { animation-delay: 0.08s; }
-    .slide.active .anim-delay-2 { animation-delay: 0.16s; }
-    .slide.active .anim-delay-3 { animation-delay: 0.24s; }
-    .slide.active .anim-delay-4 { animation-delay: 0.32s; }
-
-    @keyframes fadeInUp {
+    @keyframes popIn {
       from {
         opacity: 0;
-        transform: translateY(16px);
+        transform: translateY(20px) scale(0.97);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
       }
+    }
+
+    /* Gradient headings */
+    .grad-title {
+      background: linear-gradient(135deg, #FFF 30%, var(--sage-glow) 70%, var(--terracotta) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    [data-theme="light"] .grad-title {
+      background: linear-gradient(135deg, var(--sage) 20%, var(--terracotta) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     /* Badges */
@@ -121,340 +221,490 @@
       align-items: center;
       gap: 6px;
       padding: 6px 14px;
-      border-radius: 9999px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
     }
-    .badge-sage { background: var(--sage-subtle); color: var(--sage); }
-    .badge-terracotta { background: var(--terracotta-light); color: var(--terracotta); }
-    .badge-lavender { background: var(--lavender-light); color: var(--lavender); }
+    .badge-sage {
+      background: rgba(62, 139, 117, 0.15);
+      color: var(--sage-glow);
+      border: 1px solid rgba(62, 139, 117, 0.35);
+    }
+    .badge-terra {
+      background: rgba(224, 109, 68, 0.15);
+      color: var(--terracotta-glow);
+      border: 1px solid rgba(224, 109, 68, 0.35);
+    }
+    .badge-lavender {
+      background: rgba(142, 123, 181, 0.15);
+      color: var(--lavender-glow);
+      border: 1px solid rgba(142, 123, 181, 0.35);
+    }
 
-    /* Control Bar */
-    .deck-controls {
-      background: var(--card-bg);
-      border-top: 1px solid var(--border-subtle);
-      padding: 14px 28px;
+    /* Cards */
+    .card-3d {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 20px;
+      padding: 24px;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-3d:hover {
+      transform: translateY(-5px) scale(1.01);
+      border-color: var(--terracotta);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+    }
+    .card-3d::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.04), transparent 70%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .card-3d:hover::before {
+      opacity: 1;
+    }
+
+    /* Bottom Control Bar */
+    footer {
+      position: relative;
+      z-index: 20;
+      padding: 16px 36px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: sticky;
-      bottom: 0;
-      z-index: 50;
-      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--surface-border);
+      background: rgba(13, 19, 17, 0.5);
     }
 
-    /* Progress Dots */
-    .progress-bar-track {
+    .progress-track {
       position: absolute;
       top: 0;
       left: 0;
-      height: 4px;
       width: 100%;
-      background: var(--border-subtle);
+      height: 4px;
+      background: var(--surface-border);
     }
-    .progress-bar-fill {
+    .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--sage), var(--terracotta));
-      transition: width 0.35s ease;
+      width: 10%;
+      background: linear-gradient(90deg, var(--sage-glow), var(--terracotta-glow));
+      box-shadow: 0 0 12px var(--terracotta-glow);
+      transition: width 0.4s ease;
     }
 
-    /* Interactive Elements in Slides */
-    .feature-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-subtle);
-      border-radius: 16px;
-      padding: 20px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    .nav-btn {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text-main);
+      padding: 10px 22px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s ease;
     }
-    .feature-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-md);
-      border-color: var(--sage);
+    .nav-btn:hover {
+      background: var(--sage);
+      color: #FFF;
+      border-color: var(--sage-glow);
+      box-shadow: 0 6px 18px rgba(62, 139, 117, 0.4);
+      transform: translateY(-2px);
     }
 
-    /* Speaker Notes Modal */
-    .notes-drawer {
+    .dots-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot-btn {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--surface-border);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .dot-btn.active {
+      width: 28px;
+      background: linear-gradient(90deg, var(--sage-glow), var(--terracotta));
+      box-shadow: 0 0 10px var(--sage-glow);
+    }
+
+    /* Speaker Notes Drawer */
+    .speaker-drawer {
       position: fixed;
-      bottom: 70px;
+      bottom: 80px;
       left: 50%;
-      transform: translateX(-50%) translateY(120%);
+      transform: translateX(-50%) translateY(140%);
       width: 90%;
-      max-width: 900px;
-      background: var(--card-bg);
+      max-width: 960px;
+      background: var(--surface-card);
       border: 2px solid var(--terracotta);
-      border-radius: 18px;
-      padding: 22px 28px;
-      box-shadow: var(--shadow-lg);
+      border-radius: 20px;
+      padding: 24px 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(24px);
       z-index: 100;
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .notes-drawer.open {
+    .speaker-drawer.open {
       transform: translateX(-50%) translateY(0);
     }
 
-    /* Pulse animation for key badges */
-    .pulse-glow {
-      animation: pulseGlow 2.5s infinite;
+    /* Laser pointer effect */
+    #laserDot {
+      position: fixed;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #FF2A2A;
+      box-shadow: 0 0 16px #FF2A2A, 0 0 32px #FF2A2A;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      display: none;
     }
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(217, 107, 67, 0.4); }
-      50% { box-shadow: 0 0 0 8px rgba(217, 107, 67, 0); }
+
+    /* Interactive Demo: Swipe Card */
+    .swipe-arena {
+      position: relative;
+      width: 280px;
+      height: 240px;
+      perspective: 800px;
+    }
+    .swipe-card {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #1A2823, #233830);
+      border: 1px solid var(--sage-glow);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+      cursor: grab;
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .swipe-card.swiped-left {
+      transform: translateX(-260px) rotate(-25deg);
+      opacity: 0;
+    }
+    .swipe-card.swiped-right {
+      transform: translateX(260px) rotate(25deg);
+      opacity: 0;
+    }
+
+    /* Interactive Demo: Emotion Thermometer */
+    .emotion-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 5px;
+      background: linear-gradient(90deg, #E06D44, #F0C419, #3E8B75);
+      outline: none;
+      cursor: pointer;
+    }
+    .emotion-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #FFF;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .emotion-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+    }
+
+    /* Pulsing Pipeline Flow */
+    .flow-line {
+      stroke-dasharray: 6;
+      animation: dash 1s linear infinite;
+    }
+    @keyframes dash {
+      to { stroke-dashoffset: -12; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top bar with brand & utility toggles -->
-  <header class="px-8 py-4 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--card-bg)]">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-[var(--sage)] flex items-center justify-center text-white font-bold text-lg shadow-sm">
-        LU
-      </div>
+  <!-- Ambient Particles Canvas -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- Confetti Canvas on Slide 10 -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- Laser Pointer Dot -->
+  <div id="laserDot"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand-pill">
+      <div class="brand-icon">LU</div>
       <div>
-        <h1 class="text-base font-bold text-[var(--text-dark)] leading-tight">Lumi — Интерактивные опросы</h1>
-        <p class="text-xs text-[var(--text-muted)]">Презентация курсовой работы 2026</p>
+        <div style="font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em;">Lumi</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">Интерактивная защита курсовой работы 2026</div>
       </div>
     </div>
 
-    <div class="flex items-center gap-3">
-      <!-- Speaker Notes Button -->
-      <button id="toggleNotesBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] text-xs font-semibold hover:border-[var(--terracotta)] hover:text-[var(--terracotta)] transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-        <span>Шпаргалка докладчика [N]</span>
+    <div class="header-tools">
+      <button id="soundBtn" class="tool-btn" title="Звуковые эффекты">
+        <span id="soundIcon">🔊</span>
+        <span>Звук: Вкл</span>
       </button>
 
-      <!-- Theme Toggle -->
-      <button id="themeToggleBtn" class="p-2 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--sage)] transition-colors" title="Переключить тему">
-        <svg id="themeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      <button id="laserBtn" class="tool-btn" title="Лазерная указка [L]">
+        <span>🔴</span>
+        <span>Указка [L]</span>
       </button>
 
-      <!-- Fullscreen Toggle -->
-      <button id="fullscreenBtn" class="p-2 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--sage)] transition-colors" title="Полноэкранный режим [F]">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+      <button id="notesBtn" class="tool-btn" title="Шпаргалка докладчика [N]">
+        <span>📝</span>
+        <span>Шпаргалка [N]</span>
+      </button>
+
+      <button id="themeBtn" class="tool-btn" title="Сменить тему">
+        <span id="themeIcon">🌓</span>
+      </button>
+
+      <button id="fsBtn" class="tool-btn" title="Полноэкранный режим [F]">
+        <span>⛶</span>
       </button>
     </div>
   </header>
 
-  <!-- Main Viewport for Slides -->
+  <!-- Main Slides Viewport -->
   <main class="deck-viewport">
 
-    <!-- ==================== СЛАЙД 1: ТИТУЛЬНЫЙ ==================== -->
+    <!-- ==================== СЛАЙД 1: HERO TITLE ==================== -->
     <section class="slide active" data-slide="1">
-      <div class="flex-1 flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-          <span class="badge badge-sage anim-item">Курсовая работа • 2026</span>
-          <span class="badge badge-lavender anim-item">Django 6.1 • DRF • SQLite • Chart.js</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <span class="badge badge-sage anim-fade">Курсовая работа • Защита 2026</span>
+        <span class="badge badge-terra anim-fade">Live на Render.com</span>
+      </div>
+
+      <div style="margin: auto 0; text-align: left;">
+        <div class="badge badge-lavender anim-fade delay-1" style="margin-bottom: 16px;">
+          ★ Новое поколение онлайн-опросов
+        </div>
+        <h1 class="grad-title anim-fade delay-2" style="font-size: 3.4rem; font-weight: 900; line-height: 1.15; margin-bottom: 18px;">
+          Lumi — Платформа интерактивных опросов с геймификацией
+        </h1>
+        <p class="anim-fade delay-3" style="font-size: 1.25rem; color: var(--text-muted); max-width: 860px; line-height: 1.6; margin-bottom: 32px;">
+          Веб-сервис с мобильными свайп-карточками, эмоциональным термометром, сравнительной аналитикой в реальном времени, встроенным AI-генератором и открытым REST API.
+        </p>
+
+        <div class="anim-fade delay-4" style="display: flex; gap: 14px; flex-wrap: wrap;">
+          <div class="badge badge-sage">Django 6.1 MVT</div>
+          <div class="badge badge-terra">Django REST Framework</div>
+          <div class="badge badge-lavender">43 теста (100% OK)</div>
+          <div class="badge badge-sage">Chart.js Analytics</div>
+          <div class="badge badge-terra">Excel CSV BOM</div>
+        </div>
+      </div>
+
+      <div class="anim-fade delay-4" style="display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid var(--surface-border);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 14px; background: var(--sage); color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: 800;">А</div>
+          <div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Студент-разработчик:</div>
+            <div style="font-weight: 800; font-size: 0.95rem;">Айгерим / Информационные Системы</div>
+          </div>
         </div>
 
-        <div class="my-auto py-8">
-          <div class="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-[var(--sage-subtle)] text-[var(--sage)] mb-6 anim-item anim-delay-1">
-            <span class="w-2.5 h-2.5 rounded-full bg-[var(--terracotta)] animate-ping"></span>
-            <span class="font-bold text-sm tracking-wide uppercase">Платформа нового поколения</span>
-          </div>
-          <h1 class="text-4xl md:text-5xl font-black text-[var(--text-dark)] leading-tight mb-4 anim-item anim-delay-2">
-            Lumi — Интерактивная веб-платформа для опросов
-          </h1>
-          <p class="text-lg md:text-xl text-[var(--text-muted)] max-w-3xl leading-relaxed anim-item anim-delay-3">
-            Разработка веб-сервиса с геймифицированным интерфейсом (свайпы, эмодзи-термометр), мгновенной сравнительной аналитикой, встроенным AI-генератором и открытым REST API.
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-[var(--border-subtle)] anim-item anim-delay-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-[var(--sage)] text-white flex items-center justify-center font-bold">С</div>
-            <div>
-              <div class="text-xs text-[var(--text-muted)]">Выполнил(а) студент(ка):</div>
-              <div class="text-sm font-bold text-[var(--text-dark)]">Айгерим / Информационные системы</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-3 md:justify-end">
-            <div class="w-10 h-10 rounded-full bg-[var(--lavender)] text-white flex items-center justify-center font-bold">Р</div>
-            <div>
-              <div class="text-xs text-[var(--text-muted)]">Научный руководитель:</div>
-              <div class="text-sm font-bold text-[var(--text-dark)]">Кафедра программной инженерии</div>
-            </div>
-          </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Репозиторий GitHub:</div>
+          <div style="font-weight: 800; font-size: 0.95rem; color: var(--terracotta-glow);">github.com/aigerim1301/Lumi</div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== СЛАЙД 2: ПРОБЛЕМА И РЕШЕНИЕ ==================== -->
+    <!-- ==================== СЛАЙД 2: ПРОБЛЕМА vs РЕШЕНИЕ ==================== -->
     <section class="slide" data-slide="2">
-      <div class="flex items-center justify-between mb-6">
-        <span class="badge badge-terracotta anim-item">Проблематика & Актуальность</span>
-        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">Почему Google Forms больше не работают?</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <span class="badge badge-terra anim-fade">Проблематика & Актуальность</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Почему старые опросы проваливаются?</span>
       </div>
 
-      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-6 anim-item anim-delay-1">
-        Усталость от опросов и низкая вовлеченность
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 24px;">
+        Кризис монотонных форм и революция вовлечённости
       </h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 items-stretch anim-item anim-delay-2">
-        <!-- Колонка проблемы -->
-        <div class="feature-card border-red-200 bg-red-50/30 flex flex-col justify-between">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1;">
+        <!-- Card 1: Google Forms -->
+        <div class="card-3d anim-fade delay-2" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05); display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <div class="flex items-center gap-2 text-red-600 font-bold mb-3">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              <span>Классические сервисы (Google Forms)</span>
+            <div style="display: flex; align-items: center; gap: 8px; color: #EF4444; font-weight: 800; margin-bottom: 14px; font-size: 1.1rem;">
+              <span>✕</span> Классические Google Forms
             </div>
-            <ul class="space-y-3 text-sm text-[var(--text-dark)]">
-              <li class="flex items-start gap-2">
-                <span class="text-red-500 font-bold">✕</span>
-                <span><b>Монотонность:</b> длинные списки радиокнопок вызывают скуку.</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-red-500 font-bold">✕</span>
-                <span><b>Отказы:</b> до 45% пользователей закрывают опрос на середине.</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-red-500 font-bold">✕</span>
-                <span><b>Нет обратной связи:</b> респондент отдаёт данные, не получая ничего взамен.</span>
-              </li>
-            </ul>
+            <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.9rem; color: var(--text-muted);">
+              <div>• <b>Высокий отток:</b> до 45% пользователей закрывают опрос, не дойдя до конца.</div>
+              <div>• <b>Скучный UX:</b> длинные списки радиокнопок вызывают «баннерную слепоту».</div>
+              <div>• <b>Односторонний обмен:</b> респондент тратит время, не получая ничего полезного.</div>
+              <div>• <b>Рутина автора:</b> составление вопросов вручную отнимает часы.</div>
+            </div>
           </div>
-          <div class="mt-4 p-3 bg-red-100/60 rounded-xl text-xs font-semibold text-red-800 text-center">
-            Результат: искаженные выборки и низкая конверсия
+          <div style="padding: 12px; background: rgba(239, 68, 68, 0.15); border-radius: 12px; text-align: center; color: #EF4444; font-weight: 700; font-size: 0.85rem;">
+            Итог: низкое качество ответов и пустые выборки
           </div>
         </div>
 
-        <!-- Колонка решения Lumi -->
-        <div class="feature-card border-[var(--sage)] bg-[var(--sage-subtle)] flex flex-col justify-between">
+        <!-- Card 2: Lumi -->
+        <div class="card-3d anim-fade delay-3" style="border-color: var(--sage-glow); background: rgba(62, 139, 117, 0.08); display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <div class="flex items-center gap-2 text-[var(--sage)] font-bold mb-3">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              <span>Инновационный подход Lumi</span>
+            <div style="display: flex; align-items: center; gap: 8px; color: var(--sage-glow); font-weight: 800; margin-bottom: 14px; font-size: 1.1rem;">
+              <span>✓</span> Инновационный ответ Lumi
             </div>
-            <ul class="space-y-3 text-sm text-[var(--text-dark)]">
-              <li class="flex items-start gap-2">
-                <span class="text-[var(--sage)] font-bold">✓</span>
-                <span><b>Геймификация:</b> свайпы как в Tinder, шкала эмоций и звёзды.</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-[var(--sage)] font-bold">✓</span>
-                <span><b>Доходимость 85%+:</b> интерактив удерживает внимание до конца.</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-[var(--sage)] font-bold">✓</span>
-                <span><b>Карточка-итог:</b> мгновенное сравнение: <i>«Вы ответили так же, как 78%»</i>.</span>
-              </li>
-            </ul>
+            <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.9rem;">
+              <div>• 🎮 <b>Геймификация:</b> свайп-карточки, термометр эмоций и звёздные рейтинги.</div>
+              <div>• 📈 <b>Доходимость 85%+:</b> динамический ритм удерживает внимание респондента.</div>
+              <div>• 💡 <b>Мгновенный профит:</b> карточка-итог со сравнением: <i>«Вы ответили как 78% участников»</i>.</div>
+              <div>• 🤖 <b>AI-генератор:</b> проектирование опроса за 1 секунду по текстовой теме.</div>
+            </div>
           </div>
-          <div class="mt-4 p-3 bg-[var(--sage)] text-white rounded-xl text-xs font-bold text-center">
-            Результат: качественные данные и искреннее участие
+          <div style="padding: 12px; background: var(--sage); border-radius: 12px; text-align: center; color: #FFF; font-weight: 700; font-size: 0.85rem;">
+            Итог: вовлечённая аудитория и глубокая искренняя аналитика
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== СЛАЙД 3: ЦЕЛЬ И ЗАДАЧИ ==================== -->
+    <!-- ==================== СЛАЙД 3: ЦЕЛЬ И ЭТАПЫ ==================== -->
     <section class="slide" data-slide="3">
-      <div class="flex items-center justify-between mb-4">
-        <span class="badge badge-sage anim-item">Постановка задачи</span>
-        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">MVT Архитектура</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <span class="badge badge-sage anim-fade">Целеполагание</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Последовательная инженерия</span>
       </div>
 
-      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-3 anim-item anim-delay-1">
-        Цель и этапы разработки проекта
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 14px;">
+        Цель работы и 6 стадий реализации
       </h2>
-      <p class="text-sm text-[var(--text-muted)] mb-6 anim-item anim-delay-2">
-        <b>Цель:</b> создать надёжное, масштабируемое и безопасное веб-приложение для сбора и анализа мнений пользователей с микросервисной интеграцией через REST API.
+      <p class="anim-fade delay-2" style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 24px;">
+        <b>Цель:</b> спроектировать и развернуть отказоустойчивую веб-платформу онлайн-опросов с ролевым доступом, защитой от фальсификаций, AI-помощником и API для внешних клиентов.
       </p>
 
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 flex-1 anim-item anim-delay-3">
-        <div class="feature-card">
-          <div class="w-8 h-8 rounded-lg bg-[var(--sage-subtle)] text-[var(--sage)] flex items-center justify-center font-bold text-sm mb-2">1</div>
-          <h4 class="font-bold text-sm mb-1 text-[var(--text-dark)]">Моделирование БД</h4>
-          <p class="text-xs text-[var(--text-muted)]">6 связанных моделей с защитой от повторного голосования на уровне БД.</p>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; flex: 1;">
+        <div class="card-3d anim-fade delay-2">
+          <div style="color: var(--sage-glow); font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;">01</div>
+          <div style="font-weight: 800; font-size: 1rem; margin-bottom: 4px;">Модели БД</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">6 связанных моделей. Защита уникальности ответов через unique_together.</div>
         </div>
-        <div class="feature-card">
-          <div class="w-8 h-8 rounded-lg bg-[var(--terracotta-light)] text-[var(--terracotta)] flex items-center justify-center font-bold text-sm mb-2">2</div>
-          <h4 class="font-bold text-sm mb-1 text-[var(--text-dark)]">Ролевая система</h4>
-          <p class="text-xs text-[var(--text-muted)]">Разграничение прав: Администратор, Автор, Респондент, защита от IDOR.</p>
+
+        <div class="card-3d anim-fade delay-2">
+          <div style="color: var(--terracotta-glow); font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;">02</div>
+          <div style="font-weight: 800; font-size: 1rem; margin-bottom: 4px;">Роли & Права</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Автор, Респондент, Администратор. Полная защита от атак IDOR.</div>
         </div>
-        <div class="feature-card">
-          <div class="w-8 h-8 rounded-lg bg-[var(--lavender-light)] text-[var(--lavender)] flex items-center justify-center font-bold text-sm mb-2">3</div>
-          <h4 class="font-bold text-sm mb-1 text-[var(--text-dark)]">Геймифицированный UI</h4>
-          <p class="text-xs text-[var(--text-muted)]">Свайп-карточки, термометр эмоций, адаптивная вёрстка под смартфоны.</p>
+
+        <div class="card-3d anim-fade delay-3">
+          <div style="color: var(--lavender-glow); font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;">03</div>
+          <div style="font-weight: 800; font-size: 1rem; margin-bottom: 4px;">Геймификация</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Мобильные свайп-карточки, термометр эмоций (-4..+4), звёздный рейтинг.</div>
         </div>
-        <div class="feature-card">
-          <div class="w-8 h-8 rounded-lg bg-[var(--sage-subtle)] text-[var(--sage)] flex items-center justify-center font-bold text-sm mb-2">4</div>
-          <h4 class="font-bold text-sm mb-1 text-[var(--text-dark)]">Аналитика и экспорт</h4>
-          <p class="text-xs text-[var(--text-muted)]">Визуализация в Chart.js и выгрузка отчётов в CSV с кодировкой UTF-8 BOM для Excel.</p>
+
+        <div class="card-3d anim-fade delay-3">
+          <div style="color: var(--sage-glow); font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;">04</div>
+          <div style="font-weight: 800; font-size: 1rem; margin-bottom: 4px;">Chart.js & CSV</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Интерактивные диаграммы и выгрузка в CSV (UTF-8 BOM для Microsoft Excel).</div>
         </div>
-        <div class="feature-card">
-          <div class="w-8 h-8 rounded-lg bg-[var(--terracotta-light)] text-[var(--terracotta)] flex items-center justify-center font-bold text-sm mb-2">5</div>
-          <h4 class="font-bold text-sm mb-1 text-[var(--text-dark)]">AI Конструктор</h4>
-          <p class="text-xs text-[var(--text-muted)]">Автоматическая генерация 6 разнотипных вопросов по краткой теме.</p>
+
+        <div class="card-3d anim-fade delay-4">
+          <div style="color: var(--terracotta-glow); font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;">05</div>
+          <div style="font-weight: 800; font-size: 1rem; margin-bottom: 4px;">AI Конструктор</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Эвристический синтез 6 разнотипных вопросов по краткому описанию темы.</div>
         </div>
-        <div class="feature-card">
-          <div class="w-8 h-8 rounded-lg bg-[var(--lavender-light)] text-[var(--lavender)] flex items-center justify-center font-bold text-sm mb-2">6</div>
-          <h4 class="font-bold text-sm mb-1 text-[var(--text-dark)]">REST API & Тесты</h4>
-          <p class="text-xs text-[var(--text-muted)]">5 API эндпоинтов (DRF) и 43 автоматизированных Unit-теста.</p>
+
+        <div class="card-3d anim-fade delay-4">
+          <div style="color: var(--lavender-glow); font-size: 1.3rem; font-weight: 900; margin-bottom: 6px;">06</div>
+          <div style="font-weight: 800; font-size: 1rem; margin-bottom: 4px;">REST API & Cloud</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">5 эндпоинтов DRF, 43 теста и публикация на сервере Render.com.</div>
         </div>
       </div>
     </section>
 
     <!-- ==================== СЛАЙД 4: СТЕК ТЕХНОЛОГИЙ ==================== -->
     <section class="slide" data-slide="4">
-      <div class="flex items-center justify-between mb-6">
-        <span class="badge badge-lavender anim-item">Технологический фундамент</span>
-        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">Промышленный стек</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <span class="badge badge-lavender anim-fade">Архитектурный фундамент</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Промышленный стек</span>
       </div>
 
-      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-6 anim-item anim-delay-1">
-        Стек технологий и инструменты разработки
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 24px;">
+        Технологический стек платформы Lumi
       </h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 anim-item anim-delay-2">
-        <div class="feature-card flex flex-col justify-between">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; flex: 1;">
+        <!-- Backend -->
+        <div class="card-3d anim-fade delay-2" style="display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <div class="text-xs font-bold uppercase tracking-wider text-[var(--sage)] mb-2">Backend & API</div>
-            <h3 class="text-xl font-bold mb-3">Django 6.1 + DRF</h3>
-            <ul class="text-xs text-[var(--text-muted)] space-y-2">
-              <li>• Python 3.12+ современный синтаксис</li>
-              <li>• Django ORM с миграциями</li>
-              <li>• Django REST Framework 3.18</li>
-              <li>• Session & Basic Authentication</li>
-              <li>• Безопасный CSRF-контроль</li>
-            </ul>
+            <div class="badge badge-sage" style="margin-bottom: 12px;">Backend Core</div>
+            <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 14px;">Django 6.1 + DRF</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; color: var(--text-muted);">
+              <div>• <b>Python 3.12+</b> (строгая типизация)</div>
+              <div>• <b>Django ORM</b> с транзакционностью</div>
+              <div>• <b>Django REST Framework 3.18</b></div>
+              <div>• <b>CSRF Token</b> & Session/Basic Auth</div>
+              <div>• <b>SQLite 3</b> реляционная СУБД</div>
+            </div>
           </div>
-          <div class="mt-4 pt-3 border-t border-[var(--border-subtle)] text-xs font-semibold text-[var(--sage)]">
-            Надёжный MVT каркас
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--sage-glow); padding-top: 12px; border-top: 1px solid var(--surface-border);">
+            Чистый MVT без перегрузки
           </div>
         </div>
 
-        <div class="feature-card flex flex-col justify-between">
+        <!-- Frontend -->
+        <div class="card-3d anim-fade delay-3" style="display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <div class="text-xs font-bold uppercase tracking-wider text-[var(--terracotta)] mb-2">Frontend & UX</div>
-            <h3 class="text-xl font-bold mb-3">CSS3 + Vanilla JS</h3>
-            <ul class="text-xs text-[var(--text-muted)] space-y-2">
-              <li>• Чистый HTML5 / CSS Variables</li>
-              <li>• Палитра Lumi (шалфей, терракота)</li>
-              <li>• Живая тёмная тема (Dark Theme)</li>
-              <li>• Chart.js для Donut & Bar графиков</li>
-              <li>• Сенсорные жесты для мобильных</li>
-            </ul>
+            <div class="badge badge-terra" style="margin-bottom: 12px;">Frontend & UX</div>
+            <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 14px;">Vanilla JS + CSS3</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; color: var(--text-muted);">
+              <div>• <b>CSS Variables</b> дизайн-система</div>
+              <div>• <b>Touch Events</b> (свайп-жесты)</div>
+              <div>• <b>Chart.js</b> круговые и столбчатые графики</div>
+              <div>• <b>Dark / Light</b> динамическая тема</div>
+              <div>• Мгновенный отклик без SPA-веса</div>
+            </div>
           </div>
-          <div class="mt-4 pt-3 border-t border-[var(--border-subtle)] text-xs font-semibold text-[var(--terracotta)]">
-            Быстрая загрузка без лишнего веса
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--terracotta-glow); padding-top: 12px; border-top: 1px solid var(--surface-border);">
+            100 баллов PageSpeed на смартфонах
           </div>
         </div>
 
-        <div class="feature-card flex flex-col justify-between">
+        <!-- Cloud -->
+        <div class="card-3d anim-fade delay-4" style="display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <div class="text-xs font-bold uppercase tracking-wider text-[var(--lavender)] mb-2">DevOps & Cloud</div>
-            <h3 class="text-xl font-bold mb-3">Gunicorn & Render</h3>
-            <ul class="text-xs text-[var(--text-muted)] space-y-2">
-              <li>• SQLite 3 (транзакционность)</li>
-              <li>• WhiteNoise для сжатия статики</li>
-              <li>• WSGI сервер Gunicorn 27.0</li>
-              <li>• Git CI/CD через GitHub</li>
-              <li>• Публичный HTTPS хостинг Render</li>
-            </ul>
+            <div class="badge badge-lavender" style="margin-bottom: 12px;">Cloud & DevOps</div>
+            <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 14px;">Render + Gunicorn</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; color: var(--text-muted);">
+              <div>• <b>WSGI-сервер Gunicorn 27.0</b></div>
+              <div>• <b>WhiteNoise 6.12</b> (компрессия статики)</div>
+              <div>• <b>GitHub CI/CD</b> авторазвёртывание</div>
+              <div>• <b>build.sh & render.yaml</b> манифесты</div>
+              <div>• Автоматический SSL HTTPS</div>
+            </div>
           </div>
-          <div class="mt-4 pt-3 border-t border-[var(--border-subtle)] text-xs font-semibold text-[var(--lavender)]">
-            Готовность к 24/7 продакшену
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--lavender-glow); padding-top: 12px; border-top: 1px solid var(--surface-border);">
+            Готовность к 24/7 доступности
           </div>
         </div>
       </div>
@@ -462,116 +712,126 @@
 
     <!-- ==================== СЛАЙД 5: МОДЕЛИ ДАННЫХ ==================== -->
     <section class="slide" data-slide="5">
-      <div class="flex items-center justify-between mb-4">
-        <span class="badge badge-sage anim-item">База данных</span>
-        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">Реляционная схема ORM</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <span class="badge badge-sage anim-fade">Структура базы данных</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Целостность ORM</span>
       </div>
 
-      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-4 anim-item anim-delay-1">
-        Архитектура 6 связанных моделей
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 18px;">
+        Архитектура 6 взаимосвязанных моделей
       </h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 anim-item anim-delay-2">
-        <div class="space-y-3">
-          <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--card-bg)]">
-            <div class="flex items-center justify-between font-bold text-sm text-[var(--sage)]">
-              <span>Profile (OneToOne к User)</span>
-              <span class="text-xs px-2 py-0.5 rounded bg-[var(--sage-subtle)]">Роли: author / resp</span>
-            </div>
-            <p class="text-xs text-[var(--text-muted)] mt-1">Автосоздание через Django-сигнал <code>post_save</code>. Хранит язык, тёмную тему и статус уведомлений.</p>
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; flex: 1;">
+        <!-- Flow Schema -->
+        <div class="card-3d anim-fade delay-2" style="display: flex; flex-direction: column; justify-content: space-around;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(62,139,117,0.15); border-radius: 12px; border: 1px solid var(--sage-glow);">
+            <span style="font-weight: 800;">User & Profile</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">OneToOne | Роли: author, respondent</span>
           </div>
 
-          <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--card-bg)]">
-            <div class="flex items-center justify-between font-bold text-sm text-[var(--sage)]">
-              <span>Survey (Опрос)</span>
-              <span class="text-xs px-2 py-0.5 rounded bg-[var(--sage-subtle)]">FK: author</span>
-            </div>
-            <p class="text-xs text-[var(--text-muted)] mt-1">Заголовок, описание, статус (<code>draft</code>, <code>published</code>, <code>closed</code>), счётчик ответов.</p>
+          <div style="text-align: center; color: var(--sage-glow); font-size: 1.2rem;">↓ 1:N (создает опросы)</div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(224,109,68,0.15); border-radius: 12px; border: 1px solid var(--terracotta);">
+            <span style="font-weight: 800;">Survey (Опрос)</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Статусы: draft, published, closed</span>
           </div>
 
-          <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--card-bg)]">
-            <div class="flex items-center justify-between font-bold text-sm text-[var(--sage)]">
-              <span>Question & Choice</span>
-              <span class="text-xs px-2 py-0.5 rounded bg-[var(--sage-subtle)]">6 типов вопросов</span>
+          <div style="text-align: center; color: var(--terracotta); font-size: 1.2rem;">↓ 1:N (содержит вопросы)</div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div style="padding: 10px; background: rgba(142,123,181,0.15); border-radius: 12px; border: 1px solid var(--lavender-glow); text-align: center;">
+              <div style="font-weight: 800; font-size: 0.9rem;">Question & Choice</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">6 типов ответов</div>
             </div>
-            <p class="text-xs text-[var(--text-muted)] mt-1">Порядковый номер <code>order</code>, тип <code>qtype</code>, текст и каскадные варианты ответа.</p>
+            <div style="padding: 10px; background: rgba(62,139,117,0.15); border-radius: 12px; border: 1px solid var(--sage-glow); text-align: center;">
+              <div style="font-weight: 800; font-size: 0.9rem;">Response & Answer</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">Полиморфные ответы</div>
+            </div>
           </div>
         </div>
 
-        <div class="p-3 rounded-xl border border-[var(--terracotta)] bg-[var(--terracotta-light)] flex flex-col justify-between">
+        <!-- Security Highlight -->
+        <div class="card-3d anim-fade delay-3" style="border-color: var(--terracotta); background: rgba(224,109,68,0.06); display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <div class="flex items-center gap-2 font-bold text-sm text-[var(--terracotta)] mb-2">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-              <span>Response & Answer: Защита целостности</span>
-            </div>
-            <p class="text-xs text-[var(--text-dark)] mb-3 leading-relaxed">
-              Модель <b>Response</b> фиксирует факт прохождения опроса. В ней заложено строгое ограничение целостности:
+            <div class="badge badge-terra" style="margin-bottom: 12px;">Защита от накрутки</div>
+            <h4 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 12px;">Ограничение целостности БД</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+              В модели <code>Response</code> заложено жесткое ограничение на уровне ядра базы данных:
             </p>
-            <div class="bg-[var(--card-bg)] p-3 rounded-lg font-mono text-xs text-[var(--text-dark)] border border-[var(--border-subtle)]">
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--surface-border); padding: 12px; border-radius: 12px; font-family: monospace; font-size: 0.85rem; color: var(--terracotta-glow);">
               unique_together = ('survey', 'respondent')
             </div>
-            <p class="text-xs text-[var(--text-muted)] mt-3">
-              Это гарантирует на уровне базы данных: <b>один респондент может пройти опрос строго один раз</b>, исключая накрутки и дубликаты.
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-top: 14px;">
+              Пользователь не может отправить повторный ответ даже при попытке отправить прямой POST-запрос или манипуляции с браузером.
             </p>
           </div>
-          <div class="text-xs font-semibold text-[var(--terracotta)] mt-3">
-            Модель Answer полиморфна: хранит число, текст или FK на Choice.
+          <div style="padding: 10px; background: rgba(62,139,117,0.2); border-radius: 10px; font-size: 0.8rem; font-weight: 700; color: var(--sage-glow); text-align: center;">
+            ✓ Сигнал post_save автоматически создаёт Profile для каждого User
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== СЛАЙД 6: ИНТЕРФЕЙС РЕСПОНДЕНТА ==================== -->
+    <!-- ==================== СЛАЙД 6: ИНТЕРАКТИВНЫЙ ДЕМО-ТРЕНАЖЕР ==================== -->
     <section class="slide" data-slide="6">
-      <div class="flex items-center justify-between mb-4">
-        <span class="badge badge-terracotta anim-item">Геймификация</span>
-        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">Интерактивный UI</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <span class="badge badge-terra anim-fade">Живое демо на слайде</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Попробуйте прямо сейчас!</span>
       </div>
 
-      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-4 anim-item anim-delay-1">
-        Интерактивный опыт прохождения опроса
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 18px;">
+        Геймифицированный интерфейс прохождения
       </h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1 anim-item anim-delay-2">
-        <!-- Свайп карточки -->
-        <div class="feature-card flex flex-col justify-between">
-          <div>
-            <div class="w-10 h-10 rounded-xl bg-[var(--terracotta-light)] text-[var(--terracotta)] flex items-center justify-center font-bold text-lg mb-3">👆</div>
-            <h4 class="font-bold text-base mb-2">Свайп-карточки</h4>
-            <p class="text-xs text-[var(--text-muted)] leading-relaxed">
-              Интуитивный выбор «Да / Нет» смахиванием карточки влево или вправо на телефоне или кнопками на клавиатуре.
-            </p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1;">
+        <!-- Interactive Swipe Card Demo -->
+        <div class="card-3d anim-fade delay-2" style="display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+          <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 800; font-size: 0.9rem;">1. Демо Свайп-Карточки:</span>
+            <span id="swipeCountBadge" class="badge badge-sage">Вопрос 1 / 3</span>
           </div>
-          <div class="p-2.5 bg-[var(--sage-subtle)] rounded-lg text-center font-bold text-xs text-[var(--sage)] mt-3">
-            Swipe Gestures Touch API
+
+          <div class="swipe-arena" style="margin: 12px 0;">
+            <div id="demoSwipeCard" class="swipe-card">
+              <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--terracotta-glow); font-weight: 800;">Swipe Card</div>
+              <div id="demoSwipeText" style="font-size: 1.05rem; font-weight: 800; line-height: 1.4;">
+                «Вам нравится интерактивный формат опросов больше, чем Google Forms?»
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+                <span>← Нет</span>
+                <span>Да →</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; width: 100%;">
+            <button id="swipeNoBtn" class="nav-btn" style="flex: 1; justify-content: center; border-color: rgba(239,68,68,0.4); color: #EF4444;">
+              ✕ Пропустить
+            </button>
+            <button id="swipeYesBtn" class="nav-btn" style="flex: 1; justify-content: center; border-color: var(--sage-glow); color: var(--sage-glow);">
+              ✓ Согласен (+1)
+            </button>
           </div>
         </div>
 
-        <!-- Термометр эмоций -->
-        <div class="feature-card flex flex-col justify-between">
+        <!-- Interactive Emotion Slider Demo -->
+        <div class="card-3d anim-fade delay-3" style="display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <div class="w-10 h-10 rounded-xl bg-[var(--sage-subtle)] text-[var(--sage)] flex items-center justify-center font-bold text-lg mb-3">🌡️</div>
-            <h4 class="font-bold text-base mb-2">Шкала эмоций (-4..+4)</h4>
-            <p class="text-xs text-[var(--text-muted)] leading-relaxed">
-              Ползунок настроения с живой сменой эмодзи (😠 🙁 😐 🙂 🤩) для точной фиксации эмоционального отклика.
+            <div style="font-weight: 800; font-size: 0.9rem; margin-bottom: 8px;">2. Демо Шкалы эмоций (-4..+4):</div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">
+              Двигайте ползунок — эмодзи и настроение меняются динамически:
             </p>
-          </div>
-          <div class="p-2.5 bg-[var(--terracotta-light)] rounded-lg text-center font-bold text-xs text-[var(--terracotta)] mt-3">
-            Динамический эмодзи-отклик
-          </div>
-        </div>
 
-        <!-- Карточка-итог -->
-        <div class="feature-card flex flex-col justify-between border-[var(--lavender)] bg-[var(--lavender-light)]">
-          <div>
-            <div class="w-10 h-10 rounded-xl bg-[var(--lavender)] text-white flex items-center justify-center font-bold text-lg mb-3">🎁</div>
-            <h4 class="font-bold text-base mb-2">Карточка-итог</h4>
-            <p class="text-xs text-[var(--text-muted)] leading-relaxed">
-              Мгновенный персональный отчёт для респондента: <i>«Вы ответили так же, как 78% участников опроса!»</i>.
-            </p>
+            <div style="text-align: center; padding: 18px; background: rgba(0,0,0,0.25); border-radius: 16px; margin-bottom: 16px;">
+              <div id="demoEmoji" style="font-size: 3.5rem; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block;">🤩</div>
+              <div id="demoEmojiLabel" style="font-weight: 800; font-size: 1rem; color: var(--sage-glow); margin-top: 6px;">В полном восторге (+4)</div>
+            </div>
+
+            <input type="range" id="demoRange" min="-4" max="4" value="4" step="1" class="emotion-slider">
           </div>
-          <div class="p-2.5 bg-[var(--lavender)] text-white rounded-lg text-center font-bold text-xs mt-3">
-            Мгновенная персональная ценность
+
+          <div style="padding: 12px; background: rgba(142,123,181,0.15); border: 1px solid var(--lavender-glow); border-radius: 12px; font-size: 0.8rem;">
+            🎁 <b>Карточка-итог:</b> Сразу после опроса респондент видит: <i>«Вы ответили так же, как 78% участников!»</i>.
           </div>
         </div>
       </div>
@@ -579,294 +839,363 @@
 
     <!-- ==================== СЛАЙД 7: АВТОР & AI & АНАЛИТИКА ==================== -->
     <section class="slide" data-slide="7">
-      <div class="flex items-center justify-between mb-4">
-        <span class="badge badge-sage anim-item">Инструменты Автора</span>
-        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">AI Генератор & Аналитика</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <span class="badge badge-sage anim-fade">Инструменты Автора</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">AI Генератор & Аналитика</span>
       </div>
 
-      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-4 anim-item anim-delay-1">
-        Умный конструктор и аналитическая панель
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 18px;">
+        AI-генерация опросов и бизнес-аналитика
       </h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 anim-item anim-delay-2">
-        <div class="feature-card flex flex-col justify-between">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1;">
+        <!-- AI Generator flow -->
+        <div class="card-3d anim-fade delay-2" style="display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <div class="flex items-center gap-2 text-[var(--terracotta)] font-bold text-base mb-2">
-              <span>🤖 Встроенный AI-генератор</span>
-            </div>
-            <p class="text-xs text-[var(--text-muted)] mb-3">
-              Автору достаточно ввести тему (например, <i>«Курс по Django»</i>). Алгоритм классифицирует категорию и автоматически собирает опрос:
+            <div class="badge badge-terra" style="margin-bottom: 12px;">🤖 Встроенный AI-генератор</div>
+            <h4 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 10px;">Создание опроса за 1 секунду</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
+              Автор вводит только тему (например, <i>«Качество онлайн-курса по веб-разработке»</i>). Алгоритм классифицирует тему и строит идеальную структуру:
             </p>
-            <div class="space-y-1.5 text-xs text-[var(--text-dark)] bg-[var(--bg-cream)] p-3 rounded-xl border border-[var(--border-subtle)]">
-              <div>✓ 1 Вопрос со свайпом (быстрый хук)</div>
-              <div>✓ 1 Вопрос с термометром эмоций</div>
-              <div>✓ 1 Вопрос с рейтингом по звёздам</div>
-              <div>✓ 2 Вопроса с выбором вариантов</div>
-              <div>✓ 1 Текстовый вопрос для развёрнутого отзыва</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem;">
+              <div style="padding: 6px 10px; background: rgba(62,139,117,0.15); border-radius: 8px;">✓ 1 Вопрос-свайп (быстрое вовлечение)</div>
+              <div style="padding: 6px 10px; background: rgba(224,109,68,0.15); border-radius: 8px;">✓ 1 Термометр эмоций (-4..+4)</div>
+              <div style="padding: 6px 10px; background: rgba(142,123,181,0.15); border-radius: 8px;">✓ 1 Звёздный рейтинг (оценка полезности)</div>
+              <div style="padding: 6px 10px; background: rgba(62,139,117,0.15); border-radius: 8px;">✓ 2 Вопроса с одиночным и мультивыбором</div>
+              <div style="padding: 6px 10px; background: rgba(224,109,68,0.15); border-radius: 8px;">✓ 1 Текстовое поле для пожеланий</div>
             </div>
           </div>
-          <div class="text-xs text-[var(--terracotta)] font-semibold mt-2">
-            Готов к подключению внешних LLM API
+          <div style="font-size: 0.8rem; color: var(--terracotta-glow); font-weight: 700; margin-top: 10px;">
+            Готов к подключению внешних LLM API через файл surveys/ai.py
           </div>
         </div>
 
-        <div class="feature-card flex flex-col justify-between">
+        <!-- Realtime Analytics Mock -->
+        <div class="card-3d anim-fade delay-3" style="display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <div class="flex items-center gap-2 text-[var(--sage)] font-bold text-base mb-2">
-              <span>📊 Аналитика и экспорт данных</span>
+            <div class="badge badge-sage" style="margin-bottom: 12px;">📊 Аналитика Chart.js</div>
+            <h4 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 14px;">Аналитическая панель в реальном времени</h4>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+              <div style="padding: 14px; background: rgba(0,0,0,0.25); border-radius: 14px; text-align: center;">
+                <div style="font-size: 1.8rem; font-weight: 900; color: var(--sage-glow);">94.2%</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Завершенность</div>
+              </div>
+              <div style="padding: 14px; background: rgba(0,0,0,0.25); border-radius: 14px; text-align: center;">
+                <div style="font-size: 1.8rem; font-weight: 900; color: var(--terracotta-glow);">1 мин 18 с</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Среднее время</div>
+              </div>
             </div>
-            <p class="text-xs text-[var(--text-muted)] mb-3">
-              В режиме реального времени рассчитываются ключевые метрики вовлечённости аудитории:
-            </p>
-            <div class="space-y-2 text-xs">
-              <div class="flex justify-between items-center p-2 rounded-lg bg-[var(--sage-subtle)] text-[var(--sage)] font-semibold">
-                <span>Процент завершенности:</span>
-                <span class="font-bold">94.2%</span>
-              </div>
-              <div class="flex justify-between items-center p-2 rounded-lg bg-[var(--lavender-light)] text-[var(--lavender)] font-semibold">
-                <span>Интерактивные диаграммы:</span>
-                <span class="font-bold">Chart.js Donut & Bar</span>
-              </div>
-              <div class="flex justify-between items-center p-2 rounded-lg bg-[var(--terracotta-light)] text-[var(--terracotta)] font-semibold">
-                <span>Экспорт для Excel:</span>
-                <span class="font-bold">CSV (UTF-8 BOM ; )</span>
-              </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem; color: var(--text-muted);">
+              <div>• <b>Диаграммы Donut & Bar:</b> наглядное распределение мнений.</div>
+              <div>• <b>Экспорт в CSV с UTF-8 BOM:</b> русские буквы в Microsoft Excel открываются без «кракозябр».</div>
             </div>
           </div>
-          <div class="text-xs text-[var(--sage)] font-semibold mt-2">
-            Русский язык в Excel открывается без ошибок
+
+          <div style="padding: 10px; background: rgba(62,139,117,0.15); border-radius: 10px; font-size: 0.8rem; font-weight: 700; color: var(--sage-glow); text-align: center;">
+            ✓ Выгрузка данных в 1 клик для любых отчётов
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== СЛАЙД 8: REST API И БЕЗОПАСНОСТЬ ==================== -->
+    <!-- ==================== СЛАЙД 8: REST API & БЕЗОПАСНОСТЬ ==================== -->
     <section class="slide" data-slide="8">
-      <div class="flex items-center justify-between mb-4">
-        <span class="badge badge-lavender anim-item">REST API & Тестирование</span>
-        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">Безопасность</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <span class="badge badge-lavender anim-fade">REST API & Тесты</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Аудит защищенности</span>
       </div>
 
-      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-4 anim-item anim-delay-1">
-        REST API и автоматизированное тестирование
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 18px;">
+        REST API и 43 автоматических теста
       </h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 anim-item anim-delay-2">
-        <div class="feature-card flex flex-col justify-between">
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; flex: 1;">
+        <!-- API Endpoints -->
+        <div class="card-3d anim-fade delay-2" style="display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <h4 class="font-bold text-sm text-[var(--sage)] mb-3">5 эндпоинтов REST API (DRF)</h4>
-            <div class="space-y-2 font-mono text-xs">
-              <div class="p-2 rounded bg-[var(--bg-cream)] border border-[var(--border-subtle)] flex items-center justify-between">
-                <span><b class="text-blue-600">GET</b> /api/me/</span>
-                <span class="text-[var(--text-muted)]">Профиль</span>
+            <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; color: var(--sage-glow);">
+              5 эндпоинтов Django REST Framework:
+            </h4>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-family: monospace; font-size: 0.8rem;">
+              <div style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; display: flex; justify-content: space-between;">
+                <span><b style="color: #60A5FA;">GET</b> /api/me/</span>
+                <span style="color: var(--text-muted);">Профиль пользователя</span>
               </div>
-              <div class="p-2 rounded bg-[var(--bg-cream)] border border-[var(--border-subtle)] flex items-center justify-between">
-                <span><b class="text-blue-600">GET</b> /api/surveys/</span>
-                <span class="text-[var(--text-muted)]">Каталог</span>
+              <div style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; display: flex; justify-content: space-between;">
+                <span><b style="color: #60A5FA;">GET</b> /api/surveys/</span>
+                <span style="color: var(--text-muted);">Каталог опубликованных</span>
               </div>
-              <div class="p-2 rounded bg-[var(--bg-cream)] border border-[var(--border-subtle)] flex items-center justify-between">
-                <span><b class="text-blue-600">GET</b> /api/surveys/&lt;id&gt;/</span>
-                <span class="text-[var(--text-muted)]">Структура</span>
+              <div style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; display: flex; justify-content: space-between;">
+                <span><b style="color: #60A5FA;">GET</b> /api/surveys/&lt;id&gt;/</span>
+                <span style="color: var(--text-muted);">Детальная структура</span>
               </div>
-              <div class="p-2 rounded bg-[var(--bg-cream)] border border-[var(--border-subtle)] flex items-center justify-between">
-                <span><b class="text-green-600">POST</b> /api/surveys/&lt;id&gt;/respond/</span>
-                <span class="text-[var(--text-muted)]">Ответ</span>
+              <div style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; display: flex; justify-content: space-between;">
+                <span><b style="color: #34D399;">POST</b> /api/surveys/&lt;id&gt;/respond/</span>
+                <span style="color: var(--text-muted);">Отправка ответов</span>
               </div>
-              <div class="p-2 rounded bg-[var(--bg-cream)] border border-[var(--border-subtle)] flex items-center justify-between">
-                <span><b class="text-purple-600">GET</b> /api/surveys/&lt;id&gt;/stats/</span>
-                <span class="text-[var(--text-muted)]">Статистика</span>
+              <div style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; display: flex; justify-content: space-between;">
+                <span><b style="color: #A78BFA;">GET</b> /api/surveys/&lt;id&gt;/stats/</span>
+                <span style="color: var(--text-muted);">Только для автора (403)</span>
               </div>
             </div>
           </div>
-          <div class="text-xs text-[var(--text-muted)] mt-2">Сериализация, валидация и Session/Basic Auth</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 10px;">
+            Поддерживает Session и Basic Auth, полную JSON-валидацию входных пакетов.
+          </div>
         </div>
 
-        <div class="feature-card flex flex-col justify-between border-[var(--sage)] bg-[var(--sage-subtle)]">
+        <!-- Security & Tests -->
+        <div class="card-3d anim-fade delay-3" style="border-color: var(--sage-glow); background: rgba(62,139,117,0.08); display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-sm font-bold text-[var(--sage)]">Качество и безопасность</span>
-              <span class="px-2.5 py-1 rounded-full bg-[var(--sage)] text-white text-xs font-bold pulse-glow">43 ТЕСТА OK</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <span style="font-weight: 800; font-size: 1.1rem; color: var(--sage-glow);">Аудит безопасности</span>
+              <span class="badge badge-sage" style="animation: pulseGlow 2s infinite;">43 ТЕСТА ОК</span>
             </div>
-            <ul class="space-y-2 text-xs text-[var(--text-dark)] leading-relaxed">
-              <li>• <b>Защита от IDOR:</b> автор не может изменить чужой опрос (код 403).</li>
-              <li>• <b>CSRF защита:</b> во всех 8 веб-формах и AJAX-запросах.</li>
-              <li>• <b>Кликджекинг:</b> внедрён заголовок <code>X-Frame-Options: DENY</code>.</li>
-              <li>• <b>100% покрытие бизнес-сценариев:</b> авторизация, права, математика аналитики, предотвращение накруток.</li>
-            </ul>
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; line-height: 1.4;">
+              <div>🛡️ <b>Защита от IDOR:</b> автор не может изменить, опубликовать или удалить чужой опрос (статус 403).</div>
+              <div>🔒 <b>CSRF токены:</b> во всех 8 веб-формах платформы и AJAX-запросах.</div>
+              <div>🚫 <b>Anti-Clickjacking:</b> внедрён заголовок <code>X-Frame-Options: DENY</code>.</div>
+              <div>🧪 <b>100% покрытие бизнес-сценариев:</b> авторизация, права, математика аналитики, предотвращение накруток.</div>
+            </div>
           </div>
-          <div class="mt-4 p-2.5 bg-[var(--card-bg)] rounded-xl text-center font-bold text-xs text-[var(--sage)]">
-            python manage.py test — Ran 43 tests (100% Passed)
+          <div style="padding: 10px; background: var(--sage); border-radius: 10px; text-align: center; color: #FFF; font-weight: 800; font-size: 0.85rem;">
+            python manage.py test — Ran 43 tests (OK)
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== СЛАЙД 9: ДЕПЛОЙ И ДЕМО-ДОСТУП ==================== -->
+    <!-- ==================== СЛАЙД 9: ОБЛАЧНЫЙ ДЕПЛОЙ ==================== -->
     <section class="slide" data-slide="9">
-      <div class="flex items-center justify-between mb-4">
-        <span class="badge badge-sage anim-item">Облачная публикация</span>
-        <span class="text-xs font-semibold text-[var(--text-muted)] anim-item">Render.com & GitHub</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <span class="badge badge-sage anim-fade">Промышленный релиз</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Render.com & GitHub</span>
       </div>
 
-      <h2 class="text-3xl font-black text-[var(--text-dark)] mb-4 anim-item anim-delay-1">
-        Развёртывание в облаке и тестовый доступ
+      <h2 class="grad-title anim-fade delay-1" style="font-size: 2.3rem; font-weight: 800; margin-bottom: 18px;">
+        Развёртывание в облаке и демо-доступ
       </h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 anim-item anim-delay-2">
-        <div class="feature-card flex flex-col justify-between">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1;">
+        <div class="card-3d anim-fade delay-2" style="display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <div class="flex items-center gap-2 text-sm font-bold text-[var(--sage)] mb-2">
-              <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
-              <span>Сервис активен в реальном времени</span>
+            <div style="display: flex; align-items: center; gap: 10px; color: #10B981; font-weight: 800; font-size: 1rem; margin-bottom: 12px;">
+              <span style="width: 12px; height: 12px; border-radius: 50%; background: #10B981; display: inline-block; box-shadow: 0 0 10px #10B981;"></span>
+              Статус сервиса: LIVE в сети Интернет
             </div>
-            <p class="text-xs text-[var(--text-muted)] mb-3">
-              Проект опубликован на промышленном хостинге с автоматическим CI/CD пайплайном:
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+              Проект опубликован на облачной платформе Render.com с автоматическим обновлением при каждом коммите в GitHub.
             </p>
-            <div class="space-y-2 text-xs">
-              <div class="p-2.5 rounded-lg bg-[var(--bg-cream)] border border-[var(--border-subtle)]">
-                <div class="text-[var(--text-muted)]">Репозиторий на GitHub:</div>
-                <div class="font-bold text-[var(--sage)]">github.com/aigerim1301/Lumi</div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem;">
+              <div style="padding: 10px; background: rgba(0,0,0,0.25); border-radius: 10px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Репозиторий GitHub:</div>
+                <div style="font-weight: 800; color: var(--sage-glow);">github.com/aigerim1301/Lumi</div>
               </div>
-              <div class="p-2.5 rounded-lg bg-[var(--bg-cream)] border border-[var(--border-subtle)]">
-                <div class="text-[var(--text-muted)]">Хостинг платформы:</div>
-                <div class="font-bold text-[var(--terracotta)]">Render.com (Gunicorn + WhiteNoise)</div>
+              <div style="padding: 10px; background: rgba(0,0,0,0.25); border-radius: 10px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Архитектура запуска:</div>
+                <div style="font-weight: 800; color: var(--terracotta-glow);">Gunicorn WSGI + WhiteNoise + SSL</div>
               </div>
             </div>
           </div>
-          <div class="text-xs font-semibold text-[var(--sage)] mt-2">
-            Доступен с любого устройства и смартфона
+
+          <div style="font-size: 0.8rem; color: var(--text-muted); padding-top: 10px; border-top: 1px solid var(--surface-border);">
+            Доступен с любого устройства: ноутбук, планшет, смартфон
           </div>
         </div>
 
-        <div class="feature-card flex flex-col justify-between">
+        <!-- Credentials Table -->
+        <div class="card-3d anim-fade delay-3" style="display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <h4 class="font-bold text-sm text-[var(--text-dark)] mb-2">Тестовые аккаунты для комиссии:</h4>
-            <div class="space-y-2 text-xs">
-              <div class="p-2 rounded-lg bg-[var(--sage-subtle)] flex justify-between items-center">
+            <div class="badge badge-terra" style="margin-bottom: 10px;">Для экзаменационной комиссии</div>
+            <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 12px;">Готовые тестовые аккаунты:</h4>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem;">
+              <div style="padding: 8px 12px; background: rgba(62,139,117,0.15); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                  <div class="font-bold text-[var(--sage)]">Автор опросов</div>
-                  <div class="text-[var(--text-muted)]">Конструктор, AI, статистика</div>
+                  <div style="font-weight: 800; color: var(--sage-glow);">Автор (Конструктор & AI)</div>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">Управление своими опросами</div>
                 </div>
-                <div class="font-mono text-right font-bold">author<br>AuthorPassword123!</div>
+                <div style="text-align: right; font-family: monospace; font-weight: 700;">author<br>AuthorPassword123!</div>
               </div>
 
-              <div class="p-2 rounded-lg bg-[var(--terracotta-light)] flex justify-between items-center">
+              <div style="padding: 8px 12px; background: rgba(224,109,68,0.15); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                  <div class="font-bold text-[var(--terracotta)]">Респондент</div>
-                  <div class="text-[var(--text-muted)]">Свайпы, шкала, карточка-итог</div>
+                  <div style="font-weight: 800; color: var(--terracotta-glow);">Респондент (Свайпы & Итоги)</div>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">Прохождение опросов</div>
                 </div>
-                <div class="font-mono text-right font-bold">respondent<br>RespondentPassword123!</div>
+                <div style="text-align: right; font-family: monospace; font-weight: 700;">respondent<br>RespondentPassword123!</div>
               </div>
 
-              <div class="p-2 rounded-lg bg-[var(--lavender-light)] flex justify-between items-center">
+              <div style="padding: 8px 12px; background: rgba(142,123,181,0.15); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                  <div class="font-bold text-[var(--lavender)]">Администратор</div>
-                  <div class="text-[var(--text-muted)]">Django Admin (/admin/)</div>
+                  <div style="font-weight: 800; color: var(--lavender-glow);">Администратор (Django Admin)</div>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">Полный аудит всех данных</div>
                 </div>
-                <div class="font-mono text-right font-bold">admin<br>AdminPassword123!</div>
+                <div style="text-align: right; font-family: monospace; font-weight: 700;">admin<br>AdminPassword123!</div>
               </div>
             </div>
+          </div>
+
+          <div style="text-align: center; font-size: 0.8rem; font-weight: 700; color: var(--sage-glow); padding-top: 8px;">
+            Сидер seed_demo автоматически инициализирует данные
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==================== СЛАЙД 10: ЗАКЛЮЧЕНИЕ ==================== -->
+    <!-- ==================== СЛАЙД 10: ЗАКЛЮЧЕНИЕ & САЛЮТ ==================== -->
     <section class="slide" data-slide="10">
-      <div class="flex-1 flex flex-col justify-between text-center items-center py-6">
-        <span class="badge badge-sage anim-item">Итоги работы</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span class="badge badge-sage anim-fade">Финал курсовой работы</span>
+        <button id="confettiBtn" class="tool-btn anim-fade" style="border-color: var(--terracotta); color: var(--terracotta);">
+          🎉 Запустить салют ещё раз!
+        </button>
+      </div>
 
-        <div class="my-auto max-w-2xl anim-item anim-delay-1">
-          <div class="w-16 h-16 rounded-2xl bg-[var(--sage)] text-white text-2xl font-bold flex items-center justify-center mx-auto mb-4 shadow-lg">
-            LU
-          </div>
-          <h2 class="text-4xl font-black text-[var(--text-dark)] mb-3">
-            Цель курсовой работы достигнута!
-          </h2>
-          <p class="text-sm md:text-base text-[var(--text-muted)] leading-relaxed mb-6">
-            Платформа <b>Lumi</b> подтвердила жизнеспособность геймифицированного формата онлайн-опросов. Система готова к практическому использованию учебными заведениями и коммерческими организациями.
-          </p>
-
-          <div class="grid grid-cols-3 gap-4 text-left mb-6">
-            <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-cream)]">
-              <div class="text-xl font-bold text-[var(--sage)]">85%+</div>
-              <div class="text-xs text-[var(--text-muted)]">Прогнозируемая доходимость опросов</div>
-            </div>
-            <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-cream)]">
-              <div class="text-xl font-bold text-[var(--terracotta)]">100%</div>
-              <div class="text-xs text-[var(--text-muted)]">Успех 43 автоматических тестов</div>
-            </div>
-            <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-cream)]">
-              <div class="text-xl font-bold text-[var(--lavender)]">REST</div>
-              <div class="text-xs text-[var(--text-muted)]">Готовность к мобильным клиентам</div>
-            </div>
-          </div>
+      <div style="margin: auto 0; text-align: center;">
+        <div class="brand-icon anim-fade delay-1" style="width: 72px; height: 72px; font-size: 2.2rem; margin: 0 auto 18px; border-radius: 22px;">
+          LU
         </div>
 
-        <div class="pt-4 border-t border-[var(--border-subtle)] w-full flex items-center justify-between anim-item anim-delay-2">
-          <div class="text-xs text-[var(--text-muted)]">Спасибо за внимание!</div>
-          <div class="text-sm font-bold text-[var(--sage)]">Готов(а) ответить на ваши вопросы!</div>
+        <h1 class="grad-title anim-fade delay-2" style="font-size: 3.2rem; font-weight: 900; margin-bottom: 14px;">
+          Цель работы успешно достигнута!
+        </h1>
+        <p class="anim-fade delay-3" style="font-size: 1.15rem; color: var(--text-muted); max-width: 780px; margin: 0 auto 28px; line-height: 1.6;">
+          Платформа <b>Lumi</b> подтвердила высокую вовлеченность пользователей за счёт игровых механик, обеспечивает глубокую аналитику и готова к реальной эксплуатации.
+        </p>
+
+        <div class="anim-fade delay-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; max-width: 780px; margin: 0 auto 28px; text-align: left;">
+          <div class="card-3d" style="padding: 16px;">
+            <div style="font-size: 2rem; font-weight: 900; color: var(--sage-glow);">85%+</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Прогнозируемая доходимость опросов</div>
+          </div>
+          <div class="card-3d" style="padding: 16px;">
+            <div style="font-size: 2rem; font-weight: 900; color: var(--terracotta-glow);">100%</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">43 автоматических теста пройдено</div>
+          </div>
+          <div class="card-3d" style="padding: 16px;">
+            <div style="font-size: 2rem; font-weight: 900; color: var(--lavender-glow);">REST</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Готовность к мобильным клиентам</div>
+          </div>
         </div>
+      </div>
+
+      <div class="anim-fade delay-4" style="display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid var(--surface-border);">
+        <div style="font-size: 0.95rem; color: var(--text-muted);">Спасибо за внимание!</div>
+        <div style="font-size: 1.1rem; font-weight: 900; color: var(--sage-glow);">Готов(а) ответить на ваши вопросы!</div>
       </div>
     </section>
 
   </main>
 
-  <!-- Speaker Notes Drawer (Toggled by 'N' or button) -->
-  <div id="notesDrawer" class="notes-drawer">
-    <div class="flex items-center justify-between mb-2">
-      <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--terracotta)]">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
-        <span>Шпаргалка докладчика (Слайд <span id="notesSlideNum">1</span>)</span>
+  <!-- Speaker Notes Drawer -->
+  <div id="notesDrawer" class="speaker-drawer">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.9rem; color: var(--terracotta-glow); text-transform: uppercase;">
+        <span>📝</span>
+        <span>Шпаргалка докладчика — Слайд <span id="notesSlideNum">1</span></span>
       </div>
-      <button id="closeNotesBtn" class="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-dark)]">✕ Закрыть</button>
+      <button id="closeNotesBtn" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-weight: 700; font-size: 0.9rem;">✕ Закрыть</button>
     </div>
-    <div id="notesContent" class="text-sm text-[var(--text-dark)] leading-relaxed font-normal">
-      <!-- Notes injected dynamically via JS -->
+    <div id="notesText" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main);">
+      <!-- Injected via JS -->
     </div>
   </div>
 
-  <!-- Bottom Navigation Bar -->
-  <footer class="deck-controls">
-    <div class="progress-bar-track">
-      <div id="progressBar" class="progress-bar-fill" style="width: 10%;"></div>
+  <!-- Footer Nav -->
+  <footer>
+    <div class="progress-track">
+      <div id="progressFill" class="progress-fill"></div>
     </div>
 
-    <div class="flex items-center gap-3">
-      <button id="prevBtn" class="px-4 py-2 rounded-xl border border-[var(--border-subtle)] text-xs font-bold hover:bg-[var(--sage)] hover:text-white hover:border-[var(--sage)] transition-all flex items-center gap-1.5">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        <span>Назад</span>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <button id="prevBtn" class="nav-btn">
+        <span>← Назад</span>
       </button>
-
-      <button id="nextBtn" class="px-5 py-2 rounded-xl bg-[var(--sage)] text-white text-xs font-bold hover:bg-[var(--sage-light)] transition-all shadow-sm flex items-center gap-1.5">
-        <span>Вперёд</span>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      <button id="nextBtn" class="nav-btn" style="background: var(--sage); color: #FFF; border-color: var(--sage-glow);">
+        <span>Вперёд →</span>
       </button>
     </div>
 
-    <!-- Slide indicator dots -->
-    <div class="flex items-center gap-1.5" id="dotsContainer">
-      <!-- Dots generated via JS -->
+    <div class="dots-nav" id="dotsContainer">
+      <!-- Injected via JS -->
     </div>
 
-    <div class="text-xs font-bold text-[var(--text-muted)]">
-      Слайд <span id="currentSlideNum" class="text-[var(--text-dark)] text-sm">1</span> из <span id="totalSlidesNum">10</span>
+    <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">
+      Слайд <span id="currentSlideLabel" style="color: var(--text-main); font-size: 1rem;">1</span> / 10
     </div>
   </footer>
 
   <script>
-    // Speaker speeches for each slide
+    // Audio Synthesizer (Web Audio API - 0 external files)
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'slide') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(540, now + 0.12);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'swipe') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(450, now);
+        osc.frequency.exponentialRampToValueAtTime(750, now + 0.15);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'fanfare') {
+        [440, 554, 659, 880].forEach((freq, i) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, now + i * 0.08);
+          g.gain.setValueAtTime(0.1, now + i * 0.08);
+          g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.4);
+          o.start(now + i * 0.08);
+          o.stop(now + i * 0.08 + 0.4);
+        });
+      }
+    }
+
+    // Speeches for all 10 slides
     const speeches = {
-      1: "Уважаемый председатель и члены государственной экзаменационной комиссии! Вашему вниманию представляется курсовая работа на тему «Разработка веб-платформы для проведения интерактивных опросов с элементами геймификации и REST API». Проект получил название Lumi.",
-      2: "Большинство современных инструментов, таких как Google Forms, представляют собой скучные списки полей. Пользователи бросают их (до 45% отказов). Lumi решает это за счёт интерактивной игровой подачи (свайп-карточки, шкала эмоций) и мгновенного сравнительного отчёта для респондента.",
-      3: "Цель работы — спроектировать и разработать веб-приложение по архитектуре MVT с ролевой моделью доступа, визуальной аналитикой и REST API. Были решены 6 ключевых задач: от моделирования базы данных до покрытия тестами и публикации в облаке.",
-      4: "Приложение построено на стеке Python 3.12, Django 6.1 и Django REST Framework. Мы отказались от тяжёлых фреймворков: фронтенд написан на адаптивном чистом JavaScript и Chart.js, что гарантирует мгновенную скорость загрузки страниц на смартфонах.",
-      5: "Реляционная схема включает 6 сущностей. В модели Response заложено строгое ограничение unique_together=('survey', 'respondent'), исключающее накрутку голосов и повторные прохождения на уровне ядра базы данных.",
-      6: "Прохождение опроса интерактивно: респондент свайпает карточки как в мобильных приложениях и регулирует термометр эмоций. После отправки система сразу показывает карточку-итог с процентом совпадения мнения респондента с мнением большинства.",
-      7: "Для авторов создан визуальный конструктор со встроенным AI-генератором, собирающим сбалансированный опрос за 1 секунду по текстовой теме. В аналитической панели графики Chart.js строятся в реальном времени, доступен экспорт в CSV с UTF-8 BOM для Microsoft Excel.",
-      8: "Платформа предоставляет открытый REST API из 5 эндпоинтов (DRF) с поддержкой Session и Basic авторизации. Безопасность подтверждена защитой от CSRF, IDOR и набором из 43 автоматических тестов, проверяющих логику на 100%.",
-      9: "Проект полностью опубликован в промышленной среде на Render.com с сервером Gunicorn и сжатием WhiteNoise, а исходный код размещён на GitHub. Подготовлены тестовые профили для демонстрации комиссии.",
-      10: "В заключение отмечу: цель работы полностью достигнута. Платформа доказала преимущество геймифицированного формата сбора мнений. Готов(а) продемонстрировать работу системы и ответить на ваши вопросы!"
+      1: "Уважаемый председатель и члены экзаменационной комиссии! Вашему вниманию представляется курсовая работа «Разработка веб-платформы для проведения интерактивных опросов с элементами геймификации и REST API» — проект Lumi. Сервис уже развёрнут и доступен онлайн на Render.com.",
+      2: "Большинство существующих сервисов, таких как Google Forms, страдают от монотонности: до 45% респондентов бросают опрос. Lumi решает эту проблему игровыми свайп-механиками, шкалой эмоций и мгновенной карточкой сравнения, поднимая доходимость до 85%+.",
+      3: "Цель работы — проектирование и разработка полноценного MVT-приложения. Мы успешно решили 6 стадий: от проектирования БД и ролей до геймифицированного фронтенда, модуля аналитики, AI-генератора и REST API.",
+      4: "Стек технологий промышленный: современный Django 6.1 с Django REST Framework на бэкенде. Для фронтенда мы сознательно выбрали легковесный чистый JavaScript и Chart.js, что гарантирует мгновенную скорость загрузки на мобильных устройствах без утяжеления фреймворками.",
+      5: "Реляционная модель включает 6 связанных сущностей. В модели Response на уровне базы данных реализовано строгое ограничение unique_together=('survey', 'respondent'), полностью исключающее повторные ответы и накрутку голосов.",
+      6: "Прохождение опроса интерактивно. Респондент взаимодействует со свайп-карточками, как в мобильных приложениях, и шкалой эмоций. Сразу после прохождения генерируется карточка-итог со сравнением мнения пользователя с мнением группы.",
+      7: "Для авторов создан визуальный конструктор с AI-генератором, который по краткой теме за секунду проектирует сбалансированный опрос из 6 разнотипных вопросов. В аналитике графики строятся в реальном времени, а экспорт в CSV поддерживает кодировку Excel без искажений.",
+      8: "Платформа предоставляет открытый REST API из 5 эндпоинтов с аутентификацией. Безопасность подтверждена защитой от IDOR, CSRF и набором из 43 автоматических тестов, которые успешно проходят на 100%.",
+      9: "Проект полностью опубликован в сети на платформе Render.com с сервером Gunicorn и сжатием статики WhiteNoise. Подготовлены готовые демонстрационные аккаунты администратора, автора и респондента для проверки комиссии.",
+      10: "В заключение отмечу: цель курсовой работы полностью достигнута. Платформа Lumi доказала преимущества геймифицированного формата онлайн-опросов. Спасибо за внимание, готов(а) ответить на ваши вопросы!"
     };
 
     let currentSlide = 1;
@@ -875,100 +1204,109 @@
     const slides = document.querySelectorAll('.slide');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
-    const currentSlideNum = document.getElementById('currentSlideNum');
-    const progressBar = document.getElementById('progressBar');
+    const currentSlideLabel = document.getElementById('currentSlideLabel');
+    const progressFill = document.getElementById('progressFill');
     const dotsContainer = document.getElementById('dotsContainer');
     const notesDrawer = document.getElementById('notesDrawer');
-    const notesContent = document.getElementById('notesContent');
+    const notesText = document.getElementById('notesText');
     const notesSlideNum = document.getElementById('notesSlideNum');
-    const toggleNotesBtn = document.getElementById('toggleNotesBtn');
+    const notesBtn = document.getElementById('notesBtn');
     const closeNotesBtn = document.getElementById('closeNotesBtn');
-    const themeToggleBtn = document.getElementById('themeToggleBtn');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const themeBtn = document.getElementById('themeBtn');
+    const fsBtn = document.getElementById('fsBtn');
+    const soundBtn = document.getElementById('soundBtn');
+    const soundIcon = document.getElementById('soundIcon');
+    const laserBtn = document.getElementById('laserBtn');
+    const laserDot = document.getElementById('laserDot');
 
-    // Generate progress dots
+    // Build Dots
     for (let i = 1; i <= totalSlides; i++) {
       const dot = document.createElement('button');
-      dot.className = `w-2 h-2 rounded-full transition-all ${i === 1 ? 'bg-[var(--sage)] w-5' : 'bg-[var(--border-subtle)] hover:bg-[var(--text-muted)]'}`;
-      dot.setAttribute('title', `Слайд ${i}`);
+      dot.className = `dot-btn ${i === 1 ? 'active' : ''}`;
+      dot.title = `Слайд ${i}`;
       dot.addEventListener('click', () => goToSlide(i));
       dotsContainer.appendChild(dot);
     }
 
-    function updateSlide() {
+    function updateView() {
       slides.forEach((s, idx) => {
-        const slideIndex = idx + 1;
-        if (slideIndex === currentSlide) {
+        if (idx + 1 === currentSlide) {
           s.classList.add('active');
         } else {
           s.classList.remove('active');
         }
       });
 
-      // Update counters & progress
-      currentSlideNum.textContent = currentSlide;
-      progressBar.style.width = `${(currentSlide / totalSlides) * 100}%`;
+      currentSlideLabel.textContent = currentSlide;
+      progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
 
-      // Update dots
       const dots = dotsContainer.children;
       for (let i = 0; i < dots.length; i++) {
-        if (i + 1 === currentSlide) {
-          dots[i].className = 'w-5 h-2 rounded-full bg-[var(--sage)] transition-all';
-        } else {
-          dots[i].className = 'w-2 h-2 rounded-full bg-[var(--border-subtle)] hover:bg-[var(--text-muted)] transition-all';
-        }
+        dots[i].className = `dot-btn ${i + 1 === currentSlide ? 'active' : ''}`;
       }
 
-      // Update speech notes
       notesSlideNum.textContent = currentSlide;
-      notesContent.textContent = speeches[currentSlide] || "Текст речи для слайда.";
+      notesText.textContent = speeches[currentSlide] || "";
 
-      // Button states
       prevBtn.disabled = currentSlide === 1;
       prevBtn.style.opacity = currentSlide === 1 ? '0.4' : '1';
-      nextBtn.textContent = currentSlide === totalSlides ? 'Завершить 🎓' : 'Вперёд →';
+      nextBtn.innerHTML = currentSlide === totalSlides ? '<span>Завершить 🎓</span>' : '<span>Вперёд →</span>';
+
+      playSound('slide');
+
+      // Trigger Confetti on slide 10
+      if (currentSlide === 10) {
+        launchConfetti();
+        playSound('fanfare');
+      }
     }
 
     function goToSlide(n) {
       if (n >= 1 && n <= totalSlides) {
         currentSlide = n;
-        updateSlide();
+        updateView();
       }
     }
 
     prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
     nextBtn.addEventListener('click', () => {
-      if (currentSlide < totalSlides) {
-        goToSlide(currentSlide + 1);
-      } else {
-        goToSlide(1);
-      }
+      if (currentSlide < totalSlides) goToSlide(currentSlide + 1);
+      else goToSlide(1);
     });
 
-    // Keyboard navigation
+    // Keyboard Hotkeys
     window.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
         goToSlide(currentSlide + 1);
       } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
         goToSlide(currentSlide - 1);
-      } else if (e.key === 'n' || e.key === 'N' || e.key === 'т' || e.key === 'Т') {
+      } else if (e.key.toLowerCase() === 'n' || e.key.toLowerCase() === 'т') {
         notesDrawer.classList.toggle('open');
-      } else if (e.key === 'f' || e.key === 'F' || e.key === 'а' || e.key === 'А') {
+      } else if (e.key.toLowerCase() === 'f' || e.key.toLowerCase() === 'а') {
         toggleFullscreen();
+      } else if (e.key.toLowerCase() === 'l' || e.key.toLowerCase() === 'д') {
+        toggleLaser();
       }
     });
 
+    // Sound toggle
+    soundBtn.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundIcon.textContent = soundEnabled ? '🔊' : '🔇';
+      soundBtn.querySelector('span:last-child').textContent = soundEnabled ? 'Звук: Вкл' : 'Звук: Выкл';
+    });
+
     // Notes toggle
-    toggleNotesBtn.addEventListener('click', () => notesDrawer.classList.toggle('open'));
+    notesBtn.addEventListener('click', () => notesDrawer.classList.toggle('open'));
     closeNotesBtn.addEventListener('click', () => notesDrawer.classList.remove('open'));
 
-    // Dark theme toggle
-    themeToggleBtn.addEventListener('click', () => {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      if (isDark) {
+    // Theme toggle
+    themeBtn.addEventListener('click', () => {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      if (isLight) {
         document.documentElement.removeAttribute('data-theme');
       } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.setAttribute('data-theme', 'light');
       }
     });
 
@@ -980,10 +1318,184 @@
         if (document.exitFullscreen) document.exitFullscreen();
       }
     }
-    fullscreenBtn.addEventListener('click', toggleFullscreen);
+    fsBtn.addEventListener('click', toggleFullscreen);
 
-    // Initial setup
-    updateSlide();
+    // Laser pointer mode
+    let laserActive = false;
+    function toggleLaser() {
+      laserActive = !laserActive;
+      laserBtn.classList.toggle('active', laserActive);
+      laserDot.style.display = laserActive ? 'block' : 'none';
+    }
+    laserBtn.addEventListener('click', toggleLaser);
+
+    window.addEventListener('mousemove', (e) => {
+      if (laserActive) {
+        laserDot.style.left = e.clientX + 'px';
+        laserDot.style.top = e.clientY + 'px';
+      }
+    });
+
+    // ==================== INTERACTIVE SLIDE 6 DEMOS ====================
+    // 1. Swipe Card Demo
+    const demoCard = document.getElementById('demoSwipeCard');
+    const demoSwipeText = document.getElementById('demoSwipeText');
+    const swipeCountBadge = document.getElementById('swipeCountBadge');
+    const swipeNoBtn = document.getElementById('swipeNoBtn');
+    const swipeYesBtn = document.getElementById('swipeYesBtn');
+
+    const swipeQuestions = [
+      "«Вам нравится интерактивный формат опросов больше, чем Google Forms?»",
+      "«Считаете ли вы шкалу эмоций с эмодзи нагляднее обычных цифр?»",
+      "«Хотели бы вы видеть такую платформу в вашем университете?»"
+    ];
+    let swipeIdx = 0;
+
+    function triggerSwipe(direction) {
+      playSound('swipe');
+      demoCard.classList.add(direction === 'right' ? 'swiped-right' : 'swiped-left');
+      setTimeout(() => {
+        swipeIdx = (swipeIdx + 1) % swipeQuestions.length;
+        demoSwipeText.textContent = swipeQuestions[swipeIdx];
+        swipeCountBadge.textContent = `Вопрос ${swipeIdx + 1} / 3`;
+        demoCard.classList.remove('swiped-left', 'swiped-right');
+      }, 350);
+    }
+    swipeNoBtn.addEventListener('click', () => triggerSwipe('left'));
+    swipeYesBtn.addEventListener('click', () => triggerSwipe('right'));
+
+    // 2. Emotion Slider Demo
+    const demoRange = document.getElementById('demoRange');
+    const demoEmoji = document.getElementById('demoEmoji');
+    const demoEmojiLabel = document.getElementById('demoEmojiLabel');
+
+    const emotionMap = {
+      '-4': { emoji: '🤬', label: 'Крайне возмущён (-4)' },
+      '-3': { emoji: '😡', label: 'Очень недоволен (-3)' },
+      '-2': { emoji: '🙁', label: 'Не понравилось (-2)' },
+      '-1': { emoji: '😕', label: 'Скорее нет (-1)' },
+      '0':  { emoji: '😐', label: 'Нейтрально (0)' },
+      '1':  { emoji: '🙂', label: 'Скорее да (+1)' },
+      '2':  { emoji: '😊', label: 'Хорошо (+2)' },
+      '3':  { emoji: '😃', label: 'Очень понравилось (+3)' },
+      '4':  { emoji: '🤩', label: 'В полном восторге (+4)' }
+    };
+
+    demoRange.addEventListener('input', (e) => {
+      const val = e.target.value;
+      const data = emotionMap[val] || emotionMap['0'];
+      demoEmoji.textContent = data.emoji;
+      demoEmojiLabel.textContent = data.label;
+      demoEmoji.style.transform = `scale(${1 + Math.abs(val) * 0.08}) rotate(${val * 4}deg)`;
+    });
+
+    // ==================== BACKGROUND PARTICLES ====================
+    const bgCanvas = document.getElementById('bgCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    let particles = [];
+
+    function resizeBg() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeBg);
+    resizeBg();
+
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: Math.random() * bgCanvas.width,
+        y: Math.random() * bgCanvas.height,
+        r: Math.random() * 2.5 + 1,
+        dx: (Math.random() - 0.5) * 0.4,
+        dy: (Math.random() - 0.5) * 0.4,
+        color: ['#3E8B75', '#E06D44', '#8E7BB5'][Math.floor(Math.random() * 3)],
+        alpha: Math.random() * 0.4 + 0.1
+      });
+    }
+
+    function renderBg() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      particles.forEach(p => {
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0) p.x = bgCanvas.width;
+        if (p.x > bgCanvas.width) p.x = 0;
+        if (p.y < 0) p.y = bgCanvas.height;
+        if (p.y > bgCanvas.height) p.y = 0;
+
+        bgCtx.beginPath();
+        bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        bgCtx.fillStyle = p.color;
+        bgCtx.globalAlpha = p.alpha;
+        bgCtx.fill();
+      });
+      requestAnimationFrame(renderBg);
+    }
+    renderBg();
+
+    // ==================== CONFETTI SALUTE ====================
+    const cCanvas = document.getElementById('confettiCanvas');
+    const cCtx = cCanvas.getContext('2d');
+    let confetti = [];
+
+    function resizeConfetti() {
+      cCanvas.width = window.innerWidth;
+      cCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeConfetti);
+    resizeConfetti();
+
+    function launchConfetti() {
+      confetti = [];
+      const colors = ['#3E8B75', '#E06D44', '#8E7BB5', '#F0C419', '#FFF'];
+      for (let i = 0; i < 140; i++) {
+        confetti.push({
+          x: cCanvas.width / 2 + (Math.random() - 0.5) * 300,
+          y: cCanvas.height / 2,
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.9) * 18,
+          size: Math.random() * 9 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 10,
+          alpha: 1
+        });
+      }
+    }
+    document.getElementById('confettiBtn').addEventListener('click', () => {
+      launchConfetti();
+      playSound('fanfare');
+    });
+
+    function renderConfetti() {
+      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+      if (confetti.length > 0) {
+        confetti.forEach((p, idx) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35; // gravity
+          p.rotation += p.vRot;
+          p.alpha -= 0.007;
+
+          cCtx.save();
+          cCtx.translate(p.x, p.y);
+          cCtx.rotate((p.rotation * Math.PI) / 180);
+          cCtx.fillStyle = p.color;
+          cCtx.globalAlpha = Math.max(0, p.alpha);
+          cCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
+          cCtx.restore();
+
+          if (p.alpha <= 0) {
+            confetti.splice(idx, 1);
+          }
+        });
+      }
+      requestAnimationFrame(renderConfetti);
+    }
+    renderConfetti();
+
+    // Init first view
+    updateView();
   </script>
 </body>
 </html>
