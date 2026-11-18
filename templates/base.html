@@ -3,7 +3,10 @@
 <html lang="ru" {% if user.is_authenticated and user.profile.dark_theme %}data-theme="dark"{% endif %}>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2D5A4C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>{% block title %}{{ BRAND_NAME }}{% endblock %} — Платформа онлайн-опросов</title>
 
     <!-- Фавикон платформы Lumi -->
@@ -129,7 +132,11 @@
                 {% endif %}
             {% endif %}
 
-            <!-- Нижняя панель навигации для телефонов -->
+            
+        </main>
+    </div>
+
+    <!-- Нижняя панель навигации для телефонов -->
             <nav class="lumi-bottom-nav">
                 <a href="{% url 'survey_list' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'survey_list' %}active{% endif %}">
                     <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-3 7h4m-4 4h4m-6-4h.01M10 16h.01"/></svg>
@@ -164,8 +171,6 @@
                     </a>
                 {% endif %}
             </nav>
-        </main>
-    </div>
 
     <!-- Клиентский скрипт для мгновенного переключения тёмной темы и глазка паролей -->
     <script>

@@ -487,6 +487,10 @@
         <span id="themeIcon">🌓</span>
       </button>
 
+      <button id="qrModalBtn" class="tool-btn" title="Показать QR-код платформы">
+        <span>📱</span>
+        <span>QR-код</span>
+      </button>
       <button id="fsBtn" class="tool-btn" title="Полноэкранный режим [F]">
         <span>⛶</span>
       </button>
@@ -1050,42 +1054,77 @@
     <section class="slide" data-slide="10">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <span class="badge badge-sage anim-fade">Финал курсовой работы</span>
-        <button id="confettiBtn" class="tool-btn anim-fade" style="border-color: var(--terracotta); color: var(--terracotta);">
-          🎉 Запустить салют ещё раз!
+        <button id="confettiBtn" class="tool-btn anim-fade" style="border-color: var(--terracotta); color: var(--terracotta); font-weight: 700;">
+          🎉 Запустить салют!
         </button>
       </div>
 
-      <div style="margin: auto 0; text-align: center;">
-        <div class="brand-icon anim-fade delay-1" style="width: 72px; height: 72px; font-size: 2.2rem; margin: 0 auto 18px; border-radius: 22px;">
-          LU
+      <div style="display: grid; grid-template-columns: 1.25fr 0.95fr; gap: 28px; align-items: center; margin: auto 0;">
+        <!-- Левая колонка: Итоги и метрики -->
+        <div style="text-align: left;">
+          <div class="brand-icon anim-fade delay-1" style="width: 52px; height: 52px; font-size: 1.5rem; margin-bottom: 12px; border-radius: 16px;">
+            LU
+          </div>
+
+          <h1 class="grad-title anim-fade delay-2" style="font-size: 2.7rem; font-weight: 900; line-height: 1.15; margin-bottom: 12px;">
+            Цель работы успешно достигнута!
+          </h1>
+          <p class="anim-fade delay-3" style="font-size: 1.05rem; color: var(--text-muted); line-height: 1.55; margin-bottom: 20px;">
+            Платформа <b>Lumi</b> подтвердила высокую вовлеченность пользователей благодаря геймификации, обеспечивает детальную аналитику и полностью готова к эксплуатации.
+          </p>
+
+          <div class="anim-fade delay-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 22px;">
+            <div class="card-3d" style="padding: 12px 14px;">
+              <div style="font-size: 1.7rem; font-weight: 900; color: var(--sage-glow);">85%+</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3;">Прогнозируемая доходимость</div>
+            </div>
+            <div class="card-3d" style="padding: 12px 14px;">
+              <div style="font-size: 1.7rem; font-weight: 900; color: var(--terracotta-glow);">100%</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3;">43 автотеста успешно</div>
+            </div>
+            <div class="card-3d" style="padding: 12px 14px;">
+              <div style="font-size: 1.7rem; font-weight: 900; color: var(--lavender-glow);">REST</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3;">API для клиентов</div>
+            </div>
+          </div>
+
+          <div class="anim-fade delay-4" style="display: flex; gap: 10px; align-items: center; color: var(--text-muted); font-size: 0.88rem;">
+            <span>🎓 Разработчик: <b>Айгерим</b></span>
+            <span>•</span>
+            <span style="color: var(--sage-glow); font-weight: 700;">Спасибо за внимание!</span>
+          </div>
         </div>
 
-        <h1 class="grad-title anim-fade delay-2" style="font-size: 3.2rem; font-weight: 900; margin-bottom: 14px;">
-          Цель работы успешно достигнута!
-        </h1>
-        <p class="anim-fade delay-3" style="font-size: 1.15rem; color: var(--text-muted); max-width: 780px; margin: 0 auto 28px; line-height: 1.6;">
-          Платформа <b>Lumi</b> подтвердила высокую вовлеченность пользователей за счёт игровых механик, обеспечивает глубокую аналитику и готова к реальной эксплуатации.
-        </p>
+        <!-- Правая колонка: Светящийся стенд с QR-кодом -->
+        <div class="card-3d anim-fade delay-2" style="background: var(--surface-card); border: 2px solid var(--surface-border); border-radius: 24px; padding: 22px 18px; text-align: center; box-shadow: 0 16px 48px rgba(45, 90, 76, 0.25); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(224, 109, 68, 0.35) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+          
+          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; background: rgba(62, 139, 117, 0.15); border: 1px solid var(--sage-glow); color: var(--sage-glow); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px;">
+            <span>📱</span> Живая демо-версия
+          </div>
 
-        <div class="anim-fade delay-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; max-width: 780px; margin: 0 auto 28px; text-align: left;">
-          <div class="card-3d" style="padding: 16px;">
-            <div style="font-size: 2rem; font-weight: 900; color: var(--sage-glow);">85%+</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">Прогнозируемая доходимость опросов</div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 4px;">
+            Пройдите опрос со смартфона
+          </h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+            Наведите камеру любого телефона на QR-код:
+          </p>
+
+          <div style="background: #FFFFFF; padding: 12px; border-radius: 18px; display: inline-block; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); border: 3px solid rgba(62, 139, 117, 0.3);">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAewAAAHsCAYAAAAQKp5gAAALQ0lEQVR4nO3cwZEjNxQFQVIxXqwTusr/g65yYu2APJgVQsTyF5FpAAPTbE4FLu+51loPAGC0P959AADg1wQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAK+HnE//vrz3Uf4KD///mfU97V7ntOfv8v72Xr+094370/rfTvNDRsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAALyW+K3bcnumrZFPG1LedrzqT/PXafPc9vv/ba/98ew9/k0N2wACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAi4bku8vlU7bSvYFvR7n099e3zaeaZ9X6dN+3un/X+bxg0bAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACbIlztd0t5d2t49Nb2dO2vnfZBof/zg0bAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACbIlz9dZ0fXu87vTW+mm3fV+8lxs2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAE2BL/BVvBLfVt89Nb5dO2uOu/x9Pf12nTzsP33LABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASDgui3x+pbyNPUt5Wnb3T7/terv5y7/3z6bGzYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AATkt8Tr27919ec/bbu7btqWdf37ve394Xtu2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEPBca613H+KTnN5SPr2NvOu2reP6VvZp07a4d/m9eD6TuWEDQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0DA17sPMN20beFpW82ez2uf/+nnedv35e99r2nvQ50bNgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABNgSj21x2+ZtPf9d9W3k+vu8+/nT3p9d07bZd/2IP/9dbtgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABDwXGutdx9ismnbudO2zevbxfXnOU19q/m0aVvou6Ztv9/GDRsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAK+3n2ATzNt+7e+LXza6a3jadvL057/rtve5/rfaxv8tdywASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEg4LnWWu8+xGTTtnxvU98unrbdPW0ru27aFrfP/2xu2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEPD1iJu2dXzbVvO07e66+vszbfv6NqefT/3z69ywASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEg4LnWWo+w01vK07adT2/t1s+/y9/7Pdvgr31/pv1+p/1/q/8/Oc0NGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAr7efYDppm1NT9vynea276u+pTxti/u29+G289S5YQNAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQEB+S/z0Vm19u3jX6S1fW8H8Tqd/79M+v/77mvb8p3HDBoAAwQaAAMEGgADBBoAAwQaAAMEGgADBBoAAwQaAAMEGgADBBoAAwQaAgPyW+K5pW7K3bf9OU3/+9e9r2nmmbVNP29a+bdt8GjdsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIeK611uMi07aCd03bCq5//jSn37fTz6f+eznttvf5tJ/D3rfT3LABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASAgvyU+bRvcVvZ7TdsWrm9B3/Z7mbb1Xf97p31+nRs2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEfL37AJ/GFvFnbxHftnU8bSt72ufXz3P6+73t93KaGzYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AATYEn/zFu7p7dzTW8H17ehpz6e+9b17nvrzn/b7nbbFbav8tdywASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgwJb4m7eUbWu/9nnSet/47P8/u+rnP80NGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAp5rrfUIO701fXqrdtpWtu3ilmlbyrdtQU/7/U5z+v/Jrvr75oYNAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABX4+4+jZs/fzT3LbtPO3vnbYdPe33OO33Pu3515/naW7YABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQkN8Sr2/hTnPbNu+07evTz3/3/NPeh2nP57T697Wrfv7T3LABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASAgvyW+67at2mnb19POM+3z69vRp7/faVvfp037fnfVf+/TuGEDQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0DAdVvi9e3iadu5p7evpz3/06Y9n2lb0PX3oX7+Xbd9v6e5YQNAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIAtcX6radvX07aOd88z7fx1057n6fOc/nzv22u5YQNAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIAtcf6X3S3i06ZtF0/bgp52ntucfj717/f0VvnP+Pvphg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAG2xD98e5bP3oKetrVe33aun3/a9jiv5YYNAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQAB122J28LF+9DdNp+2fV3fHq+f/zZu2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEPBca613HwIA+J4bNgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYAPOb7F0xe3lpmz/B1AAAAAElFTkSuQmCC" alt="QR код платформы Lumi" style="width: 175px; height: 175px; display: block; border-radius: 8px;">
           </div>
-          <div class="card-3d" style="padding: 16px;">
-            <div style="font-size: 2rem; font-weight: 900; color: var(--terracotta-glow);">100%</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">43 автоматических теста пройдено</div>
-          </div>
-          <div class="card-3d" style="padding: 16px;">
-            <div style="font-size: 2rem; font-weight: 900; color: var(--lavender-glow);">REST</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">Готовность к мобильным клиентам</div>
+
+          <div style="margin-top: 14px;">
+            <a href="https://lumi-yk31.onrender.com/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, var(--sage), var(--terracotta)); color: #FFF; text-decoration: none; padding: 8px 18px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; box-shadow: 0 4px 14px rgba(45, 90, 76, 0.4);">
+              <span>🔗</span> lumi-yk31.onrender.com <span>↗</span>
+            </a>
           </div>
         </div>
       </div>
 
-      <div class="anim-fade delay-4" style="display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid var(--surface-border);">
-        <div style="font-size: 0.95rem; color: var(--text-muted);">Спасибо за внимание!</div>
-        <div style="font-size: 1.1rem; font-weight: 900; color: var(--sage-glow);">Готов(а) ответить на ваши вопросы!</div>
+      <div class="anim-fade delay-4" style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--surface-border);">
+        <div style="font-size: 0.85rem; color: var(--text-muted);">Курсовая работа • 2026</div>
+        <div style="font-size: 0.95rem; font-weight: 900; color: var(--sage-glow);">Готова ответить на ваши вопросы! 🌟</div>
       </div>
     </section>
 
@@ -1497,5 +1536,30 @@
     // Init first view
     updateView();
   </script>
+
+  <!-- QR Code Modal Dialog -->
+  <div id="qrModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="card-3d" style="background: var(--surface-card); border: 2px solid var(--surface-border); border-radius: 28px; padding: 32px 28px; text-align: center; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative;">
+      <button id="closeQrModalBtn" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">✕</button>
+      
+      <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; background: rgba(62, 139, 117, 0.15); border: 1px solid var(--sage-glow); color: var(--sage-glow); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px;">
+        <span>📱</span> Живая платформа
+      </div>
+
+      <h3 style="font-size: 1.25rem; font-weight: 900; margin-bottom: 6px;">Отсканируйте QR-код</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Наведите камеру смартфона, чтобы пройти опрос на Lumi прямо сейчас:</p>
+
+      <div style="background: #FFFFFF; padding: 14px; border-radius: 20px; display: inline-block; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border: 3px solid rgba(62, 139, 117, 0.3);">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAewAAAHsCAYAAAAQKp5gAAALQ0lEQVR4nO3cwZEjNxQFQVIxXqwTusr/g65yYu2APJgVQsTyF5FpAAPTbE4FLu+51loPAGC0P959AADg1wQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAK+HnE//vrz3Uf4KD///mfU97V7ntOfv8v72Xr+094370/rfTvNDRsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAALyW+K3bcnumrZFPG1LedrzqT/PXafPc9vv/ba/98ew9/k0N2wACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAi4bku8vlU7bSvYFvR7n099e3zaeaZ9X6dN+3un/X+bxg0bAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACbIlztd0t5d2t49Nb2dO2vnfZBof/zg0bAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACbIlz9dZ0fXu87vTW+mm3fV+8lxs2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAE2BL/BVvBLfVt89Nb5dO2uOu/x9Pf12nTzsP33LABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASDgui3x+pbyNPUt5Wnb3T7/terv5y7/3z6bGzYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AATkt8Tr27919ec/bbu7btqWdf37ve394Xtu2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEPBca613H+KTnN5SPr2NvOu2reP6VvZp07a4d/m9eD6TuWEDQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0DA17sPMN20beFpW82ez2uf/+nnedv35e99r2nvQ50bNgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABNgSj21x2+ZtPf9d9W3k+vu8+/nT3p9d07bZd/2IP/9dbtgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABDwXGutdx9ismnbudO2zevbxfXnOU19q/m0aVvou6Ztv9/GDRsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAK+3n2ATzNt+7e+LXza6a3jadvL057/rtve5/rfaxv8tdywASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEg4LnWWu8+xGTTtnxvU98unrbdPW0ru27aFrfP/2xu2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEPD1iJu2dXzbVvO07e66+vszbfv6NqefT/3z69ywASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEg4LnWWo+w01vK07adT2/t1s+/y9/7Pdvgr31/pv1+p/1/q/8/Oc0NGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAr7efYDppm1NT9vynea276u+pTxti/u29+G289S5YQNAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQEB+S/z0Vm19u3jX6S1fW8H8Tqd/79M+v/77mvb8p3HDBoAAwQaAAMEGgADBBoAAwQaAAMEGgADBBoAAwQaAAMEGgADBBoAAwQaAgPyW+K5pW7K3bf9OU3/+9e9r2nmmbVNP29a+bdt8GjdsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIeK611uMi07aCd03bCq5//jSn37fTz6f+eznttvf5tJ/D3rfT3LABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASAgvyU+bRvcVvZ7TdsWrm9B3/Z7mbb1Xf97p31+nRs2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEfL37AJ/GFvFnbxHftnU8bSt72ufXz3P6+73t93KaGzYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AATYEn/zFu7p7dzTW8H17ehpz6e+9b17nvrzn/b7nbbFbav8tdywASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgwJb4m7eUbWu/9nnSet/47P8/u+rnP80NGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAgQbAAIEGwACBBsAAp5rrfUIO701fXqrdtpWtu3ilmlbyrdtQU/7/U5z+v/Jrvr75oYNAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABX4+4+jZs/fzT3LbtPO3vnbYdPe33OO33Pu3515/naW7YABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQkN8Sr2/hTnPbNu+07evTz3/3/NPeh2nP57T697Wrfv7T3LABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASBAsAEgQLABIECwASAgvyW+67at2mnb19POM+3z69vRp7/faVvfp037fnfVf+/TuGEDQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0DAdVvi9e3iadu5p7evpz3/06Y9n2lb0PX3oX7+Xbd9v6e5YQNAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIAtcX6radvX07aOd88z7fx1057n6fOc/nzv22u5YQNAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIBgA0CAYANAgGADQIAtcf6X3S3i06ZtF0/bgp52ntucfj717/f0VvnP+Pvphg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAG2xD98e5bP3oKetrVe33aun3/a9jiv5YYNAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQABgg0AAYINAAGCDQAB122J28LF+9DdNp+2fV3fHq+f/zZu2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAEPBca613HwIA+J4bNgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYABAg2AAQINgAECDYAPOb7F0xe3lpmz/B1AAAAAElFTkSuQmCC" alt="QR-код платформы Lumi" style="width: 200px; height: 200px; display: block; border-radius: 10px;">
+      </div>
+
+      <div style="margin-top: 18px;">
+        <a href="https://lumi-yk31.onrender.com/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, var(--sage), var(--terracotta)); color: #FFF; text-decoration: none; padding: 10px 20px; border-radius: 14px; font-size: 0.9rem; font-weight: 800; box-shadow: 0 4px 16px rgba(45, 90, 76, 0.4);">
+          <span>🔗</span> lumi-yk31.onrender.com <span>↗</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

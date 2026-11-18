@@ -44,7 +44,7 @@
 
     /* Размеры навигации */
     --sidebar-width: 260px;
-    --bottom-nav-height: 68px;
+    --bottom-nav-height: 58px;
     --header-height: 64px;
 }
 
@@ -362,18 +362,23 @@ img {
 .lumi-bottom-nav {
     display: none;
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: var(--bottom-nav-height);
-    background-color: var(--card-bg);
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    z-index: 100;
-    padding: 6px 12px 10px;
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: var(--bottom-nav-height) !important;
+    background-color: var(--card-bg) !important;
+    border-top: 1px solid var(--border-color) !important;
+    z-index: 99999 !important;
+    padding-top: 6px !important;
+    padding-bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important;
+    padding-left: max(8px, env(safe-area-inset-left, 8px)) !important;
+    padding-right: max(8px, env(safe-area-inset-right, 8px)) !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
+    box-sizing: border-box !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
 .bottom-nav-item {
@@ -382,12 +387,15 @@ img {
     align-items: center;
     justify-content: center;
     color: var(--text-muted);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 500;
-    gap: 4px;
-    padding: 4px 8px;
+    gap: 2px;
+    padding: 4px 6px;
     border-radius: var(--radius-sm);
     transition: var(--transition);
+    text-decoration: none;
+    flex: 1;
+    max-width: 86px;
 }
 
 .bottom-nav-item svg {
@@ -819,8 +827,69 @@ img {
     }
 }
 
+
+    /* Дополнительная мобильная адаптация */
+    .lumi-main-content {
+        padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 8px) + 24px) !important;
+    }
+    .home-hero-card {
+        padding: 24px 16px !important;
+        border-radius: var(--radius-md) !important;
+    }
+    .home-hero-logo {
+        max-height: 54px !important;
+        margin-bottom: 12px !important;
+    }
+    .home-hero-title {
+        font-size: 1.45rem !important;
+        margin-bottom: 8px !important;
+    }
+    .home-hero-desc {
+        font-size: 0.88rem !important;
+        line-height: 1.5 !important;
+        margin-bottom: 18px !important;
+    }
+    .home-hero-badges {
+        gap: 6px !important;
+        margin-bottom: 14px !important;
+    }
+    .home-hero-badges .badge {
+        font-size: 0.72rem !important;
+        padding: 4px 10px !important;
+    }
+    .home-hero-actions {
+        flex-direction: column !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+    .home-hero-actions .btn {
+        width: 100% !important;
+        padding: 11px 18px !important;
+        font-size: 0.92rem !important;
+        justify-content: center !important;
+    }
+
+}
+
 @media (min-width: 769px) {
     .lumi-bottom-nav {
         display: none !important;
     }
+}
+
+/* Стили для адаптивного баннера главной страницы */
+.home-hero-card {
+    padding: 42px 32px;
+}
+.home-hero-logo {
+    max-height: 84px;
+    margin-bottom: 20px;
+}
+.home-hero-title {
+    font-size: 2.3rem;
+    margin-bottom: 12px;
+}
+.home-hero-desc {
+    font-size: 1.05rem;
+    margin-bottom: 24px;
 }

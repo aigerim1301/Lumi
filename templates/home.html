@@ -6,12 +6,12 @@
 {% block content %}
 <div style="max-width: 900px; margin: 0 auto; padding: 10px 0 40px 0;">
     <!-- Главный приветственный баннер Lumi -->
-    <div class="lumi-card" style="text-align: center; padding: 48px 32px; border-top: 4px solid var(--accent-primary); position: relative; overflow: hidden;">
+    <div class="lumi-card home-hero-card" style="text-align: center; border-top: 3px solid var(--accent-primary); position: relative; overflow: hidden;">
         <div style="display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px; position: relative;">
-            <img src="{% static 'img/logo.png' %}" alt="{{ BRAND_NAME }}" style="max-height: 96px; width: auto; margin: 0 auto; background: transparent; filter: drop-shadow(0 8px 18px rgba(45,90,76,0.15));">
+            <img src="{% static 'img/logo.png' %}" alt="{{ BRAND_NAME }}" class="home-hero-logo" style="width: auto; margin: 0 auto; background: transparent; filter: drop-shadow(0 8px 18px rgba(45,90,76,0.15));">
         </div>
 
-        <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+        <div class="home-hero-badges" style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
             <span class="badge" style="background-color: var(--accent-primary-light); color: var(--accent-primary); border: 1px solid rgba(45,90,76,0.25); font-weight: 700; padding: 5px 12px; border-radius: 999px; font-size: 0.8rem;">
                 ★ Платформа нового поколения
             </span>
@@ -23,10 +23,10 @@
             </span>
         </div>
 
-        <h1 style="font-size: 2.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px; letter-spacing: -0.02em; line-height: 1.2;">
+        <h1 class="home-hero-title" style="font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.2;">
             Добро пожаловать в {{ BRAND_NAME }}
         </h1>
-        <p style="font-size: 1.1rem; color: var(--text-muted); max-width: 640px; margin: 0 auto 28px; line-height: 1.6;">
+        <p class="home-hero-desc" style="color: var(--text-muted); max-width: 640px; margin: 0 auto 24px; line-height: 1.6;">
             Интерактивная веб-платформа для опросов нового поколения. Мобильные свайп-карточки, живая шкала эмоций, персональные итоги сравнения мнений и автоматическая генерация опросов через AI.
         </p>
 
@@ -44,7 +44,7 @@
             </div>
         {% else %}
             <!-- Кнопки входа и регистрации для гостей -->
-            <div style="display: flex; gap: 14px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
+            <div class="home-hero-actions" style="display: flex; gap: 14px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
                 <a href="{% url 'login' %}" class="btn btn-primary btn-lg" style="padding: 12px 28px; font-weight: 700;">
                     Войти в аккаунт
                 </a>
