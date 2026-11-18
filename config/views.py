@@ -31,13 +31,3 @@ def test_404_view(request):
     """Вспомогательный маршрут для быстрой проверки страницы 404 на защите."""
     raise Http404("Тестовый вызов страницы 404")
 
-
-def presentation_view(request):
-    """Отображение интерактивной презентации курсовой работы."""
-    from django.conf import settings
-    from django.http import FileResponse
-    file_path = settings.BASE_DIR / 'presentation.html'
-    if file_path.exists():
-        return FileResponse(open(file_path, 'rb'), content_type='text/html; charset=utf-8')
-    raise Http404("Файл презентации не найден")
-
