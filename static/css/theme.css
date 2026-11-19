@@ -1230,7 +1230,7 @@ img {
     }
 
     /* Гарантия кликабельности и защиты от горизонтального распирания кнопок */
-    .btn, button, a, .bottom-nav-item {
+    .btn, button, a, .bottom-nav-item, .star-item, .rating-num-btn, .emotion-preset-btn, .choice-card-item {
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         pointer-events: auto !important;
