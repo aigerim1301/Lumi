@@ -175,7 +175,7 @@
                 {% if request.resolver_match.url_name == 'survey_list' %}
                 <a href="{% url 'survey_create' %}" class="fab-create">
                     <svg style="width: 18px; height: 18px; stroke: #FFFFFF; fill: none; stroke-width: 2.5;" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    <span>+ Создать</span>
+                    <span data-i18n="create_short">Создать</span>
                 </a>
                 {% endif %}
             {% endif %}
@@ -224,290 +224,251 @@
         window.LUMI_CSRF = '{{ csrf_token }}';
         window.LUMI_PROFILE_URL = "{% url 'profile' %}";
 
-        // Словарь переводов элементов интерфейса Lumi (Русский, Английский, Кыргызский)
+        // Мгновенное переключение темы (0ms задержка)
+        function toggleThemeQuick() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const nextTheme = isDark ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', nextTheme);
+            localStorage.setItem('lumi-theme', nextTheme);
+            updateThemeIcons(nextTheme);
+
+            const profileToggle = document.getElementById('darkThemeToggle');
+            if (profileToggle) {
+                profileToggle.checked = (nextTheme === 'dark');
+            }
+
+            if (window.LUMI_IS_AUTH) {
+                fetch(window.LUMI_PROFILE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': window.LUMI_CSRF,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ dark_theme: (nextTheme === 'dark') })
+                }).catch(() => {});
+            }
+        }
+
+        // Обновление иконок темы (☀️ / 🌙)
+        function updateThemeIcons(theme) {
+            const indicators = document.querySelectorAll('.theme-icon-indicator');
+            indicators.forEach(el => {
+                el.innerText = (theme === 'dark') ? '🌙' : '☀️';
+            });
+        }
+
+        // LUMI Multilingual Client Engine (RU, EN, KY)
         window.LUMI_TRANSLATIONS = {
         "ru": {
                 "surveys": "Опросы",
                 "builder": "Конструктор",
                 "stats": "Статистика",
                 "profile": "Профиль",
-                "login": "Вход",
-                "register": "Регистрация",
                 "logout": "Выйти",
-                "enter_lumi": "Войти в Lumi",
-                "available_surveys": "Доступные опросы",
-                "available_surveys_desc": "Проходите интересные интерактивные анкеты, оценивайте темы и делитесь мнением",
-                "my_surveys": "Мои опросы",
-                "my_surveys_desc": "Управляйте вашими анкетами, запускайте сбор и смотрите результаты",
-                "create_survey": "+ Создать опрос",
+                "login": "Войти",
+                "register": "Регистрация",
+                "role_author": "Автор опросов",
+                "role_respondent": "Респондент",
+                "role_admin": "Администратор",
+                "author": "Автор",
+                "welcome_back": "С возвращением!",
+                "create_survey": "Создать опрос",
+                "create_short": "Создать",
                 "create_first_survey": "+ Создать первый опрос",
                 "take_survey": "🚀 Пройти опрос",
                 "already_completed": "✓ Вы уже прошли этот опрос",
                 "view_results": "Посмотреть свои итоги",
+                "back_to_surveys": "← Вернуться к опросам",
+                "to_my_profile": "В мой профиль",
+                "next_step": "Далее →",
+                "prev_step": "← Назад",
+                "finish_survey": "🚀 Завершить и узнать результат",
                 "published": "Опубликован",
                 "draft": "Черновик",
                 "closed": "Завершён",
                 "questions": "вопросов",
                 "responses": "ответов",
-                "author": "Автор",
-                "respondent": "Респондент",
-                "administrator": "Администратор",
-                "author_role": "Автор",
-                "welcome_to_lumi": "Добро пожаловать в Lumi",
-                "hero_desc": "Интерактивная веб-платформа для опросов нового поколения. Мобильные свайп-карточки, живая шкала эмоций, персональные итоги сравнения мнений и автоматическая генерация опросов через AI.",
-                "sign_in_btn": "Войти в аккаунт",
-                "register_btn": "Зарегистрироваться",
-                "ai_generator": "AI-генератор опросов",
-                "ai_desc": "Опишите тему (например: «Качество онлайн-курса» или «Оценка нового сайта»), и система сама создаст 6 вопросов со свайпами и эмоциями:",
-                "ai_input_placeholder": "Введите тему опроса...",
-                "ai_generate_btn": "🪄 Сгенерировать",
-                "smart_builder": "Умный конструктор",
                 "filter_all": "Все",
                 "filter_published": "Опубликованные",
                 "filter_draft": "Черновики",
                 "filter_closed": "Завершённые",
-                "next_step": "Далее →",
-                "prev_step": "← Назад",
-                "finish_survey": "🚀 Завершить и узнать результат",
-                "saving_answers": "⏳ Сохраняем ответы...",
+                "my_surveys": "Мои опросы",
+                "my_surveys_desc": "Управляйте вашими анкетами, запускайте сбор и смотрите аналитику результатов",
+                "ai_generator": "AI-генератор опросов",
+                "smart_builder": "Умный конструктор",
+                "ai_desc": "Опишите тему (например: «Качество онлайн-курса» или «Оценка нового сайта»), и система сама создаст 6 вопросов со свайпами и эмоциями:",
+                "ai_input_placeholder": "Введите тему опроса...",
+                "ai_generate_btn": "🪄 Сгенерировать",
+                "available_surveys": "Доступные опросы",
+                "available_surveys_desc": "Проходите интересные интерактивные анкеты, оценивайте темы и делитесь мнением",
+                "click_star_hint": "Нажмите на звезду или кнопку ниже:",
                 "swipe_card_title": "Свайпните карточку",
                 "swipe_card_desc": "Влево — отрицательно, вправо — положительно. Или нажмите кнопки ниже:",
-                "swipe_no": "← Нет / Трудно",
-                "swipe_yes": "Да / Легко →",
                 "swipe_badge_no": "← НЕТ / ТРУДНО",
                 "swipe_badge_yes": "ДА / ЛЕГКО →",
-                "click_star_hint": "Нажмите на звезду или кнопку ниже:",
-                "rate_very_poor": "Очень плохо",
-                "rate_poor": "Плохо",
-                "rate_normal": "Нормально",
-                "rate_good": "Хорошо",
-                "rate_excellent": "Отлично!",
-                "emotion_mood": "Термометр настроения",
-                "emotion_terrible": "Ужасно",
-                "emotion_neutral": "Нейтрально",
-                "emotion_delight": "Восторг!",
+                "swipe_btn_left": "← Нет / Трудно",
+                "swipe_btn_right": "Да / Легко →",
                 "text_answer_placeholder": "Напишите ваш подробный ответ здесь...",
+                "rating_1_lbl": "Очень плохо",
+                "rating_2_lbl": "Плохо",
+                "rating_3_lbl": "Нормально",
+                "rating_4_lbl": "Хорошо",
+                "rating_5_lbl": "Отлично!",
+                "emotion_m4_lbl": "Ужасно",
+                "emotion_m2_lbl": "Плохо",
+                "emotion_0_lbl": "Норма",
+                "emotion_p2_lbl": "Хорошо",
+                "emotion_p4_lbl": "Восторг",
                 "survey_completed_title": "✓ Опрос успешно пройден",
                 "similarity_title": "СХОДСТВО С ДРУГИМИ УЧАСТНИКАМИ",
                 "survey_thanks": "Благодарим за ваше время! Ваш голос сохранён и учтён в общей аналитике.",
                 "comparison_section": "Сравнение ваших ответов со средней статистикой:",
-                "majority_opinion": "👑 Мнение большинства",
                 "your_choice": "Ваш выбор:",
-                "average": "Среднее:",
-                "back_to_surveys": "← Вернуться к опросам",
-                "to_my_profile": "В мой профиль",
-                "pro_plan": "Платный тариф: Pro",
-                "pro_active": "Активен",
-                "pro_desc": "Вам доступны безлимитные опросы, AI-генератор анкет, расширенный экспорт и углублённая аналитика диаграмм.",
-                "save_settings": "Сохранить настройки",
-                "notifications": "Уведомления",
-                "notifications_desc": "Получать оповещения о новых ответах",
-                "dark_theme": "Тёмная тема",
-                "dark_theme_desc": "Комфортная контрастная тема Lumi",
-                "language": "Язык",
-                "language_interface": "Язык интерфейса",
-                "data_export": "Экспорт данных",
-                "download_json": "Скачать JSON",
-                "personal_data": "Личные данные",
-                "first_name": "Имя",
-                "last_name": "Фамилия",
-                "email": "Электронная почта",
-                "login_label": "Имя пользователя (логин)",
-                "password_label": "Пароль",
-                "repeat_password": "Повторите пароль",
-                "choose_role": "Выберите вашу роль в Lumi",
-                "already_have_account": "Уже есть аккаунт в Lumi?",
-                "no_account": "Нет аккаунта в Lumi?"
+                "majority_opinion": "👑 Мнение большинства",
+                "theme_light": "Светлая",
+                "theme_dark": "Тёмная"
         },
         "en": {
                 "surveys": "Surveys",
                 "builder": "Builder",
                 "stats": "Statistics",
                 "profile": "Profile",
-                "login": "Log In",
-                "register": "Register",
                 "logout": "Log Out",
-                "enter_lumi": "Enter Lumi",
-                "available_surveys": "Available Surveys",
-                "available_surveys_desc": "Take engaging interactive surveys, rate topics and share your feedback",
-                "my_surveys": "My Surveys",
-                "my_surveys_desc": "Manage your surveys, collect responses and view analytics",
-                "create_survey": "+ Create Survey",
-                "create_first_survey": "+ Create First Survey",
+                "login": "Log In",
+                "register": "Sign Up",
+                "role_author": "Survey Author",
+                "role_respondent": "Respondent",
+                "role_admin": "Administrator",
+                "author": "Author",
+                "welcome_back": "Welcome back!",
+                "create_survey": "Create survey",
+                "create_short": "Create",
+                "create_first_survey": "+ Create first survey",
                 "take_survey": "🚀 Take Survey",
                 "already_completed": "✓ You have completed this survey",
                 "view_results": "View My Results",
+                "back_to_surveys": "← Back to surveys",
+                "to_my_profile": "To My Profile",
+                "next_step": "Next →",
+                "prev_step": "← Back",
+                "finish_survey": "🚀 Finish and see results",
                 "published": "Published",
                 "draft": "Draft",
                 "closed": "Closed",
                 "questions": "questions",
                 "responses": "responses",
-                "author": "Author",
-                "respondent": "Respondent",
-                "administrator": "Administrator",
-                "author_role": "Author",
-                "welcome_to_lumi": "Welcome to Lumi",
-                "hero_desc": "Next-generation interactive web platform for surveys. Mobile swipe cards, live emotion scale, personal opinion comparison, and AI automated generation.",
-                "sign_in_btn": "Sign In",
-                "register_btn": "Create Account",
-                "ai_generator": "AI Survey Generator",
-                "ai_desc": "Describe your topic (e.g., 'Online course quality' or 'New website evaluation'), and AI will generate 6 questions with swipes and emotions:",
-                "ai_input_placeholder": "Enter survey topic...",
-                "ai_generate_btn": "🪄 Generate",
-                "smart_builder": "Smart Builder",
                 "filter_all": "All",
                 "filter_published": "Published",
                 "filter_draft": "Drafts",
                 "filter_closed": "Closed",
-                "next_step": "Next →",
-                "prev_step": "← Back",
-                "finish_survey": "🚀 Finish and View Results",
-                "saving_answers": "⏳ Saving answers...",
+                "my_surveys": "My Surveys",
+                "my_surveys_desc": "Manage your questionnaires, launch collections and review results analytics",
+                "ai_generator": "AI Survey Generator",
+                "smart_builder": "Smart Builder",
+                "ai_desc": "Describe the topic (e.g. \"Online course quality\" or \"New website feedback\") and AI will craft 6 questions with swipes and emotions:",
+                "ai_input_placeholder": "Enter survey topic...",
+                "ai_generate_btn": "🪄 Generate",
+                "available_surveys": "Available Surveys",
+                "available_surveys_desc": "Take engaging interactive surveys, rate topics and share your feedback",
+                "click_star_hint": "Tap a star or button below:",
                 "swipe_card_title": "Swipe the card",
-                "swipe_card_desc": "Left — negative, right — positive. Or click the buttons below:",
-                "swipe_no": "← No / Hard",
-                "swipe_yes": "Yes / Easy →",
+                "swipe_card_desc": "Left for negative, right for positive. Or use the buttons below:",
                 "swipe_badge_no": "← NO / HARD",
                 "swipe_badge_yes": "YES / EASY →",
-                "click_star_hint": "Click a star or button below:",
-                "rate_very_poor": "Very Poor",
-                "rate_poor": "Poor",
-                "rate_normal": "Normal",
-                "rate_good": "Good",
-                "rate_excellent": "Excellent!",
-                "emotion_mood": "Mood Thermometer",
-                "emotion_terrible": "Terrible",
-                "emotion_neutral": "Neutral",
-                "emotion_delight": "Delight!",
+                "swipe_btn_left": "← No / Hard",
+                "swipe_btn_right": "Yes / Easy →",
                 "text_answer_placeholder": "Write your detailed answer here...",
-                "survey_completed_title": "✓ Survey completed successfully",
+                "rating_1_lbl": "Very poor",
+                "rating_2_lbl": "Poor",
+                "rating_3_lbl": "Average",
+                "rating_4_lbl": "Good",
+                "rating_5_lbl": "Excellent!",
+                "emotion_m4_lbl": "Terrible",
+                "emotion_m2_lbl": "Poor",
+                "emotion_0_lbl": "Neutral",
+                "emotion_p2_lbl": "Good",
+                "emotion_p4_lbl": "Delight",
+                "survey_completed_title": "✓ Survey successfully completed",
                 "similarity_title": "SIMILARITY TO OTHER PARTICIPANTS",
-                "survey_thanks": "Thank you for your time! Your vote is saved and included in general analytics.",
-                "comparison_section": "Comparison of your answers with average statistics:",
-                "majority_opinion": "👑 Majority opinion",
+                "survey_thanks": "Thank you for your time! Your vote is recorded and counted in overall analytics.",
+                "comparison_section": "Comparing your answers with average statistics:",
                 "your_choice": "Your choice:",
-                "average": "Average:",
-                "back_to_surveys": "← Back to Surveys",
-                "to_my_profile": "To My Profile",
-                "pro_plan": "Subscription Plan: Pro",
-                "pro_active": "Active",
-                "pro_desc": "You have access to unlimited surveys, AI questionnaire generator, advanced export and in-depth chart analytics.",
-                "save_settings": "Save Settings",
-                "notifications": "Notifications",
-                "notifications_desc": "Receive alerts about new survey responses",
-                "dark_theme": "Dark Theme",
-                "dark_theme_desc": "Comfortable high-contrast Lumi theme",
-                "language": "Language",
-                "language_interface": "Interface Language",
-                "data_export": "Data Export",
-                "download_json": "Download JSON",
-                "personal_data": "Personal Details",
-                "first_name": "First Name",
-                "last_name": "Last Name",
-                "email": "Email Address",
-                "login_label": "Username",
-                "password_label": "Password",
-                "repeat_password": "Confirm Password",
-                "choose_role": "Choose your role in Lumi",
-                "already_have_account": "Already have a Lumi account?",
-                "no_account": "Don't have an account in Lumi?"
+                "majority_opinion": "👑 Majority opinion",
+                "theme_light": "Light",
+                "theme_dark": "Dark"
         },
         "ky": {
                 "surveys": "Сурамжылоолор",
                 "builder": "Конструктор",
                 "stats": "Статистика",
                 "profile": "Профиль",
+                "logout": "Чыгуу",
                 "login": "Кирүү",
                 "register": "Катталуу",
-                "logout": "Чыгуу",
-                "enter_lumi": "Lumiге кирүү",
-                "available_surveys": "Жеткиликтүү сурамжылоолор",
-                "available_surveys_desc": "Кызыктуу интерактивдүү анкеталарды толтуруңуз, темаларды баалаңыз жана пикириңиз менен бөлүшүңүз",
-                "my_surveys": "Менин сурамжылоолорум",
-                "my_surveys_desc": "Анкеталарыңызды башкарыңыз, жоопторду чогултуңуз жана жыйынтыктарды көрүңүз",
-                "create_survey": "+ Сурамжылоо түзүү",
+                "role_author": "Сурамжылоо автору",
+                "role_respondent": "Респондент",
+                "role_admin": "Администратор",
+                "author": "Автору",
+                "welcome_back": "Кош келиңиз!",
+                "create_survey": "Сурамжылоо түзүү",
+                "create_short": "Түзүү",
                 "create_first_survey": "+ Биринчи сурамжылоону түзүү",
-                "take_survey": "🚀 Сурамжылоону баштоо",
-                "already_completed": "✓ Сиз бул сурамжылоодон өттүңүз",
-                "view_results": "Жыйынтыкты көрүү",
-                "published": "Жарыяланды",
-                "draft": "Долбоор",
-                "closed": "Аяктады",
-                "questions": "суроо",
-                "responses": "жооп",
-                "author": "Автор",
-                "respondent": "Респондент",
-                "administrator": "Администратор",
-                "author_role": "Автор",
-                "welcome_to_lumi": "Lumiге кош келиңиз",
-                "hero_desc": "Жаңы муундагы интерактивдүү веб-сурамжылоо платформасы. Мобилдик свайп-карталар, жандуу сезимдер шкаласы, пикирлерди салыштыруу жана AI аркылуу автоматтык сурамжылоо түзүү.",
-                "sign_in_btn": "Аккаунтка кирүү",
-                "register_btn": "Катталуу",
-                "ai_generator": "AI-сурамжылоо генератору",
-                "ai_desc": "Теманы сүрөттөп жазыңыз (мисалы: «Онлайн-курстун сапаты» же «Жаңы сайтты баалоо»), система 6 суроону свайп жана сезимдер менен түзүп берет:",
-                "ai_input_placeholder": "Сурамжылоонун темасын жазыңыз...",
-                "ai_generate_btn": "🪄 Түзүү",
-                "smart_builder": "Акылдуу конструктор",
-                "filter_all": "Баары",
-                "filter_published": "Жарыялангандар",
-                "filter_draft": "Долбоорлор",
-                "filter_closed": "Аяктагандар",
+                "take_survey": "🚀 Сурамжылоодон өтүү",
+                "already_completed": "✓ Сиз бул сурамжылоодон өткөнсүз",
+                "view_results": "Менин жыйынтыктарымды көрүү",
+                "back_to_surveys": "← Сурамжылоолорго кайтуу",
+                "to_my_profile": "Менин профилиме",
                 "next_step": "Кийинки →",
                 "prev_step": "← Артка",
                 "finish_survey": "🚀 Аяктоо жана жыйынтыкты көрүү",
-                "saving_answers": "⏳ Жооптор сакталууда...",
-                "swipe_card_title": "Картаны свайптаңыз",
+                "published": "Жарыяланган",
+                "draft": "Черновик",
+                "closed": "Аяктаган",
+                "questions": "суроо",
+                "responses": "жооп",
+                "filter_all": "Баары",
+                "filter_published": "Жарыялангандар",
+                "filter_draft": "Черновиктер",
+                "filter_closed": "Аяктагандар",
+                "my_surveys": "Менин сурамжылоолорум",
+                "my_surveys_desc": "Анкеталарыңызды башкарыңыз, жооп чогултууну баштаңыз жана натыйжаларды талдаңыз",
+                "ai_generator": "AI-сурамжылоо генератору",
+                "smart_builder": "Акылдуу конструктор",
+                "ai_desc": "Теманы жазыңыз (мисалы: «Онлайн-курстун сапаты» же «Жаңы сайтты баалоо»), система өзү 6 оюн суроосун түзөт:",
+                "ai_input_placeholder": "Сурамжылоо темасын жазыңыз...",
+                "ai_generate_btn": "🪄 Түзүү",
+                "available_surveys": "Жеткиликтүү сурамжылоолор",
+                "available_surveys_desc": "Кызыктуу интерактивдүү анкеталардан өтүңүз, темаларды баалаңыз жана пикир бөлүшүңүз",
+                "click_star_hint": "Жылдызчаны же төмөнкү баскычты басыңыз:",
+                "swipe_card_title": "Карточканы свайптаңыз",
                 "swipe_card_desc": "Солго — терс, оңго — оң. Же төмөнкү баскычтарды басыңыз:",
-                "swipe_no": "← Жок / Кыйын",
-                "swipe_yes": "Ооба / Оңой →",
                 "swipe_badge_no": "← ЖОК / КЫЙЫН",
                 "swipe_badge_yes": "ООБА / ОҢОЙ →",
-                "click_star_hint": "Жылдызды же төмөнкү баскычты басыңыз:",
-                "rate_very_poor": "Абдан начар",
-                "rate_poor": "Начар",
-                "rate_normal": "Орточо",
-                "rate_good": "Жакшы",
-                "rate_excellent": "Мыкты!",
-                "emotion_mood": "Маанай термометри",
-                "emotion_terrible": "Абдан начар",
-                "emotion_neutral": "Бейтарап",
-                "emotion_delight": "Абдан сонун!",
-                "text_answer_placeholder": "Толук жообуңузду бул жерге жазыңыз...",
+                "swipe_btn_left": "← Жок / Кыйын",
+                "swipe_btn_right": "Ооба / Оңой →",
+                "text_answer_placeholder": "Кененирээк жообуңузду бул жерге жазыңыз...",
+                "rating_1_lbl": "Абдан начар",
+                "rating_2_lbl": "Начар",
+                "rating_3_lbl": "Орточо",
+                "rating_4_lbl": "Жакшы",
+                "rating_5_lbl": "Эң сонун!",
+                "emotion_m4_lbl": "Өтө начар",
+                "emotion_m2_lbl": "Начар",
+                "emotion_0_lbl": "Орточо",
+                "emotion_p2_lbl": "Жакшы",
+                "emotion_p4_lbl": "Абдан жакшы",
                 "survey_completed_title": "✓ Сурамжылоо ийгиликтүү аяктады",
                 "similarity_title": "БАШКА КАТЫШУУЧУЛАР МЕНЕН ОКШОШТУК",
                 "survey_thanks": "Убактыңыз үчүн рахмат! Сиздин добушуңуз сакталды жана жалпы аналитикага киргизилди.",
                 "comparison_section": "Жоопторуңузду орточо статистика менен салыштыруу:",
-                "majority_opinion": "👑 Көпчүлүктүн пикири",
                 "your_choice": "Сиздин тандооңуз:",
-                "average": "Орточо:",
-                "back_to_surveys": "← Сурамжылоолорго кайтуу",
-                "to_my_profile": "Менин профилиме",
-                "pro_plan": "Тарифтик план: Pro",
-                "pro_active": "Активдүү",
-                "pro_desc": "Сизге чексиз сурамжылоолор, AI анкета генератору, кеңейтилген экспорт жана диаграмма аналитикасы жеткиликтүү.",
-                "save_settings": "Жөндөөлөрдү сактоо",
-                "notifications": "Билдирүүлөр",
-                "notifications_desc": "Жаңы жооптор тууралуу билдирүүлөрдү алуу",
-                "dark_theme": "Караңгы тема",
-                "dark_theme_desc": "Lumiнин ыңгайлуу контрасттуу караңгы темасы",
-                "language": "Тил",
-                "language_interface": "Интерфейс тили",
-                "data_export": "Маалыматты экспорттоо",
-                "download_json": "JSON жүктөө",
-                "personal_data": "Жеке маалыматтар",
-                "first_name": "Аты",
-                "last_name": "Фамилиясы",
-                "email": "Электрондук почта",
-                "login_label": "Колдонуучунун аты (логин)",
-                "password_label": "Сыр сөз",
-                "repeat_password": "Сыр сөздү кайталаңыз",
-                "choose_role": "Lumiдеги ролуңузду тандаңыз",
-                "already_have_account": "Lumiде аккаунтуңуз барбы?",
-                "no_account": "Lumiде аккаунтуңуз жокпу?"
+                "majority_opinion": "👑 Көпчүлүктүн пикири",
+                "theme_light": "Ачык",
+                "theme_dark": "Караңгы"
         }
 };
 
-        // База переводов динамического контента платформы (названия опросов, описания, вопросы, варианты, авторы)
         window.LUMI_PHRASE_TRANSLATIONS = {
         "Обратная связь: дизайн и механики Lumi": {
                 "en": "Feedback: Lumi Design & Mechanics",
@@ -541,6 +502,54 @@
                 "en": "Survey generated by Lumi AI assistant on topic: 'Hackathon'. Includes 6 gamified questions (swipe, emotion thermometer, rating, choices, text).",
                 "ky": "Lumi AI-жардамчысы тарабынан «Хакатон» темасында түзүлгөн сурамжылоо. 6 оюн суроосун камтыйт (свайп, маанай термометри, рейтинг, тандоо, текст)."
         },
+        "Было ли вам легко усваивать материал первых модулей?": {
+                "en": "Was it easy for you to grasp the material of the first modules?",
+                "ky": "Биринчи модулдардын материалын өздөштүрүү сизге оңой болдубу?"
+        },
+        "Термометр настроения: насколько уверенно вы чувствуете себя при работе с Django?": {
+                "en": "Mood thermometer: how confident do you feel working with Django?",
+                "ky": "Маанай термометри: Django менен иштөөдө өзүңүздү канчалык ишенимдүү сезесиз?"
+        },
+        "Оцените понятность объяснений наставника от 1 до 5 звёзд": {
+                "en": "Rate the mentor's clarity of explanations from 1 to 5 stars",
+                "ky": "Насаатчынын түшүндүрүүсүнүн тактыгын 1ден 5 жылдызга чейин баалаңыз"
+        },
+        "Какой архитектурный паттерн вам показался самым удобным?": {
+                "en": "Which architectural pattern seemed most convenient to you?",
+                "ky": "Кайсы архитектуралык паттерн сизге эң ыңгайлуу сезилди?"
+        },
+        "Какие темы вы хотите разобрать дополнительно?": {
+                "en": "Which topics would you like to cover additionally?",
+                "ky": "Кайсы темаларды кошумча талдагыңыз келет?"
+        },
+        "Что в обучении понравилось больше всего?": {
+                "en": "What did you like the most about the course?",
+                "ky": "Окууда баарынан эмне жакты?"
+        },
+        "Django MVT (Model-View-Template)": {
+                "en": "Django MVT (Model-View-Template)",
+                "ky": "Django MVT (Model-View-Template)"
+        },
+        "REST API + Frontend": {
+                "en": "REST API + Frontend",
+                "ky": "REST API + Frontend"
+        },
+        "Микросервисы": {
+                "en": "Microservices",
+                "ky": "Микросервистер"
+        },
+        "Тестирование и автотесты": {
+                "en": "Testing and automated tests",
+                "ky": "Тестирлөө жана автотесттер"
+        },
+        "Оптимизация запросов к базе (select_related)": {
+                "en": "Database query optimization (select_related)",
+                "ky": "Маалымат базасына сурамдарды оптималдаштыруу (select_related)"
+        },
+        "Деплой на боевой сервер": {
+                "en": "Deployment to production server",
+                "ky": "Продакшн серверге жайгаштыруу (деплой)"
+        },
         "Оцените цветовую гамму платформы (шалфей, терракота, лаванда)": {
                 "en": "Rate the platform color palette (sage, terracotta, lavender)",
                 "ky": "Платформанын түстөр топтомун баалаңыз (шалфей, терракота, лаванда)"
@@ -569,69 +578,9 @@
                 "en": "Light (warm beige #F7F5F0)",
                 "ky": "Ачык (жылуу бежевый #F7F5F0)"
         },
-        "Светлая (песочный фон #F7F5F0)": {
-                "en": "Light (sand background #F7F5F0)",
-                "ky": "Ачык (кум түстүү фон #F7F5F0)"
-        },
         "Тёмная (глубокий шалфейный #141A18)": {
                 "en": "Dark (deep sage #141A18)",
                 "ky": "Караңгы (терең шалфей #141A18)"
-        },
-        "Тёмная (глубокий хвойный #141A18)": {
-                "en": "Dark (deep pine #141A18)",
-                "ky": "Караңгы (терең ийне жалбырактуу #141A18)"
-        },
-        "Было ли вам легко усваивать материал первых модулей?": {
-                "en": "Was it easy for you to grasp the material of the first modules?",
-                "ky": "Биринчи модулдардын материалын өздөштүрүү сизге оңой болдубу?"
-        },
-        "Как вам интерактивные свайп-карточки?": {
-                "en": "How do you like the interactive swipe cards?",
-                "ky": "Интерактивдүү свайп-карталар сизге кандай таасир калтырды?"
-        },
-        "Термометр настроения: насколько уверенно вы чувствуете себя при работе с Django?": {
-                "en": "Mood thermometer: how confident do you feel working with Django?",
-                "ky": "Маанай термометри: Django менен иштөөдө өзүңүздү канчалык ишенимдүү сезесиз?"
-        },
-        "Оцените понятность объяснений наставника от 1 до 5 звёзд": {
-                "en": "Rate the mentor's clarity of explanations from 1 to 5 stars",
-                "ky": "Насаатчынын түшүндүрүүсүнүн тактыгын 1ден 5 жылдызга чейин баалаңыз"
-        },
-        "Оцените сложность вопросов от 1 до 5 звёзд": {
-                "en": "Rate the difficulty of questions from 1 to 5 stars",
-                "ky": "Суроолордун татаалдыгын 1ден 5 жылдызга чейин баалаңыз"
-        },
-        "Какой архитектурный паттерн вам показался самым удобным?": {
-                "en": "Which architectural pattern seemed most convenient to you?",
-                "ky": "Кайсы архитектуралык паттерн сизге эң ыңгайлуу сезилди?"
-        },
-        "Микросервисы": {
-                "en": "Microservices",
-                "ky": "Микросервистер"
-        },
-        "Другое": {
-                "en": "Other",
-                "ky": "Башка"
-        },
-        "Какие темы вы хотите разобрать дополнительно?": {
-                "en": "Which topics would you like to cover additionally?",
-                "ky": "Кайсы темаларды кошумча талдагыңыз келет?"
-        },
-        "Тестирование и автотесты": {
-                "en": "Testing and automated tests",
-                "ky": "Тестирлөө жана автотесттер"
-        },
-        "Оптимизация запросов к базе (select_related)": {
-                "en": "Database query optimization (select_related)",
-                "ky": "Маалымат базасына сурамдарды оптималдаштыруу (select_related)"
-        },
-        "Деплой на боевой сервер": {
-                "en": "Deployment to production server",
-                "ky": "Продакшн серверге жайгаштыруу (деплой)"
-        },
-        "Что в обучении понравилось больше всего?": {
-                "en": "What did you like the most about the course?",
-                "ky": "Окууда баарынан эмне жакты?"
         },
         "Считаете ли вы тему «День учителя» важной и полезной?": {
                 "en": "Do you consider the 'Teacher's Day' topic important and useful?",
@@ -693,6 +642,14 @@
                 "en": "How do you rate our services?",
                 "ky": "Биздин кызматтарды кандай баалайсыз?"
         },
+        "Свайп вправо (Да / Легко)": {
+                "en": "Swipe right (Yes / Easy)",
+                "ky": "Оңго свайп (Ооба / Оңой)"
+        },
+        "Свайп влево (Нет / Трудно)": {
+                "en": "Swipe left (No / Hard)",
+                "ky": "Солго свайп (Жок / Кыйын)"
+        },
         "Александр Коваленко": {
                 "en": "Aleksandr Kovalenko",
                 "ky": "Александр Коваленко"
@@ -728,66 +685,28 @@
         "Текстовый ответ": {
                 "en": "Text Answer",
                 "ky": "Тексттик жооп"
+        },
+        "Текст": {
+                "en": "Text",
+                "ky": "Текст"
         }
 };
 
-        // Получить текущий выбранный язык
-        function getCurrentLanguage() {
-            return localStorage.getItem('lumi-lang') || document.documentElement.getAttribute('lang') || 'ru';
+        function setLanguage(lang) {
+            changeLanguage(lang);
         }
 
-        // Мгновенное переключение темы (0ms задержка)
-        function toggleThemeQuick() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const nextTheme = isDark ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', nextTheme);
-            localStorage.setItem('lumi-theme', nextTheme);
-            updateThemeIcons(nextTheme);
-
-            const profileToggle = document.getElementById('darkThemeToggle');
-            if (profileToggle) {
-                profileToggle.checked = (nextTheme === 'dark');
-            }
-
-            if (window.LUMI_IS_AUTH) {
-                fetch(window.LUMI_PROFILE_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': window.LUMI_CSRF,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({ dark_theme: (nextTheme === 'dark') })
-                }).catch(() => {});
-            }
-        }
-
-        // Обновление иконок темы (☀️ / 🌙)
-        function updateThemeIcons(theme) {
-            const indicators = document.querySelectorAll('.theme-icon-indicator');
-            indicators.forEach(el => {
-                el.innerText = (theme === 'dark') ? '🌙' : '☀️';
-            });
-        }
-
-        // Мгновенное переключение языка (0ms задержка, переводит весь интерфейс и контент)
         function changeLanguage(lang) {
-            if (!window.LUMI_TRANSLATIONS[lang]) return;
+            if (!['ru', 'en', 'ky'].includes(lang)) lang = 'ru';
             localStorage.setItem('lumi-lang', lang);
-            document.cookie = 'django_language=' + lang + ';path=/;max-age=31536000';
             document.documentElement.setAttribute('lang', lang);
 
-            // Синхронизируем все селекторы языков
-            const selects = document.querySelectorAll('.header-lang-select, #profileLanguageSelect, .sidebar-lang-select, .mobile-lang-select');
-            selects.forEach(s => {
+            // Обновляем селектор языка
+            document.cookie = 'django_language=' + lang + ';path=/;max-age=31536000';
+            document.querySelectorAll('.header-lang-select, #profileLanguageSelect, .sidebar-lang-select, .mobile-lang-select, #langSelect').forEach(s => {
                 if (s.value !== lang) s.value = lang;
             });
-
-            // Мгновенно переводим всю страницу (интерфейс и контент опросов)
-            applyLanguageTranslations(lang);
-
-            // Сохраняем в профиль пользователя в фоне без блокировки
-            if (window.LUMI_IS_AUTH) {
+            if (window.LUMI_IS_AUTH && window.LUMI_PROFILE_URL) {
                 fetch(window.LUMI_PROFILE_URL, {
                     method: 'POST',
                     headers: {
@@ -798,9 +717,13 @@
                     body: JSON.stringify({ language: lang })
                 }).catch(() => {});
             }
+            const sel = document.getElementById('langSelect');
+            if (sel) sel.value = lang;
+
+            // Применяем все переводы
+            applyLanguageTranslations(lang);
         }
 
-        // Полное применение переводов: атрибуты data-i18n + названия опросов + описания + вопросы + счётчики
         function applyLanguageTranslations(lang) {
             const dict = window.LUMI_TRANSLATIONS[lang] || window.LUMI_TRANSLATIONS['ru'];
             if (!dict) return;
@@ -821,23 +744,15 @@
                 }
             });
 
-            // 3. Перевод заголовков, описаний опросов, вопросов и вариантов из базы данных
-            const contentElements = document.querySelectorAll(
-                '.survey-card-heading, .survey-card-text, .author-card-title, ' +
-                '.survey-step h2, .choices-container .choice-card-item span, ' +
-                '#ratingLabel_' + (window.currentQid || ''),
-                '.badge, .author-status-icon'
-            );
-
-            // Также сканируем все заголовки h2 в карточках и описания
+            // 3. Перевод динамического контента базы данных (заголовки опросов, описания, вопросы, варианты ответов, типы вопросов)
             const allContentTargets = document.querySelectorAll(
                 '.survey-card-heading, .survey-card-text, .author-card-title, ' +
-                '.choices-container .choice-card-item span, .survey-step h2, ' +
-                '.rating-num-btn .r-lbl, .emotion-preset-btn .e-lbl'
+                '.survey-result-title, .result-question-title, ' +
+                '.choices-container .choice-card-item span, .survey-step h2, .question-title-heading, ' +
+                '.rating-num-btn .r-lbl, .emotion-preset-btn .e-lbl, .badge[data-orig-text]'
             );
 
             allContentTargets.forEach(el => {
-                // Сохраняем исходный русский текст при первом рендере
                 if (!el.dataset.origText) {
                     el.dataset.origText = el.innerText.trim();
                 }
@@ -853,7 +768,108 @@
                 }
             });
 
-            // 4. Динамические шаблоны: счётчики вопросов и ответов
+            // 4. Карточка результатов (survey_result.html)
+            // А. Ключевой блок: "Вы ответили так же, как X% участников!"
+            document.querySelectorAll('.survey-match-text').forEach(el => {
+                const pct = el.dataset.matchPct || '';
+                if (lang === 'en') {
+                    el.innerText = `You answered similarly to ${pct}% of participants!`;
+                } else if (lang === 'ky') {
+                    el.innerText = `Сиз катышуучулардын ${pct}% сыяктуу жооп бердиңиз!`;
+                } else {
+                    el.innerText = `Вы ответили так же, как ${pct}% участников!`;
+                }
+            });
+
+            // Б. Общее количество участников: "Всего в этом опросе приняли участие: N человек"
+            document.querySelectorAll('.survey-total-text').forEach(el => {
+                const tot = el.dataset.totalResponses || '';
+                if (lang === 'en') {
+                    el.innerHTML = `Total participants in this survey: <b>${tot}</b>`;
+                } else if (lang === 'ky') {
+                    el.innerHTML = `Бул сурамжылоого жалпы <b>${tot} адам</b> катышты`;
+                } else {
+                    el.innerHTML = `Всего в этом опросе приняли участие: <b>${tot} человек</b>`;
+                }
+            });
+
+            // В. Среднее значение: "Среднее: X"
+            document.querySelectorAll('.result-avg-display').forEach(el => {
+                const val = el.dataset.origVal || '';
+                let transVal = val;
+                const m = val.match(/([\d.]+)\s*из\s*5\s*★/i);
+                if (m) {
+                    transVal = lang === 'en' ? `${m[1]} of 5 ★` : (lang === 'ky' ? `5тен ${m[1]} ★` : `${m[1]} из 5 ★`);
+                }
+                if (lang === 'en') el.innerText = `Average: ${transVal}`;
+                else if (lang === 'ky') el.innerText = `Орточо: ${transVal}`;
+                else el.innerText = `Среднее: ${transVal}`;
+            });
+
+            // Г. Текст ответа пользователя: .result-user-display
+            document.querySelectorAll('.result-user-display').forEach(el => {
+                if (!el.dataset.origText) el.dataset.origText = el.innerText.trim();
+                const orig = el.dataset.origText;
+                if (lang === 'ru') {
+                    el.innerText = orig;
+                    return;
+                }
+                // Проверяем рейтинг: "N из 5 ★"
+                const mRating = orig.match(/^(\d+)\s*из\s*5\s*★$/i);
+                if (mRating) {
+                    el.innerText = lang === 'en' ? `${mRating[1]} of 5 ★` : `5тен ${mRating[1]} ★`;
+                    return;
+                }
+                // Точное совпадение в словаре фраз
+                if (window.LUMI_PHRASE_TRANSLATIONS[orig] && window.LUMI_PHRASE_TRANSLATIONS[orig][lang]) {
+                    el.innerText = window.LUMI_PHRASE_TRANSLATIONS[orig][lang];
+                    return;
+                }
+                // Если несколько вариантов через запятую
+                if (orig.includes(',')) {
+                    const parts = orig.split(',').map(s => s.trim());
+                    const translatedParts = parts.map(p => (window.LUMI_PHRASE_TRANSLATIONS[p] && window.LUMI_PHRASE_TRANSLATIONS[p][lang]) ? window.LUMI_PHRASE_TRANSLATIONS[p][lang] : p);
+                    el.innerText = translatedParts.join(', ');
+                    return;
+                }
+                el.innerText = orig;
+            });
+
+            // Д. Сравнение со статистикой: .result-comparison-text
+            document.querySelectorAll('.result-comparison-text').forEach(el => {
+                if (!el.dataset.origText) el.dataset.origText = el.innerText.replace(/^📊\s*/, '').trim();
+                const orig = el.dataset.origText;
+                if (lang === 'ru') {
+                    el.innerText = `📊 ${orig}`;
+                    return;
+                }
+                let trans = orig;
+                let m;
+                if ((m = orig.match(/Так же ответили (\d+)% участников/i))) {
+                    trans = lang === 'en' ? `${m[1]}% of participants answered the same way` : `Катышуучулардын ${m[1]}% ушундай жооп берди`;
+                } else if ((m = orig.match(/(\d+)% участников выбрали этот же вариант/i))) {
+                    trans = lang === 'en' ? `${m[1]}% of participants chose this option` : `Катышуучулардын ${m[1]}% ушул вариантты тандады`;
+                } else if ((m = orig.match(/Близко к среднему значению участников \(([^)]+)\)/i))) {
+                    trans = lang === 'en' ? `Close to the participants' average (${m[1]})` : `Катышуучулардын орточо көрсөткүчүнө жакын (${m[1]})`;
+                } else if ((m = orig.match(/Выше среднего балла \(([^)]+)\)/i))) {
+                    trans = lang === 'en' ? `Above average rating (${m[1]})` : `Орточо баллдан жогору (${m[1]})`;
+                } else if ((m = orig.match(/Ниже среднего балла \(([^)]+)\)/i))) {
+                    trans = lang === 'en' ? `Below average rating (${m[1]})` : `Орточо баллдан төмөн (${m[1]})`;
+                } else if ((m = orig.match(/Ваше настроение совпадает со средним по группе \(([^)]+)\)/i))) {
+                    trans = lang === 'en' ? `Your mood matches the group average (${m[1]})` : `Сиздин маанайыңыз топтун орточосуна дал келет (${m[1]})`;
+                } else if ((m = orig.match(/Ваш настрой оптимистичнее среднего \(([^)]+)\)/i))) {
+                    trans = lang === 'en' ? `Your mood is more optimistic than average (${m[1]})` : `Сиздин маанайыңыз орточодон оптимисттик (${m[1]})`;
+                } else if ((m = orig.match(/Ваша оценка строже средней по группе \(([^)]+)\)/i))) {
+                    trans = lang === 'en' ? `Your rating is stricter than the group average (${m[1]})` : `Сиздин бааңыз топтун орточосунан катуураак (${m[1]})`;
+                } else if ((m = orig.match(/Выбрано вариантов:\s*(\d+)/i))) {
+                    trans = lang === 'en' ? `Options selected: ${m[1]}` : `Тандалган варианттар: ${m[1]}`;
+                } else if (orig.includes('Текстовый отзыв учтён автором')) {
+                    trans = lang === 'en' ? 'Text feedback noted by author' : 'Тексттик пикир автор тарабынан эске алынды';
+                }
+                el.innerText = `📊 ${trans}`;
+            });
+
+            // 5. Динамические шаблоны: счётчики вопросов и ответов
             // А. "⏱️ N вопросов" -> "⏱️ N questions" / "⏱️ N суроо"
             document.querySelectorAll('.survey-meta-pill').forEach(el => {
                 if (!el.dataset.origHtml) el.dataset.origHtml = el.innerHTML;
@@ -878,7 +894,7 @@
                 }
             });
 
-            // В. "Вопрос N из M" в прохождении опроса
+            // В. "Вопрос N из M" в шапке прохождения опроса
             const progTxt = document.getElementById('progressText');
             if (progTxt) {
                 const m = progTxt.innerText.match(/(\d+)\s*(?:из|of|\/)\s*(\d+)/i);
@@ -946,11 +962,11 @@
             if (!currentLang) {
                 currentLang = document.documentElement.getAttribute('lang') || 'ru';
             }
-            if (window.LUMI_TRANSLATIONS[currentLang]) {
+            if (window.LUMI_TRANSLATIONS && window.LUMI_TRANSLATIONS[currentLang]) {
                 changeLanguage(currentLang);
             }
 
-            // Универсальный переключатель видимости пароля (глазок)
+            { // Универсальный переключатель видимости пароля (глазок)
             document.addEventListener('click', function(e) {
                 const btn = e.target.closest('.password-toggle-btn');
                 if (!btn) return;
@@ -977,6 +993,7 @@
                     btn.setAttribute('aria-label', 'Показать пароль');
                 }
             });
+            }
         });
 
     </script>

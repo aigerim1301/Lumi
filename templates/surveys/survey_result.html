@@ -12,7 +12,7 @@
             <span data-i18n="survey_completed_title">✓ Опрос успешно пройден</span>
         </span>
 
-        <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px; line-height: 1.3;">
+        <h1 class="survey-result-title" data-orig-text="{{ survey.title }}" style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px; line-height: 1.3;">
             {{ survey.title }}
         </h1>
 
@@ -24,10 +24,10 @@
             <div style="font-size: 3rem; font-weight: 900; color: var(--accent-primary); line-height: 1.1;">
                 {{ overall_match_pct }}%
             </div>
-            <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-top: 6px;">
+            <div class="survey-match-text" data-match-pct="{{ overall_match_pct }}" style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-top: 6px;">
                 Вы ответили так же, как {{ overall_match_pct }}% участников!
             </div>
-            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+            <div class="survey-total-text" data-total-responses="{{ total_responses }}" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
                 Всего в этом опросе приняли участие: <b>{{ total_responses }} человек</b>
             </div>
         </div>
@@ -46,11 +46,11 @@
         {% for item in summary_items %}
         <div class="lumi-card" style="margin-bottom: 0; padding: 20px 22px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
-                <div style="font-weight: 700; font-size: 1rem; color: var(--text-primary); line-height: 1.35;">
+                <div class="result-question-title" data-orig-text="{{ item.question_text }}" style="font-weight: 700; font-size: 1rem; color: var(--text-primary); line-height: 1.35;">
                     {{ item.question_text }}
                 </div>
                 {% if item.is_majority %}
-                <span class="badge badge-published" style="flex-shrink: 0;">
+                <span class="badge badge-published" data-i18n="majority_opinion" style="flex-shrink: 0;">
                     👑 Мнение большинства
                 </span>
                 {% endif %}
@@ -60,15 +60,15 @@
                 <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 2px;">
                     <span data-i18n="your_choice">Ваш выбор:</span>
                 </div>
-                <div style="font-size: 1.05rem; font-weight: 700; color: var(--accent-primary);">
+                <div class="result-user-display" data-orig-text="{{ item.user_display }}" style="font-size: 1.05rem; font-weight: 700; color: var(--accent-primary);">
                     {{ item.user_display }}
                 </div>
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-muted); padding: 0 4px;">
-                <span>📊 {{ item.comparison_text }}</span>
+                <span class="result-comparison-text" data-orig-text="{{ item.comparison_text }}">📊 {{ item.comparison_text }}</span>
                 {% if item.avg_display %}
-                <span style="font-weight: 600; color: var(--accent-secondary);">Среднее: {{ item.avg_display }}</span>
+                <span class="result-avg-display" data-orig-val="{{ item.avg_display }}" style="font-weight: 600; color: var(--accent-secondary);">Среднее: {{ item.avg_display }}</span>
                 {% endif %}
             </div>
         </div>

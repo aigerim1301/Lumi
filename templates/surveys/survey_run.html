@@ -477,23 +477,23 @@
                         <div class="rating-buttons-grid" id="ratingBtns_{{ q.id }}">
                             <button type="button" class="rating-num-btn" data-val="1" onclick="setRating('{{ q.id }}', 1)">
                                 <span class="r-num">1</span>
-                                <span class="r-lbl">Очень плохо</span>
+                                <span class="r-lbl" data-i18n="rating_1_lbl">Очень плохо</span>
                             </button>
                             <button type="button" class="rating-num-btn" data-val="2" onclick="setRating('{{ q.id }}', 2)">
                                 <span class="r-num">2</span>
-                                <span class="r-lbl">Плохо</span>
+                                <span class="r-lbl" data-i18n="rating_2_lbl">Плохо</span>
                             </button>
                             <button type="button" class="rating-num-btn" data-val="3" onclick="setRating('{{ q.id }}', 3)">
                                 <span class="r-num">3</span>
-                                <span class="r-lbl">Нормально</span>
+                                <span class="r-lbl" data-i18n="rating_3_lbl">Нормально</span>
                             </button>
                             <button type="button" class="rating-num-btn" data-val="4" onclick="setRating('{{ q.id }}', 4)">
                                 <span class="r-num">4</span>
-                                <span class="r-lbl">Хорошо</span>
+                                <span class="r-lbl" data-i18n="rating_4_lbl">Хорошо</span>
                             </button>
                             <button type="button" class="rating-num-btn" data-val="5" onclick="setRating('{{ q.id }}', 5)">
                                 <span class="r-num">5</span>
-                                <span class="r-lbl">Отлично!</span>
+                                <span class="r-lbl" data-i18n="rating_5_lbl">Отлично!</span>
                             </button>
                         </div>
                     </div>
@@ -523,7 +523,7 @@
                             <button type="button" class="emotion-preset-btn" data-val="-4" onclick="updateEmotion('{{ q.id }}', -4)">
                                 <span class="e-emoji">🥶</span>
                                 <span class="e-val">-4°C</span>
-                                <span class="e-lbl">Ужасно</span>
+                                <span class="e-lbl" data-i18n="emotion_m4_lbl">Ужасно</span>
                             </button>
                             <button type="button" class="emotion-preset-btn" data-val="-2" onclick="updateEmotion('{{ q.id }}', -2)">
                                 <span class="e-emoji">🙁</span>
@@ -533,7 +533,7 @@
                             <button type="button" class="emotion-preset-btn active" data-val="0" onclick="updateEmotion('{{ q.id }}', 0)">
                                 <span class="e-emoji">😐</span>
                                 <span class="e-val">0°C</span>
-                                <span class="e-lbl">Норма</span>
+                                <span class="e-lbl" data-i18n="emotion_0_lbl">Норма</span>
                             </button>
                             <button type="button" class="emotion-preset-btn" data-val="2" onclick="updateEmotion('{{ q.id }}', 2)">
                                 <span class="e-emoji">🙂</span>
@@ -543,7 +543,7 @@
                             <button type="button" class="emotion-preset-btn" data-val="4" onclick="updateEmotion('{{ q.id }}', 4)">
                                 <span class="e-emoji">😍</span>
                                 <span class="e-val">+4°C</span>
-                                <span class="e-lbl">Восторг</span>
+                                <span class="e-lbl" data-i18n="emotion_p4_lbl">Восторг</span>
                             </button>
                         </div>
                     </div>
@@ -570,17 +570,17 @@
                     <!-- Кнопки выбора для ПК и удобства -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px;">
                         <button type="button" class="btn btn-secondary btn-lg" onclick="makeSwipeChoice('{{ q.id }}', -1)" style="border-color: var(--accent-secondary); color: var(--accent-secondary); padding: 14px; font-weight: 700; touch-action: manipulation;">
-                            ← Нет / Трудно
+                            <span data-i18n="swipe_btn_left">← Нет / Трудно</span>
                         </button>
                         <button type="button" class="btn btn-primary btn-lg" onclick="makeSwipeChoice('{{ q.id }}', 1)" style="padding: 14px; font-weight: 700; touch-action: manipulation;">
-                            Да / Легко →
+                            <span data-i18n="swipe_btn_right">Да / Легко →</span>
                         </button>
                     </div>
 
                 {% elif q.qtype == 'text' %}
                     <!-- Текстовый ввод -->
                     <div class="form-group" style="margin-bottom: 0;">
-                        <textarea class="form-control" name="q_{{ q.id }}" id="input_text_{{ q.id }}" rows="4" placeholder="Напишите ваш подробный ответ здесь..." style="font-size: 1rem; resize: vertical;"></textarea>
+                        <textarea class="form-control" name="q_{{ q.id }}" id="input_text_{{ q.id }}" rows="4" placeholder="Напишите ваш подробный ответ здесь..." data-i18n-placeholder="text_answer_placeholder" style="font-size: 1rem; resize: vertical;"></textarea>
                     </div>
                 {% endif %}
             </div>

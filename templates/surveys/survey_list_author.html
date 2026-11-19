@@ -17,7 +17,7 @@
         </div>
         <a href="{% url 'survey_create' %}" class="btn btn-primary author-header-create-btn">
             <svg style="width: 18px; height: 18px; stroke: #FFFFFF; fill: none; stroke-width: 2.5;" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span data-i18n="create_survey">+ Создать опрос</span>
+            <span data-i18n="create_survey">Создать опрос</span>
         </a>
     </div>
 
@@ -132,8 +132,8 @@
             <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">
                 Создайте свой первый опрос с игровым интерфейсом или сгенерируйте его через AI-помощника.
             </p>
-            <a href="{% url 'survey_create' %}" class="btn btn-primary" data-i18n="create_first_survey">
-                + Создать первый опрос
+            <a href="{% url 'survey_create' %}" class="btn btn-primary">
+                <span data-i18n="create_first_survey">+ Создать первый опрос</span>
             </a>
         </div>
     {% endif %}
