@@ -28,11 +28,11 @@
 
                 <!-- Основной контент: заголовок и описание на всю ширину -->
                 <div class="survey-card-body-block">
-                    <h2 class="survey-card-heading">
+                    <h2 class="survey-card-heading" data-orig-text="{{ item.survey.title }}">
                         {{ item.survey.title }}
                     </h2>
                     {% if item.survey.description %}
-                    <p class="survey-card-text">
+                    <p class="survey-card-text" data-orig-text="{{ item.survey.description }}">
                         {{ item.survey.description }}
                     </p>
                     {% endif %}

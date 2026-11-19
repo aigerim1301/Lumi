@@ -79,7 +79,7 @@
 
                     <!-- Информация об опросе -->
                     <div class="author-card-info">
-                        <a href="{% url 'survey_builder' survey.pk %}" class="author-card-title">
+                        <a href="{% url 'survey_builder' survey.pk %}" class="author-card-title" data-orig-text="{{ survey.title }}">
                             {{ survey.title }}
                         </a>
                         <div class="author-card-meta">

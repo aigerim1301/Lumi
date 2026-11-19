@@ -421,7 +421,7 @@
                     </span>
                 </div>
 
-                <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 22px; line-height: 1.35;">
+                <h2 class="question-title-heading" style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 22px; line-height: 1.35;" data-orig-text="{{ q.text }}">
                     {{ q.text }}
                 </h2>
 
@@ -469,7 +469,7 @@
                         </div>
 
                         <!-- Подпись текущей оценки -->
-                        <div id="ratingLabel_{{ q.id }}" style="font-weight: 700; font-size: 1.05rem; color: var(--text-muted); margin-bottom: 12px; transition: color 0.15s ease;">
+                        <div id="ratingLabel_{{ q.id }}" class="rating-status-lbl" data-i18n="click_star_hint" style="font-weight: 700; font-size: 1.05rem; color: var(--text-muted); margin-bottom: 12px; transition: color 0.15s ease;">
                             Нажмите на звезду или кнопку ниже:
                         </div>
 
@@ -554,14 +554,14 @@
                         <input type="hidden" name="q_{{ q.id }}" id="input_swipe_{{ q.id }}" value="">
                         
                         <div class="swipe-card" id="swipeCard_{{ q.id }}">
-                            <div class="swipe-badge-left" id="badgeLeft_{{ q.id }}">← НЕТ / ТРУДНО</div>
-                            <div class="swipe-badge-right" id="badgeRight_{{ q.id }}">ДА / ЛЕГКО →</div>
+                            <div class="swipe-badge-left" id="badgeLeft_{{ q.id }}" data-i18n="swipe_badge_no">← НЕТ / ТРУДНО</div>
+                            <div class="swipe-badge-right" id="badgeRight_{{ q.id }}" data-i18n="swipe_badge_yes">ДА / ЛЕГКО →</div>
                             
                             <div style="font-size: 3rem; margin-bottom: 12px;">👆</div>
-                            <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+                            <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;" data-i18n="swipe_card_title">
                                 Свайпните карточку
                             </div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                            <div style="font-size: 0.85rem; color: var(--text-muted);" data-i18n="swipe_card_desc">
                                 Влево — отрицательно, вправо — положительно. Или нажмите кнопки ниже:
                             </div>
                         </div>
