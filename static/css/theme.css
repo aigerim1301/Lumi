@@ -868,53 +868,458 @@ img {
 }
 
 /* ==========================================================================
+   Компоненты списков опросов (Респондент и Автор) и Главной страницы
+   ========================================================================== */
+
+/* Карточка опроса в кабинете респондента */
+.respondent-survey-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px 28px;
+    margin-bottom: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.respondent-survey-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+.survey-card-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.survey-meta-pill {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+.survey-meta-responses {
+    margin-left: auto;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+.survey-card-body-block {
+    width: 100%;
+}
+.survey-card-heading {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.35;
+    margin-bottom: 6px;
+    word-break: break-word;
+}
+.survey-card-text {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
+    margin-bottom: 0;
+    word-break: break-word;
+}
+.survey-card-footer-info {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+    margin-top: 2px;
+}
+.survey-card-action-bar {
+    margin-top: 6px;
+    width: 100%;
+}
+.survey-start-btn {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Шапка кабинета автора */
+.author-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.author-header-create-btn {
+    padding: 10px 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* AI генератор в кабинете автора */
+.ai-generator-card {
+    background: linear-gradient(135deg, var(--card-bg) 0%, var(--accent-tertiary-light) 100%);
+    border: 1.5px dashed var(--accent-tertiary);
+    padding: 20px;
+    margin-bottom: 24px;
+}
+.ai-generator-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.ai-generator-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ai-generator-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    line-height: 1.45;
+}
+.ai-generator-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.ai-input-field {
+    flex: 1 1 200px;
+    min-width: 0;
+    width: 100%;
+}
+.ai-submit-btn {
+    background-color: var(--accent-tertiary);
+    border-color: var(--accent-tertiary);
+}
+
+/* Вкладки фильтрации статусов */
+.filter-tabs-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-width: 100%;
+    width: 100%;
+    min-width: 0;
+}
+.filter-tabs-row::-webkit-scrollbar {
+    display: none;
+}
+.filter-tabs-row .btn {
+    border-radius: var(--radius-pill);
+    white-space: nowrap !important;
+    flex-shrink: 0;
+}
+
+/* Карточки опросов автора */
+.author-survey-card {
+    margin-bottom: 0;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.author-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    width: 100%;
+    min-width: 0;
+}
+.author-status-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.author-status-icon.icon-published {
+    background-color: var(--accent-primary-light);
+    color: var(--accent-primary);
+}
+.author-status-icon.icon-draft {
+    background-color: var(--accent-tertiary-light);
+    color: var(--accent-tertiary);
+}
+.author-status-icon.icon-closed {
+    background-color: var(--accent-secondary-light);
+    color: var(--accent-secondary);
+}
+.author-card-info {
+    flex: 1;
+    min-width: 0;
+}
+.author-card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    line-height: 1.35;
+    display: block;
+    word-break: break-word;
+}
+.author-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+    font-size: 0.85rem;
+    flex-wrap: wrap;
+}
+.author-card-subtext {
+    color: var(--text-muted);
+}
+.author-card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+    width: 100%;
+}
+.author-response-badge {
+    background-color: var(--accent-tertiary-light);
+    color: var(--accent-tertiary);
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+}
+.author-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Главная страница: сетки и бейджи */
+.home-hero-card {
+    padding: 42px 32px;
+}
+.home-hero-logo {
+    max-height: 84px;
+    margin-bottom: 20px;
+}
+.home-hero-title {
+    font-size: 2.3rem;
+    margin-bottom: 12px;
+}
+.home-hero-desc {
+    font-size: 1.05rem;
+    margin-bottom: 24px;
+}
+.home-hero-badges {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+.home-hero-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.home-hero-btn {
+    padding: 12px 28px;
+    font-weight: 700;
+}
+.user-welcome-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 24px;
+    background-color: var(--accent-primary-light);
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--accent-primary);
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+}
+.demo-accounts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.demo-creds {
+    font-size: 0.82rem;
+    font-weight: 600;
+    word-break: break-all;
+}
+
+/* ==========================================================================
    Адаптивность для мобильных телефонов (Mobile First)
    ========================================================================== */
 @media (max-width: 768px) {
 
     /* Оптимизация производительности на мобильных (устранение лагов скролла) */
     html, body {
-        background-attachment: scroll !important; /* Ускоряет скролл в 5 раз, браузер не перерисовывает градиенты на каждом кадре */
+        background-attachment: scroll !important;
+        overflow-x: hidden !important;
+        width: 100% !important;
+        max-width: 100vw !important;
     }
 
     .lumi-app::before,
     .lumi-app::after {
-        display: none !important; /* Отключаем тяжелые 50px Gaussian blur фильтры на смартфонах */
-    }
-
-    .fab-create {
-        display: none !important; /* Скрываем плавающую кнопку на телефонах: внизу уже есть таб 'Конструктор' и вверху кнопка '+ Создать опрос', поэтому плавающая кнопка больше не перекрывает вкладки и не 'плывет' */
-    }
-
-    .lumi-sidebar {
-        display: none; /* Скрываем боковое меню на мобильных экранах */
-    }
-
-    .lumi-main-content {
-        margin-left: 0;
-        padding-bottom: calc(var(--bottom-nav-height) + 20px); /* Место для нижней панели */
-    }
-
-    .lumi-mobile-header {
-        display: flex; /* Показываем мобильную шапку */
-    }
-
-    .lumi-bottom-nav {
-        display: flex; /* Показываем нижнюю панель навигации */
-    }
-
-    .lumi-container {
-        padding: 16px;
+        display: none !important;
     }
 
     .fab-create {
         display: none !important;
     }
 
-    /* Дополнительная мобильная адаптация */
+    .lumi-sidebar {
+        display: none;
+    }
+
     .lumi-main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
         padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 12px) + 36px) !important;
     }
+
+    .lumi-mobile-header {
+        display: flex !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        box-sizing: border-box !important;
+        padding: 0 14px !important;
+    }
+
+    .lumi-bottom-nav {
+        display: flex !important;
+    }
+
+    .lumi-container {
+        padding: 14px 12px 28px !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    .lumi-card {
+        padding: 18px 14px !important;
+        border-radius: var(--radius-md) !important;
+        margin-bottom: 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Гарантия кликабельности и защиты от горизонтального распирания кнопок */
+    .btn, button, a, .bottom-nav-item {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        pointer-events: auto !important;
+        cursor: pointer;
+    }
+    .btn:not(.btn-sm):not(.filter-tabs-row .btn) {
+        white-space: normal !important;
+        word-break: break-word;
+    }
+
+    /* Адаптация карточки респондента */
+    .respondent-survey-card {
+        padding: 18px 14px !important;
+        gap: 10px !important;
+    }
+    .survey-card-heading {
+        font-size: 1.18rem !important;
+        line-height: 1.35 !important;
+    }
+    .survey-card-text {
+        font-size: 0.88rem !important;
+        line-height: 1.4 !important;
+    }
+    .survey-start-btn {
+        width: 100% !important;
+        font-size: 0.95rem !important;
+        padding: 12px 16px !important;
+    }
+
+    /* Адаптация кабинета автора */
+    .author-header-flex {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+    .author-header-create-btn {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 12px 18px !important;
+    }
+    .ai-generator-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+    }
+    .ai-generator-form {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    .ai-submit-btn {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 11px 16px !important;
+    }
+    .author-survey-card {
+        padding: 16px 14px !important;
+    }
+    .author-card-top {
+        gap: 10px !important;
+    }
+    .author-status-icon {
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 10px !important;
+    }
+    .author-status-icon svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+    .author-card-title {
+        font-size: 1.05rem !important;
+    }
+    .author-card-bottom {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+    .author-actions-group {
+        width: 100% !important;
+        justify-content: space-between !important;
+    }
+    .author-actions-group .btn {
+        flex: 1 !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 8px 10px !important;
+    }
+
+    /* Главная страница на смартфонах */
     .home-hero-card {
         padding: 24px 16px !important;
         border-radius: var(--radius-md) !important;
@@ -945,19 +1350,30 @@ img {
         gap: 10px !important;
         width: 100% !important;
     }
-    .home-hero-actions .btn {
+    .home-hero-btn {
         width: 100% !important;
-        padding: 11px 18px !important;
-        font-size: 0.92rem !important;
+        padding: 12px 16px !important;
+        font-size: 0.95rem !important;
         justify-content: center !important;
     }
-
-    /* Гарантия кликабельности всех кнопок и ссылок */
-    .btn, button, a, .bottom-nav-item {
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-        pointer-events: auto !important;
-        cursor: pointer;
+    .features-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    .demo-accounts-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+    .user-welcome-chip {
+        flex-direction: column !important;
+        text-align: center !important;
+        padding: 12px 16px !important;
+        width: 100% !important;
+        border-radius: var(--radius-md) !important;
+    }
+    .user-welcome-chip .btn {
+        width: 100% !important;
+        justify-content: center !important;
     }
 }
 
@@ -965,21 +1381,4 @@ img {
     .lumi-bottom-nav {
         display: none !important;
     }
-}
-
-/* Стили для адаптивного баннера главной страницы */
-.home-hero-card {
-    padding: 42px 32px;
-}
-.home-hero-logo {
-    max-height: 84px;
-    margin-bottom: 20px;
-}
-.home-hero-title {
-    font-size: 2.3rem;
-    margin-bottom: 12px;
-}
-.home-hero-desc {
-    font-size: 1.05rem;
-    margin-bottom: 24px;
 }

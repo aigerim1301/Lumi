@@ -4,12 +4,13 @@
 {% block title %}Доступные опросы | {{ BRAND_NAME }}{% endblock %}
 
 {% block content %}
-<div style="max-width: 820px; margin: 0 auto;">
-    <div style="margin-bottom: 24px;">
-        <h1 style="font-size: 1.9rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">
+<div style="max-width: 820px; margin: 0 auto; width: 100%; min-width: 0;">
+    <!-- Заголовок страницы -->
+    <div style="margin-bottom: 20px;">
+        <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; line-height: 1.25;">
             Доступные опросы
         </h1>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">
+        <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.45;">
             Проходите интересные интерактивные анкеты, оценивайте темы и делитесь мнением
         </p>
     </div>
@@ -17,46 +18,47 @@
     {% if surveys_data %}
         <div style="display: flex; flex-direction: column; gap: 16px;">
             {% for item in surveys_data %}
-            <div class="lumi-card" style="margin-bottom: 0; padding: 24px; display: flex; flex-direction: column; gap: 14px;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 0; flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                            <span class="badge badge-published">Опубликован</span>
-                            <span style="font-size: 0.82rem; color: var(--text-muted);">
-                                ⏱️ {{ item.question_count }} вопросов
-                            </span>
-                        </div>
-                        <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
-                            {{ item.survey.title }}
-                        </h2>
-                        {% if item.survey.description %}
-                        <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.4; margin-bottom: 0;">
-                            {{ item.survey.description }}
-                        </p>
-                        {% endif %}
-                    </div>
-
-                    <div>
-                        {% if item.is_completed %}
-                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                                <span class="badge badge-published" style="background-color: var(--accent-primary-light); color: var(--accent-primary); padding: 6px 12px; font-size: 0.85rem;">
-                                    ✓ Вы уже прошли этот опрос
-                                </span>
-                                <a href="{% url 'survey_respond' item.survey.pk %}" class="btn btn-secondary btn-sm">
-                                    Посмотреть итоги
-                                </a>
-                            </div>
-                        {% else %}
-                            <a href="{% url 'survey_respond' item.survey.pk %}" class="btn btn-primary" style="padding: 10px 22px;">
-                                🚀 Пройти опрос
-                            </a>
-                        {% endif %}
-                    </div>
+            <div class="lumi-card respondent-survey-card">
+                <!-- Верхняя плашка метаданных: статус и счётчик вопросов -->
+                <div class="survey-card-topbar">
+                    <span class="badge badge-published">Опубликован</span>
+                    <span class="survey-meta-pill">⏱️ {{ item.question_count }} вопросов</span>
+                    <span class="survey-meta-responses">💬 {{ item.survey.response_count }} ответов</span>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 12px;">
-                    <div>Автор: <b>{{ item.survey.author.get_full_name|default:item.survey.author.username }}</b></div>
-                    <div>Ответов участников: {{ item.survey.response_count }}</div>
+                <!-- Основной контент: заголовок и описание на всю ширину -->
+                <div class="survey-card-body-block">
+                    <h2 class="survey-card-heading">
+                        {{ item.survey.title }}
+                    </h2>
+                    {% if item.survey.description %}
+                    <p class="survey-card-text">
+                        {{ item.survey.description }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Автор опроса -->
+                <div class="survey-card-footer-info">
+                    <span>Автор: <b>{{ item.survey.author.get_full_name|default:item.survey.author.username }}</b></span>
+                </div>
+
+                <!-- Кнопка действия: полноразмерная и удобная на смартфонах -->
+                <div class="survey-card-action-bar">
+                    {% if item.is_completed %}
+                        <div class="survey-completed-wrapper" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                            <span class="badge badge-published" style="background-color: var(--accent-primary-light); color: var(--accent-primary); padding: 8px 12px; font-size: 0.85rem; text-align: center; justify-content: center; width: 100%;">
+                                ✓ Вы уже прошли этот опрос
+                            </span>
+                            <a href="{% url 'survey_respond' item.survey.pk %}" class="btn btn-secondary btn-block" style="padding: 10px 16px; font-weight: 600; justify-content: center; width: 100%;">
+                                Посмотреть свои итоги
+                            </a>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'survey_respond' item.survey.pk %}" class="btn btn-primary btn-block survey-start-btn" style="padding: 12px 20px; font-weight: 700; font-size: 1rem; border-radius: var(--radius-md); justify-content: center; width: 100%;">
+                            🚀 Пройти опрос
+                        </a>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}

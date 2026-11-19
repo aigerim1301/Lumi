@@ -6,73 +6,67 @@
 {% block content %}
 <div style="max-width: 900px; margin: 0 auto; width: 100%; min-width: 0;">
     <!-- Заголовок и кнопка создания -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+    <div class="author-header-flex">
         <div>
-            <h1 style="font-size: 1.9rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; line-height: 1.25;">
                 Мои опросы
             </h1>
-            <p style="color: var(--text-muted); font-size: 0.95rem;">
+            <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.45;">
                 Управляйте вашими анкетами, запускайте сбор и смотрите результаты
             </p>
         </div>
-        <a href="{% url 'survey_create' %}" class="btn btn-primary" style="padding: 10px 20px;">
+        <a href="{% url 'survey_create' %}" class="btn btn-primary author-header-create-btn">
             <svg style="width: 18px; height: 18px; stroke: #FFFFFF; fill: none; stroke-width: 2.5;" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span>+ Создать опрос</span>
         </a>
     </div>
 
     <!-- Быстрая AI-генерация опроса по фразе -->
-    <div class="lumi-card" style="background: linear-gradient(135deg, var(--card-bg) 0%, var(--accent-tertiary-light) 100%); border: 1.5px dashed var(--accent-tertiary); padding: 20px; margin-bottom: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
-            <div style="font-weight: 700; font-size: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                <span>✨</span> AI-генератор: создайте опрос за одну секунду
+    <div class="lumi-card ai-generator-card">
+        <div class="ai-generator-header">
+            <div class="ai-generator-title">
+                <span>✨</span> AI-генератор опросов
             </div>
             <span class="badge badge-ai">Умный конструктор</span>
         </div>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
-            Опишите, что хотите узнать (например: «Качество онлайн-курса» или «Оценка нового сайта»), и система сама создаст 6 вопросов со свайпами и эмоциями:
+        <p class="ai-generator-desc">
+            Опишите тему (например: «Качество онлайн-курса» или «Оценка нового сайта»), и система сама создаст 6 вопросов со свайпами и эмоциями:
         </p>
-        <form method="post" action="{% url 'survey_create_with_ai' %}" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <form method="post" action="{% url 'survey_create_with_ai' %}" class="ai-generator-form">
             {% csrf_token %}
-            <input type="text" name="topic" class="form-control" placeholder="Введите тему опроса..." required style="flex: 1 1 200px; min-width: 0; width: 100%;">
-            <button type="submit" class="btn btn-primary" style="background-color: var(--accent-tertiary); border-color: var(--accent-tertiary);">
-                🪄 Сгенерировать опрос
+            <input type="text" name="topic" class="form-control ai-input-field" placeholder="Введите тему опроса..." required>
+            <button type="submit" class="btn btn-primary ai-submit-btn">
+                🪄 Сгенерировать
             </button>
         </form>
     </div>
 
     <!-- Вкладки фильтрации статусов (Все, Опубликованные, Черновики, Завершённые) -->
-    <div style="display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px;">
-        <a href="?status=all" class="btn {% if status_filter == 'all' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm" style="border-radius: var(--radius-pill);">
+    <div class="filter-tabs-row">
+        <a href="?status=all" class="btn {% if status_filter == 'all' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
             Все ({{ total_count }})
         </a>
-        <a href="?status=published" class="btn {% if status_filter == 'published' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm" style="border-radius: var(--radius-pill);">
+        <a href="?status=published" class="btn {% if status_filter == 'published' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
             Опубликованные ({{ published_count }})
         </a>
-        <a href="?status=draft" class="btn {% if status_filter == 'draft' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm" style="border-radius: var(--radius-pill);">
+        <a href="?status=draft" class="btn {% if status_filter == 'draft' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
             Черновики ({{ draft_count }})
         </a>
-        <a href="?status=closed" class="btn {% if status_filter == 'closed' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm" style="border-radius: var(--radius-pill);">
+        <a href="?status=closed" class="btn {% if status_filter == 'closed' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
             Завершённые ({{ closed_count }})
         </a>
     </div>
 
-    <!-- Список карточек опросов (дизайн точно по скриншоту) -->
+    <!-- Список карточек опросов автора -->
     {% if surveys %}
         <div style="display: flex; flex-direction: column; gap: 14px;">
             {% for survey in surveys %}
-            <div class="lumi-card" style="margin-bottom: 0; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; gap: 14px; flex: 1 1 200px; min-width: 0;">
+            <div class="lumi-card author-survey-card">
+                <!-- Верхняя часть: иконка статуса и заголовок -->
+                <div class="author-card-top">
                     <!-- Цветная иконка статуса -->
-                    <div style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-                        {% if survey.status == 'published' %}
-                            background-color: var(--accent-primary-light); color: var(--accent-primary);
-                        {% elif survey.status == 'draft' %}
-                            background-color: var(--accent-tertiary-light); color: var(--accent-tertiary);
-                        {% else %}
-                            background-color: var(--accent-secondary-light); color: var(--accent-secondary);
-                        {% endif %}">
-                        <svg style="width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24">
+                    <div class="author-status-icon {% if survey.status == 'published' %}icon-published{% elif survey.status == 'draft' %}icon-draft{% else %}icon-closed{% endif %}">
+                        <svg style="width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24">
                             {% if survey.status == 'published' %}
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                             {% elif survey.status == 'draft' %}
@@ -84,44 +78,46 @@
                     </div>
 
                     <!-- Информация об опросе -->
-                    <div>
-                        <a href="{% url 'survey_builder' survey.pk %}" style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); text-decoration: none;">
+                    <div class="author-card-info">
+                        <a href="{% url 'survey_builder' survey.pk %}" class="author-card-title">
                             {{ survey.title }}
                         </a>
-                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px; font-size: 0.85rem;">
+                        <div class="author-card-meta">
                             <span class="badge {% if survey.status == 'published' %}badge-published{% elif survey.status == 'draft' %}badge-draft{% else %}badge-closed{% endif %}">
                                 {{ survey.get_status_display }}
                             </span>
-                            <span style="color: var(--text-muted);">
+                            <span class="author-card-subtext">
                                 Вопросов: {{ survey.questions.count }} • {{ survey.created_at|date:"d M Y" }}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Бейдж счётчика ответов и кнопки действий -->
-                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <div style="background-color: var(--accent-tertiary-light); color: var(--accent-tertiary); font-weight: 700; font-size: 0.85rem; padding: 6px 14px; border-radius: var(--radius-pill);">
+                <!-- Нижняя часть: счётчик ответов и кнопки действий -->
+                <div class="author-card-bottom">
+                    <div class="author-response-badge">
                         💬 {{ survey.response_count }} ответов
                     </div>
 
-                    <a href="{% url 'survey_builder' survey.pk %}" class="btn btn-secondary btn-sm" title="Открыть в конструкторе">
-                        ✏️ Конструктор
-                    </a>
+                    <div class="author-actions-group">
+                        <a href="{% url 'survey_builder' survey.pk %}" class="btn btn-secondary btn-sm" title="Открыть в конструкторе">
+                            ✏️ Конструктор
+                        </a>
 
-                    {% if survey.response_count > 0 %}
-                    <a href="{% url 'stats_summary' %}?survey={{ survey.pk }}" class="btn btn-secondary btn-sm" title="Смотреть статистику">
-                        📊 Статистика
-                    </a>
-                    {% endif %}
+                        {% if survey.response_count > 0 %}
+                        <a href="{% url 'stats_summary' %}?survey={{ survey.pk }}" class="btn btn-secondary btn-sm" title="Смотреть статистику">
+                            📊 Статистика
+                        </a>
+                        {% endif %}
 
-                    <!-- Выпадающее меню быстрых действий / удаление -->
-                    <form method="post" action="{% url 'survey_delete' survey.pk %}" style="margin: 0;" onsubmit="return confirm('Вы уверены, что хотите удалить опрос «{{ survey.title }}»?');">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--accent-secondary); padding: 6px 10px;" title="Удалить опрос">
-                            🗑️
-                        </button>
-                    </form>
+                        <!-- Быстрое удаление опроса -->
+                        <form method="post" action="{% url 'survey_delete' survey.pk %}" style="margin: 0; display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить опрос «{{ survey.title }}»?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--accent-secondary); padding: 6px 10px;" title="Удалить опрос">
+                                🗑️
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
             {% endfor %}
