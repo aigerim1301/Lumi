@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -76,6 +77,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.i18n',
                 # Добавляем имя бренда во все шаблоны
                 'config.context_processors.lumi_settings',
             ],
@@ -112,7 +114,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Интернационализация и локализация
+# Интернационализация и локализация (Русский, Английский, Кыргызский)
+LANGUAGES = [
+    ('ru', 'Русский'),
+    ('en', 'English'),
+    ('ky', 'Кыргызча'),
+]
 LANGUAGE_CODE = 'ru'
 TIME_ZONE = 'Asia/Bishkek'
 USE_I18N = True

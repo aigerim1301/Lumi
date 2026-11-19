@@ -8,16 +8,16 @@
     <!-- Заголовок и кнопка создания -->
     <div class="author-header-flex">
         <div>
-            <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; line-height: 1.25;">
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; line-height: 1.25;" data-i18n="my_surveys">
                 Мои опросы
             </h1>
-            <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.45;">
+            <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.45;" data-i18n="my_surveys_desc">
                 Управляйте вашими анкетами, запускайте сбор и смотрите результаты
             </p>
         </div>
         <a href="{% url 'survey_create' %}" class="btn btn-primary author-header-create-btn">
             <svg style="width: 18px; height: 18px; stroke: #FFFFFF; fill: none; stroke-width: 2.5;" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span>+ Создать опрос</span>
+            <span data-i18n="create_survey">+ Создать опрос</span>
         </a>
     </div>
 
@@ -25,17 +25,17 @@
     <div class="lumi-card ai-generator-card">
         <div class="ai-generator-header">
             <div class="ai-generator-title">
-                <span>✨</span> AI-генератор опросов
+                <span>✨</span> <span data-i18n="ai_generator">AI-генератор опросов</span>
             </div>
-            <span class="badge badge-ai">Умный конструктор</span>
+            <span class="badge badge-ai" data-i18n="smart_builder">Умный конструктор</span>
         </div>
-        <p class="ai-generator-desc">
+        <p class="ai-generator-desc" data-i18n="ai_desc">
             Опишите тему (например: «Качество онлайн-курса» или «Оценка нового сайта»), и система сама создаст 6 вопросов со свайпами и эмоциями:
         </p>
         <form method="post" action="{% url 'survey_create_with_ai' %}" class="ai-generator-form">
             {% csrf_token %}
-            <input type="text" name="topic" class="form-control ai-input-field" placeholder="Введите тему опроса..." required>
-            <button type="submit" class="btn btn-primary ai-submit-btn">
+            <input type="text" name="topic" class="form-control ai-input-field" placeholder="Введите тему опроса..." data-i18n-placeholder="ai_input_placeholder" required>
+            <button type="submit" class="btn btn-primary ai-submit-btn" data-i18n="ai_generate_btn">
                 🪄 Сгенерировать
             </button>
         </form>
@@ -44,16 +44,16 @@
     <!-- Вкладки фильтрации статусов (Все, Опубликованные, Черновики, Завершённые) -->
     <div class="filter-tabs-row">
         <a href="?status=all" class="btn {% if status_filter == 'all' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
-            Все ({{ total_count }})
+            <span data-i18n="filter_all">Все</span> ({{ total_count }})
         </a>
         <a href="?status=published" class="btn {% if status_filter == 'published' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
-            Опубликованные ({{ published_count }})
+            <span data-i18n="filter_published">Опубликованные</span> ({{ published_count }})
         </a>
         <a href="?status=draft" class="btn {% if status_filter == 'draft' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
-            Черновики ({{ draft_count }})
+            <span data-i18n="filter_draft">Черновики</span> ({{ draft_count }})
         </a>
         <a href="?status=closed" class="btn {% if status_filter == 'closed' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
-            Завершённые ({{ closed_count }})
+            <span data-i18n="filter_closed">Завершённые</span> ({{ closed_count }})
         </a>
     </div>
 
@@ -87,7 +87,7 @@
                                 {{ survey.get_status_display }}
                             </span>
                             <span class="author-card-subtext">
-                                Вопросов: {{ survey.questions.count }} • {{ survey.created_at|date:"d M Y" }}
+                                <span data-i18n="questions">Вопросов</span>: {{ survey.questions.count }} • {{ survey.created_at|date:"d M Y" }}
                             </span>
                         </div>
                     </div>
@@ -96,17 +96,17 @@
                 <!-- Нижняя часть: счётчик ответов и кнопки действий -->
                 <div class="author-card-bottom">
                     <div class="author-response-badge">
-                        💬 {{ survey.response_count }} ответов
+                        💬 {{ survey.response_count }} <span data-i18n="responses">ответов</span>
                     </div>
 
                     <div class="author-actions-group">
                         <a href="{% url 'survey_builder' survey.pk %}" class="btn btn-secondary btn-sm" title="Открыть в конструкторе">
-                            ✏️ Конструктор
+                            ✏️ <span data-i18n="builder">Конструктор</span>
                         </a>
 
                         {% if survey.response_count > 0 %}
                         <a href="{% url 'stats_summary' %}?survey={{ survey.pk }}" class="btn btn-secondary btn-sm" title="Смотреть статистику">
-                            📊 Статистика
+                            📊 <span data-i18n="stats">Статистика</span>
                         </a>
                         {% endif %}
 
@@ -132,7 +132,7 @@
             <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">
                 Создайте свой первый опрос с игровым интерфейсом или сгенерируйте его через AI-помощника.
             </p>
-            <a href="{% url 'survey_create' %}" class="btn btn-primary">
+            <a href="{% url 'survey_create' %}" class="btn btn-primary" data-i18n="create_first_survey">
                 + Создать первый опрос
             </a>
         </div>

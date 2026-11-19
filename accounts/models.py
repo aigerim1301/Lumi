@@ -11,12 +11,17 @@ class Profile(models.Model):
     Расширяет стандартного пользователя Django связью OneToOne:
     - роль (автор опросов или респондент)
     - переключатель тёмной темы
-    - язык интерфейса
+    - язык интерфейса (русский, английский, кыргызский)
     - настройки уведомлений
     """
     ROLE_CHOICES = (
         ('author', 'Автор опросов'),
         ('respondent', 'Респондент'),
+    )
+    LANGUAGE_CHOICES = (
+        ('ru', 'Русский'),
+        ('en', 'English'),
+        ('ky', 'Кыргызча'),
     )
 
     user = models.OneToOneField(
@@ -37,6 +42,7 @@ class Profile(models.Model):
     )
     language = models.CharField(
         max_length=10,
+        choices=LANGUAGE_CHOICES,
         default='ru',
         verbose_name='Язык'
     )

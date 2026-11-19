@@ -12,6 +12,27 @@
     <!-- Фавикон платформы Lumi -->
     <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
 
+    <!-- Мгновенная инициализация темы и языка ДО первого рендера DOM (0ms задержка) -->
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('lumi-theme');
+                if (theme) {
+                    document.documentElement.setAttribute('data-theme', theme);
+                } else if ({% if user.is_authenticated and user.profile.dark_theme %}true{% else %}false{% endif %}) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+                var lang = localStorage.getItem('lumi-lang');
+                if (!lang && "{% if user.is_authenticated %}{{ user.profile.language }}{% endif %}") {
+                    lang = "{% if user.is_authenticated %}{{ user.profile.language }}{% endif %}";
+                }
+                if (lang) {
+                    document.documentElement.setAttribute('lang', lang);
+                }
+            } catch (e) {}
+        })();
+    </script>
+
     <!-- Основная таблица стилей Lumi (шалфей, терракота, лаванда) -->
     <link rel="stylesheet" href="{% static 'css/theme.css' %}">
 
@@ -29,39 +50,54 @@
             <nav class="sidebar-menu">
                 <a href="{% url 'survey_list' %}" class="{% if request.resolver_match.url_name == 'survey_list' %}active{% endif %}">
                     <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-3 7h4m-4 4h4m-6-4h.01M10 16h.01"/></svg>
-                    <span>Опросы</span>
+                    <span data-i18n="surveys">Опросы</span>
                 </a>
 
                 {% if user.is_authenticated %}
                     {% if not user.profile or user.profile.role == 'author' or user.is_staff %}
                     <a href="{% url 'survey_create' %}" class="{% if request.resolver_match.url_name == 'survey_create' %}active{% endif %}">
                         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                        <span>Конструктор</span>
+                        <span data-i18n="builder">Конструктор</span>
                     </a>
                     {% endif %}
 
                     <a href="{% url 'stats_summary' %}" class="{% if request.resolver_match.url_name == 'stats_summary' %}active{% endif %}">
                         <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                        <span>Статистика</span>
+                        <span data-i18n="stats">Статистика</span>
                     </a>
 
                     <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                         <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        <span>Профиль</span>
+                        <span data-i18n="profile">Профиль</span>
                     </a>
                 {% else %}
                     <a href="{% url 'login' %}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">
                         <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
-                        <span>Вход</span>
+                        <span data-i18n="login">Вход</span>
                     </a>
                     <a href="{% url 'register' %}" class="{% if request.resolver_match.url_name == 'register' %}active{% endif %}">
                         <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                        <span>Регистрация</span>
+                        <span data-i18n="register">Регистрация</span>
                     </a>
                 {% endif %}
             </nav>
 
             <div class="sidebar-footer">
+                <!-- Панель быстрых переключателей: Язык (RU/EN/KG) и Тёмная тема -->
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; padding: 6px 4px; border-bottom: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 0.95rem;">🌐</span>
+                        <select class="header-lang-select sidebar-lang-select" onchange="changeLanguage(this.value)" aria-label="Язык интерфейса">
+                            <option value="ru">RU 🇷🇺</option>
+                            <option value="en">EN 🇬🇧</option>
+                            <option value="ky">KG 🇰🇬</option>
+                        </select>
+                    </div>
+                    <button type="button" class="theme-quick-btn" onclick="toggleThemeQuick()" title="Сменить тему (светлая/тёмная)" aria-label="Сменить тему">
+                        <span class="theme-icon-indicator">☀️</span>
+                    </button>
+                </div>
+
                 {% if user.is_authenticated %}
                     <div class="user-profile-badge">
                         <div class="user-avatar-circle">
@@ -70,7 +106,7 @@
                         <div class="user-badge-info">
                             <div class="user-badge-name">{{ user.get_full_name|default:user.username }}</div>
                             <div class="user-badge-role">
-                                {% if user.is_staff %}Администратор{% elif user.profile.role == 'author' %}Автор{% else %}Респондент{% endif %}
+                                {% if user.is_staff %}<span data-i18n="administrator">Администратор</span>{% elif user.profile.role == 'author' %}<span data-i18n="author_role">Автор</span>{% else %}<span data-i18n="respondent">Респондент</span>{% endif %}
                             </div>
                         </div>
                     </div>
@@ -78,11 +114,11 @@
                         {% csrf_token %}
                         <button type="submit" class="btn btn-secondary btn-sm btn-block" style="border: none; justify-content: flex-start; padding: 8px 10px;">
                             <svg style="width: 16px; height: 16px; stroke: currentColor; fill: none;" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-                            Выйти
+                            <span data-i18n="logout">Выйти</span>
                         </button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-primary btn-sm btn-block">Войти в Lumi</a>
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-sm btn-block" data-i18n="enter_lumi">Войти в Lumi</a>
                 {% endif %}
             </div>
         </aside>
@@ -96,12 +132,24 @@
                     <span>{{ BRAND_NAME }}</span>
                 </a>
                 <div style="display: flex; align-items: center; gap: 8px;">
+                    <!-- Быстрый переключатель темы (0ms задержка) -->
+                    <button type="button" class="theme-quick-btn" onclick="toggleThemeQuick()" title="Сменить тему (светлая/тёмная)" aria-label="Сменить тему">
+                        <span class="theme-icon-indicator">☀️</span>
+                    </button>
+
+                    <!-- Выбор языка: RU, EN, KG -->
+                    <select class="header-lang-select mobile-lang-select" onchange="changeLanguage(this.value)" aria-label="Язык интерфейса">
+                        <option value="ru">RU 🇷🇺</option>
+                        <option value="en">EN 🇬🇧</option>
+                        <option value="ky">KG 🇰🇬</option>
+                    </select>
+
                     {% if user.is_authenticated %}
                         <a href="{% url 'profile' %}" class="user-avatar-circle" style="width: 32px; height: 32px; font-size: 0.8rem;">
                             {{ user.username|slice:":1"|upper }}
                         </a>
                     {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-primary btn-sm">Вход</a>
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-sm" data-i18n="login">Вход</a>
                     {% endif %}
                 </div>
             </header>
@@ -131,81 +179,396 @@
                 </a>
                 {% endif %}
             {% endif %}
-
-            
         </main>
     </div>
 
     <!-- Нижняя панель навигации для телефонов -->
-            <nav class="lumi-bottom-nav">
-                <a href="{% url 'survey_list' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'survey_list' %}active{% endif %}">
-                    <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-3 7h4m-4 4h4m-6-4h.01M10 16h.01"/></svg>
-                    <span>Опросы</span>
-                </a>
+    <nav class="lumi-bottom-nav">
+        <a href="{% url 'survey_list' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'survey_list' %}active{% endif %}">
+            <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-3 7h4m-4 4h4m-6-4h.01M10 16h.01"/></svg>
+            <span data-i18n="surveys">Опросы</span>
+        </a>
 
-                {% if user.is_authenticated %}
-                    {% if not user.profile or user.profile.role == 'author' or user.is_staff %}
-                    <a href="{% url 'survey_create' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'survey_create' %}active{% endif %}">
-                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                        <span>Конструктор</span>
-                    </a>
-                    {% endif %}
+        {% if user.is_authenticated %}
+            {% if not user.profile or user.profile.role == 'author' or user.is_staff %}
+            <a href="{% url 'survey_create' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'survey_create' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span data-i18n="builder">Конструктор</span>
+            </a>
+            {% endif %}
 
-                    <a href="{% url 'stats_summary' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'stats_summary' %}active{% endif %}">
-                        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                        <span>Статистика</span>
-                    </a>
+            <a href="{% url 'stats_summary' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'stats_summary' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span data-i18n="stats">Статистика</span>
+            </a>
 
-                    <a href="{% url 'profile' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
-                        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        <span>Профиль</span>
-                    </a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
-                        <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
-                        <span>Вход</span>
-                    </a>
-                    <a href="{% url 'register' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'register' %}active{% endif %}">
-                        <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                        <span>Регистрация</span>
-                    </a>
-                {% endif %}
-            </nav>
+            <a href="{% url 'profile' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span data-i18n="profile">Профиль</span>
+            </a>
+        {% else %}
+            <a href="{% url 'login' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+                <span data-i18n="login">Вход</span>
+            </a>
+            <a href="{% url 'register' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'register' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                <span data-i18n="register">Регистрация</span>
+            </a>
+        {% endif %}
+    </nav>
 
-    <!-- Клиентский скрипт для мгновенного переключения тёмной темы и глазка паролей -->
+    <!-- Глобальные скрипты Lumi: Мгновенное переключение темы (0ms) и Интернационализация (RU, EN, KG) -->
     <script>
-        // Проверяем сохраненную тему в localStorage для гостей
-        const savedTheme = localStorage.getItem('lumi-theme');
-        if (savedTheme) {
-            document.documentElement.setAttribute('data-theme', savedTheme);
+        window.LUMI_IS_AUTH = {% if user.is_authenticated %}true{% else %}false{% endif %};
+        window.LUMI_CSRF = '{{ csrf_token }}';
+        window.LUMI_PROFILE_URL = "{% url 'profile' %}";
+
+        // Словарь переводов Lumi (Русский, Английский, Кыргызский)
+        const LUMI_TRANSLATIONS = {
+            ru: {
+                surveys: "Опросы",
+                builder: "Конструктор",
+                stats: "Статистика",
+                profile: "Профиль",
+                login: "Вход",
+                register: "Регистрация",
+                logout: "Выйти",
+                enter_lumi: "Войти в Lumi",
+                available_surveys: "Доступные опросы",
+                available_surveys_desc: "Проходите интересные интерактивные анкеты, оценивайте темы и делитесь мнением",
+                my_surveys: "Мои опросы",
+                my_surveys_desc: "Управляйте вашими анкетами, запускайте сбор и смотрите результаты",
+                create_survey: "+ Создать опрос",
+                create_first_survey: "+ Создать первый опрос",
+                take_survey: "🚀 Пройти опрос",
+                already_completed: "✓ Вы уже прошли этот опрос",
+                view_results: "Посмотреть свои итоги",
+                published: "Опубликован",
+                draft: "Черновик",
+                closed: "Завершён",
+                questions: "вопросов",
+                responses: "ответов",
+                author: "Автор",
+                respondent: "Респондент",
+                administrator: "Администратор",
+                author_role: "Автор",
+                welcome_to_lumi: "Добро пожаловать в Lumi",
+                hero_desc: "Интерактивная веб-платформа для опросов нового поколения. Мобильные свайп-карточки, живая шкала эмоций, персональные итоги сравнения мнений и автоматическая генерация опросов через AI.",
+                sign_in_btn: "Войти в аккаунт",
+                register_btn: "Зарегистрироваться",
+                ai_generator: "AI-генератор опросов",
+                ai_desc: "Опишите тему (например: «Качество онлайн-курса» или «Оценка нового сайта»), и система сама создаст 6 вопросов со свайпами и эмоциями:",
+                ai_input_placeholder: "Введите тему опроса...",
+                ai_generate_btn: "🪄 Сгенерировать",
+                smart_builder: "Умный конструктор",
+                filter_all: "Все",
+                filter_published: "Опубликованные",
+                filter_draft: "Черновики",
+                filter_closed: "Завершённые",
+                innovations_title: "Инновации платформы Lumi",
+                swipe_cards: "Свайп-карточки",
+                swipe_cards_desc: "Интуитивный выбор «Да / Нет» смахиванием карточки жестом на смартфоне или кнопками на клавиатуре.",
+                emotion_scale: "Шкала эмоций (-4..+4)",
+                emotion_scale_desc: "Ползунок настроения с динамической сменой мимики эмодзи (от 🤬 до 🤩) для точной фиксации реакции.",
+                summary_card: "Карточка-итог",
+                summary_card_desc: "Мгновенный персональный отчёт сразу после прохождения: «Вы ответили так же, как 78% участников!».",
+                ai_builder_title: "Встроенный AI-генератор",
+                ai_builder_desc: "Автоматическое создание сбалансированного опроса из 6 разнотипных вопросов по краткому описанию темы.",
+                demo_accounts_title: "Учётные записи для проверки и защиты:",
+                save_settings: "Сохранить настройки",
+                notifications: "Уведомления",
+                notifications_desc: "Получать оповещения о новых ответах",
+                dark_theme: "Тёмная тема",
+                dark_theme_desc: "Комфортная контрастная тема Lumi",
+                language: "Язык",
+                data_export: "Экспорт данных",
+                download_json: "Скачать JSON",
+                personal_data: "Личные данные",
+                first_name: "Имя",
+                last_name: "Фамилия",
+                email: "Электронная почта",
+                login_label: "Имя пользователя (логин)",
+                password_label: "Пароль",
+                repeat_password: "Повторите пароль",
+                choose_role: "Выберите вашу роль в Lumi",
+                already_have_account: "Уже есть аккаунт в Lumi?",
+                no_account: "Нет аккаунта в Lumi?",
+                back_to_surveys: "← Вернуться к опросам"
+            },
+            en: {
+                surveys: "Surveys",
+                builder: "Builder",
+                stats: "Statistics",
+                profile: "Profile",
+                login: "Log In",
+                register: "Register",
+                logout: "Log Out",
+                enter_lumi: "Enter Lumi",
+                available_surveys: "Available Surveys",
+                available_surveys_desc: "Take engaging interactive surveys, rate topics and share your feedback",
+                my_surveys: "My Surveys",
+                my_surveys_desc: "Manage your surveys, collect responses and view analytics",
+                create_survey: "+ Create Survey",
+                create_first_survey: "+ Create First Survey",
+                take_survey: "🚀 Take Survey",
+                already_completed: "✓ You have completed this survey",
+                view_results: "View My Results",
+                published: "Published",
+                draft: "Draft",
+                closed: "Closed",
+                questions: "questions",
+                responses: "responses",
+                author: "Author",
+                respondent: "Respondent",
+                administrator: "Administrator",
+                author_role: "Author",
+                welcome_to_lumi: "Welcome to Lumi",
+                hero_desc: "Next-generation interactive web platform for surveys. Mobile swipe cards, live emotion scale, personal opinion comparison, and AI automated generation.",
+                sign_in_btn: "Sign In",
+                register_btn: "Create Account",
+                ai_generator: "AI Survey Generator",
+                ai_desc: "Describe your topic (e.g., 'Online course quality' or 'New website evaluation'), and AI will generate 6 questions with swipes and emotions:",
+                ai_input_placeholder: "Enter survey topic...",
+                ai_generate_btn: "🪄 Generate",
+                smart_builder: "Smart Builder",
+                filter_all: "All",
+                filter_published: "Published",
+                filter_draft: "Drafts",
+                filter_closed: "Closed",
+                innovations_title: "Lumi Platform Innovations",
+                swipe_cards: "Swipe Cards",
+                swipe_cards_desc: "Intuitive 'Yes / No' selection by swiping cards on mobile touchscreens or using keyboard keys.",
+                emotion_scale: "Emotion Scale (-4..+4)",
+                emotion_scale_desc: "Mood slider with dynamic emoji expressions (from 🤬 to 🤩) for precise emotional feedback.",
+                summary_card: "Summary Card",
+                summary_card_desc: "Instant personalized report right after completion: 'You answered the same as 78% of participants!'.",
+                ai_builder_title: "Built-in AI Generator",
+                ai_builder_desc: "Automatic creation of a balanced survey with 6 diverse question types from a brief description.",
+                demo_accounts_title: "Demo accounts for evaluation:",
+                save_settings: "Save Settings",
+                notifications: "Notifications",
+                notifications_desc: "Receive alerts about new survey responses",
+                dark_theme: "Dark Theme",
+                dark_theme_desc: "Comfortable high-contrast Lumi theme",
+                language: "Language",
+                data_export: "Data Export",
+                download_json: "Download JSON",
+                personal_data: "Personal Details",
+                first_name: "First Name",
+                last_name: "Last Name",
+                email: "Email Address",
+                login_label: "Username",
+                password_label: "Password",
+                repeat_password: "Confirm Password",
+                choose_role: "Choose your role in Lumi",
+                already_have_account: "Already have a Lumi account?",
+                no_account: "Don't have an account in Lumi?",
+                back_to_surveys: "← Back to Surveys"
+            },
+            ky: {
+                surveys: "Сурамжылоолор",
+                builder: "Конструктор",
+                stats: "Статистика",
+                profile: "Профиль",
+                login: "Кирүү",
+                register: "Катталуу",
+                logout: "Чыгуу",
+                enter_lumi: "Lumiге кирүү",
+                available_surveys: "Жеткиликтүү сурамжылоолор",
+                available_surveys_desc: "Кызыктуу интерактивдүү анкеталарды толтуруңуз, темаларды баалаңыз жана пикириңиз менен бөлүшүңүз",
+                my_surveys: "Менин сурамжылоолорум",
+                my_surveys_desc: "Анкеталарыңызды башкарыңыз, жоопторду чогултуңуз жана жыйынтыктарды көрүңүз",
+                create_survey: "+ Сурамжылоо түзүү",
+                create_first_survey: "+ Биринчи сурамжылоону түзүү",
+                take_survey: "🚀 Сурамжылоону баштоо",
+                already_completed: "✓ Сиз бул сурамжылоодон өттүңүз",
+                view_results: "Жыйынтыкты көрүү",
+                published: "Жарыяланды",
+                draft: "Долбоор",
+                closed: "Аяктады",
+                questions: "суроо",
+                responses: "жооп",
+                author: "Автор",
+                respondent: "Респондент",
+                administrator: "Администратор",
+                author_role: "Автор",
+                welcome_to_lumi: "Lumiге кош келиңиз",
+                hero_desc: "Жаңы муундагы интерактивдүү веб-сурамжылоо платформасы. Мобилдик свайп-карталар, жандуу сезимдер шкаласы, пикирлерди салыштыруу жана AI аркылуу автоматтык сурамжылоо түзүү.",
+                sign_in_btn: "Аккаунтка кирүү",
+                register_btn: "Катталуу",
+                ai_generator: "AI-сурамжылоо генератору",
+                ai_desc: "Теманы сүрөттөп жазыңыз (мисалы: «Онлайн-курстун сапаты» же «Жаңы сайтты баалоо»), система 6 суроону свайп жана сезимдер менен түзүп берет:",
+                ai_input_placeholder: "Сурамжылоонун темасын жазыңыз...",
+                ai_generate_btn: "🪄 Түзүү",
+                smart_builder: "Акылдуу конструктор",
+                filter_all: "Баары",
+                filter_published: "Жарыялангандар",
+                filter_draft: "Долбоорлор",
+                filter_closed: "Аяктагандар",
+                innovations_title: "Lumi платформасынын жаңылыктары",
+                swipe_cards: "Свайп-карталар",
+                swipe_cards_desc: "Смартфондо карточканы свайптоо же клавиатура баскычтары аркылуу «Ооба / Жок» тандоо.",
+                emotion_scale: "Сезимдер шкаласы (-4..+4)",
+                emotion_scale_desc: "Эмодзилердин динамикалык мимикасы (🤬 баштап 🤩 чейин) менен маанайды так аныктоо.",
+                summary_card: "Жыйынтык картасы",
+                summary_card_desc: "Өткөндөн кийин дароо жеке отчет: «Сиз катышуучулардын 78% сыяктуу эле жооп бердиңиз!».",
+                ai_builder_title: "Камтылган AI-генератор",
+                ai_builder_desc: "Кыскача сүрөттөмө боюнча 6 түрдүү суроодон турган тең салмактуу сурамжылоону автоматтык түзүү.",
+                demo_accounts_title: "Текшерүү жана коргоо үчүн аккаунттар:",
+                save_settings: "Ырастоолорду сактоо",
+                notifications: "Билдирүүлөр",
+                notifications_desc: "Жаңы жооптор тууралуу билдирүүлөрдү алуу",
+                dark_theme: "Караңгы тема",
+                dark_theme_desc: "Lumiнин ыңгайлуу контрасттуу караңгы темасы",
+                language: "Тил",
+                data_export: "Маалыматты экспорттоо",
+                download_json: "JSON жүктөө",
+                personal_data: "Жеке маалыматтар",
+                first_name: "Аты",
+                last_name: "Фамилиясы",
+                email: "Электрондук почта",
+                login_label: "Колдонуучунун аты (логин)",
+                password_label: "Сыр сөз",
+                repeat_password: "Сыр сөздү кайталаңыз",
+                choose_role: "Lumiдеги ролуңузду тандаңыз",
+                already_have_account: "Lumiде аккаунтуңуз барбы?",
+                no_account: "Lumiде аккаунтуңуз жокпу?",
+                back_to_surveys: "← Сурамжылоолорго кайтуу"
+            }
+        };
+
+        // Мгновенное переключение темы (0ms задержка)
+        function toggleThemeQuick() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const nextTheme = isDark ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', nextTheme);
+            localStorage.setItem('lumi-theme', nextTheme);
+            updateThemeIcons(nextTheme);
+
+            const profileToggle = document.getElementById('darkThemeToggle');
+            if (profileToggle) {
+                profileToggle.checked = (nextTheme === 'dark');
+            }
+
+            if (window.LUMI_IS_AUTH) {
+                fetch(window.LUMI_PROFILE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': window.LUMI_CSRF,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ dark_theme: (nextTheme === 'dark') })
+                }).catch(() => {});
+            }
         }
 
-        // Универсальный переключатель видимости пароля (глазок)
-        document.addEventListener('click', function(e) {
-            const btn = e.target.closest('.password-toggle-btn');
-            if (!btn) return;
-            e.preventDefault();
-            const wrapper = btn.closest('.password-input-wrapper');
-            if (!wrapper) return;
-            const input = wrapper.querySelector('input');
-            if (!input) return;
+        // Обновление иконок темы (☀️ / 🌙)
+        function updateThemeIcons(theme) {
+            const indicators = document.querySelectorAll('.theme-icon-indicator');
+            indicators.forEach(el => {
+                el.innerText = (theme === 'dark') ? '🌙' : '☀️';
+            });
+        }
 
-            const eyeOpen = btn.querySelector('.eye-open');
-            const eyeClosed = btn.querySelector('.eye-closed');
+        // Мгновенное переключение языка (0ms задержка, переводит весь интерфейс)
+        function changeLanguage(lang) {
+            if (!LUMI_TRANSLATIONS[lang]) return;
+            localStorage.setItem('lumi-lang', lang);
+            document.cookie = 'django_language=' + lang + ';path=/;max-age=31536000';
+            document.documentElement.setAttribute('lang', lang);
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                if (eyeOpen) eyeOpen.style.display = 'none';
-                if (eyeClosed) eyeClosed.style.display = 'block';
-                btn.setAttribute('title', 'Скрыть пароль');
-                btn.setAttribute('aria-label', 'Скрыть пароль');
-            } else {
-                input.type = 'password';
-                if (eyeOpen) eyeOpen.style.display = 'block';
-                if (eyeClosed) eyeClosed.style.display = 'none';
-                btn.setAttribute('title', 'Показать пароль');
-                btn.setAttribute('aria-label', 'Показать пароль');
+            // Синхронизируем все селекторы языков
+            const selects = document.querySelectorAll('.header-lang-select, #profileLanguageSelect');
+            selects.forEach(s => {
+                if (s.value !== lang) s.value = lang;
+            });
+
+            // Мгновенно переводим все размеченные элементы страницы
+            applyLanguageTranslations(lang);
+
+            // Сохраняем в профиль пользователя в фоне без блокировки
+            if (window.LUMI_IS_AUTH) {
+                fetch(window.LUMI_PROFILE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': window.LUMI_CSRF,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ language: lang })
+                }).catch(() => {});
             }
+        }
+
+        // Применение переводов ко всем элементам с data-i18n
+        function applyLanguageTranslations(lang) {
+            const dict = LUMI_TRANSLATIONS[lang];
+            if (!dict) return;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    el.innerText = dict[key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (dict[key]) {
+                    el.setAttribute('placeholder', dict[key]);
+                }
+            });
+        }
+
+        // Инициализация при загрузке документа
+        document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация темы
+            const curTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            updateThemeIcons(curTheme);
+
+            const profileToggle = document.getElementById('darkThemeToggle');
+            if (profileToggle) {
+                profileToggle.checked = (curTheme === 'dark');
+            }
+
+            // Инициализация языка
+            let currentLang = localStorage.getItem('lumi-lang');
+            if (!currentLang) {
+                currentLang = document.documentElement.getAttribute('lang') || 'ru';
+            }
+            if (LUMI_TRANSLATIONS[currentLang]) {
+                changeLanguage(currentLang);
+            }
+
+            // Универсальный переключатель видимости пароля (глазок)
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.password-toggle-btn');
+                if (!btn) return;
+                e.preventDefault();
+                const wrapper = btn.closest('.password-input-wrapper');
+                if (!wrapper) return;
+                const input = wrapper.querySelector('input');
+                if (!input) return;
+
+                const eyeOpen = btn.querySelector('.eye-open');
+                const eyeClosed = btn.querySelector('.eye-closed');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    if (eyeOpen) eyeOpen.style.display = 'none';
+                    if (eyeClosed) eyeClosed.style.display = 'block';
+                    btn.setAttribute('title', 'Скрыть пароль');
+                    btn.setAttribute('aria-label', 'Скрыть пароль');
+                } else {
+                    input.type = 'password';
+                    if (eyeOpen) eyeOpen.style.display = 'block';
+                    if (eyeClosed) eyeClosed.style.display = 'none';
+                    btn.setAttribute('title', 'Показать пароль');
+                    btn.setAttribute('aria-label', 'Показать пароль');
+                }
+            });
         });
     </script>
     {% block extra_js %}{% endblock %}

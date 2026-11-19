@@ -133,15 +133,29 @@ class ProfileSettingsForm(forms.ModelForm):
         required=False,
         widget=forms.EmailInput(attrs={'class': 'form-control'})
     )
+    language = forms.ChoiceField(
+        label='Язык интерфейса',
+        choices=Profile.LANGUAGE_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select form-select-sm', 'id': 'profileLanguageSelect', 'onchange': 'changeLanguage(this.value)', 'style': 'width: auto; padding: 6px 12px; font-weight: 600;'})
+    )
+
+    def clean_language(self):
+        lang = self.cleaned_data.get('language')
+        if not lang:
+            return self.instance.language if self.instance and self.instance.pk else 'ru'
+        return lang
 
     class Meta:
         model = Profile
-        fields = ['dark_theme', 'notifications']
+        fields = ['dark_theme', 'language', 'notifications']
         labels = {
             'dark_theme': 'Тёмная тема',
+            'language': 'Язык интерфейса',
             'notifications': 'Уведомления',
         }
         widgets = {
             'dark_theme': forms.CheckboxInput(attrs={'class': 'toggle-input', 'id': 'darkThemeToggle'}),
+            'language': forms.Select(attrs={'class': 'form-select form-select-sm', 'id': 'profileLanguageSelect', 'onchange': 'changeLanguage(this.value)', 'style': 'width: auto; padding: 6px 12px; font-weight: 600;'}),
             'notifications': forms.CheckboxInput(attrs={'class': 'toggle-input', 'id': 'notificationsToggle'}),
         }

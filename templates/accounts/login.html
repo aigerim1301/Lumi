@@ -12,7 +12,7 @@
         </div>
 
         <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">
-            Вход в {{ BRAND_NAME }}
+            <span data-i18n="login">Вход</span> в {{ BRAND_NAME }}
         </h1>
         <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 28px;">
             Войдите в свой аккаунт, чтобы продолжить работу
@@ -25,7 +25,7 @@
             {% endif %}
 
             <div class="form-group">
-                <label class="form-label" for="id_username">{{ form.username.label }}</label>
+                <label class="form-label" for="id_username" data-i18n="login_label">{{ form.username.label }}</label>
                 {{ form.username }}
                 {% if form.username.errors %}
                     <div class="form-error">{{ form.username.errors.0 }}</div>
@@ -33,7 +33,7 @@
             </div>
 
             <div class="form-group" style="margin-bottom: 24px;">
-                <label class="form-label" for="id_password">{{ form.password.label }}</label>
+                <label class="form-label" for="id_password" data-i18n="password_label">{{ form.password.label }}</label>
                 <div class="password-input-wrapper">
                     {{ form.password }}
                     <button type="button" class="password-toggle-btn" aria-label="Показать пароль" title="Показать пароль">
@@ -46,13 +46,13 @@
                 {% endif %}
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-bottom: 20px;">
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-bottom: 20px;" data-i18n="sign_in_btn">
                 Войти в аккаунт
             </button>
 
             <div style="text-align: center; font-size: 0.92rem; color: var(--text-muted);">
-                Нет аккаунта в Lumi? 
-                <a href="{% url 'register' %}" style="font-weight: 600; color: var(--accent-secondary);">
+                <span data-i18n="no_account">Нет аккаунта в Lumi?</span>
+                <a href="{% url 'register' %}" style="font-weight: 600; color: var(--accent-secondary);" data-i18n="register">
                     Зарегистрироваться
                 </a>
             </div>
@@ -60,9 +60,9 @@
 
         <!-- Подсказка с демо-аккаунтами для удобства на защите -->
         <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: left; font-size: 0.82rem; color: var(--text-muted);">
-            <div style="font-weight: 600; margin-bottom: 6px; color: var(--text-primary);">💡 Быстрый вход для проверки:</div>
-            <div>• <b>Автор</b>: <code>author</code> / <code>AuthorPassword123!</code></div>
-            <div>• <b>Респондент</b>: <code>respondent</code> / <code>RespondentPassword123!</code></div>
+            <div style="font-weight: 600; margin-bottom: 6px; color: var(--text-primary);" data-i18n="demo_accounts_title">💡 Быстрый вход для проверки:</div>
+            <div>• <b data-i18n="author">Автор</b>: <code>author</code> / <code>AuthorPassword123!</code></div>
+            <div>• <b data-i18n="respondent">Респондент</b>: <code>respondent</code> / <code>RespondentPassword123!</code></div>
         </div>
     </div>
 </div>

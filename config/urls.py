@@ -15,6 +15,9 @@ urlpatterns = [
     # Авторизация и профили (accounts)
     path('accounts/', include('accounts.urls')),
 
+    # Интернационализация (i18n)
+    path('i18n/', include('django.conf.urls.i18n')),
+
     # REST API (Django REST Framework)
     path('api/', include('surveys.api_urls')),
 

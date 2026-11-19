@@ -114,14 +114,21 @@ def profile_view(request):
     user = request.user
     profile, _ = Profile.objects.get_or_create(user=user)
 
-    # Обработка быстрого асинхронного переключения темы (AJAX)
+    # Обработка быстрого асинхронного переключения темы и языка (AJAX)
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'POST':
         try:
             data = json.loads(request.body)
-            dark_theme = data.get('dark_theme', False)
-            profile.dark_theme = dark_theme
+            if 'dark_theme' in data:
+                profile.dark_theme = bool(data['dark_theme'])
+            if 'language' in data and data['language'] in ['ru', 'en', 'ky']:
+                profile.language = data['language']
+                request.session['django_language'] = data['language']
             profile.save()
-            return JsonResponse({'status': 'ok', 'dark_theme': profile.dark_theme})
+            return JsonResponse({
+                'status': 'ok',
+                'dark_theme': profile.dark_theme,
+                'language': profile.language
+            })
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
@@ -134,8 +141,9 @@ def profile_view(request):
             user.email = form.cleaned_data.get('email', '')
             user.save()
 
-            # Сохраняем настройки профиля (тёмная тема, уведомления)
+            # Сохраняем настройки профиля (тёмная тема, язык, уведомления)
             form.save()
+            request.session['django_language'] = profile.language
             messages.success(request, 'Настройки профиля успешно сохранены!')
             return redirect('profile')
     else:
