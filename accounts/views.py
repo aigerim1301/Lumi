@@ -120,7 +120,7 @@ def profile_view(request):
             data = json.loads(request.body)
             if 'dark_theme' in data:
                 profile.dark_theme = bool(data['dark_theme'])
-            if 'language' in data and data['language'] in ['ru', 'en', 'ky']:
+            if 'language' in data and data['language'] in ['ru']:
                 profile.language = data['language']
                 request.session['django_language'] = data['language']
             profile.save()

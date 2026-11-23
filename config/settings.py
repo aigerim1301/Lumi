@@ -117,8 +117,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # Интернационализация и локализация (Русский, Английский, Кыргызский)
 LANGUAGES = [
     ('ru', 'Русский'),
-    ('en', 'English'),
-    ('ky', 'Кыргызча'),
 ]
 LANGUAGE_CODE = 'ru'
 TIME_ZONE = 'Asia/Bishkek'

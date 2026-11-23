@@ -20,8 +20,6 @@ class Profile(models.Model):
     )
     LANGUAGE_CHOICES = (
         ('ru', 'Русский'),
-        ('en', 'English'),
-        ('ky', 'Кыргызча'),
     )
 
     user = models.OneToOneField(

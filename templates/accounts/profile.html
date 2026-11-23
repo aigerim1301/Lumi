@@ -148,11 +148,6 @@
         });
     }
 
-    // Синхронизация значения языка в форме профиля
-    const profileLangSelect = document.getElementById('profileLanguageSelect');
-    if (profileLangSelect) {
-        const curLang = localStorage.getItem('lumi-lang') || '{{ profile.language|default:"ru" }}';
-        profileLangSelect.value = curLang;
-    }
+    
 </script>
 {% endblock %}

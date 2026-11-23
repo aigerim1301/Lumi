@@ -137,7 +137,7 @@ class ProfileSettingsForm(forms.ModelForm):
         label='Язык интерфейса',
         choices=Profile.LANGUAGE_CHOICES,
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select form-select-sm', 'id': 'profileLanguageSelect', 'onchange': 'changeLanguage(this.value)', 'style': 'width: auto; padding: 6px 12px; font-weight: 600;'})
+        widget=forms.Select(attrs={'class': 'form-select form-select-sm', 'id': 'profileLanguageSelect', 'style': 'width: auto; padding: 6px 12px; font-weight: 600;'})
     )
 
     def clean_language(self):
@@ -156,6 +156,6 @@ class ProfileSettingsForm(forms.ModelForm):
         }
         widgets = {
             'dark_theme': forms.CheckboxInput(attrs={'class': 'toggle-input', 'id': 'darkThemeToggle'}),
-            'language': forms.Select(attrs={'class': 'form-select form-select-sm', 'id': 'profileLanguageSelect', 'onchange': 'changeLanguage(this.value)', 'style': 'width: auto; padding: 6px 12px; font-weight: 600;'}),
+            'language': forms.Select(attrs={'class': 'form-select form-select-sm', 'id': 'profileLanguageSelect', 'style': 'width: auto; padding: 6px 12px; font-weight: 600;'}),
             'notifications': forms.CheckboxInput(attrs={'class': 'toggle-input', 'id': 'notificationsToggle'}),
         }
